@@ -1,0 +1,6 @@
+@DMSystem_HostAddress = http://localhost:5175
+
+GET {{DMSystem_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

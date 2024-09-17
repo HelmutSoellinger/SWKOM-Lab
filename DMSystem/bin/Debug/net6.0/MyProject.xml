@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DMSystem</name>
+    </assembly>
+    <members>
+        <member name="M:DMSystem.Controllers.DocumentController.PostTodoItem(DMSystem.Document)">
+            <summary>
+            Creates a new Document
+            </summary>
+            <param name="doc"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DMSystem.Controllers.DocumentController.Get(System.String)">
+            <summary>
+            Returns all Documents
+            </summary>
+            <param name="name"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

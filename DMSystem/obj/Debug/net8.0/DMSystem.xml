@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>DMSystem</name>
+    </assembly>
+    <members>
+        <member name="M:DMSystem.Controllers.DocumentController.Get(System.String)">
+            <summary>
+            Returns all Documents. Possible Filters: name
+            </summary>
+            <param name="name"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DMSystem.Controllers.DocumentController.PostDocument(DMSystem.Document)">
+            <summary>
+            Creates a new Document
+            </summary>
+            <param name="doc"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DMSystem.Controllers.DocumentController.PutDocument(System.Int32,DMSystem.Document)">
+            <summary>
+            Updates a specific Document
+            </summary>
+            <param name="id"></param>
+            <param name="document"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
