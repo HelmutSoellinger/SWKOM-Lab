@@ -32,38 +32,3 @@ C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\DMSystem\DMSystem\obj\Debu
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\DMSystem\DMSystem\obj\Debug\net8.0\ref\DMSystem.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\DMSystem\DMSystem\bin\Debug\net8.0\DMSystem.xml
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\DMSystem\DMSystem\obj\Debug\net8.0\DMSystem.xml
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\bin\Debug\net8.0\appsettings.Development.json
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\bin\Debug\net8.0\appsettings.json
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\bin\Debug\net8.0\DMSystem.exe
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\bin\Debug\net8.0\DMSystem.deps.json
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\bin\Debug\net8.0\DMSystem.runtimeconfig.json
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\bin\Debug\net8.0\DMSystem.dll
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\bin\Debug\net8.0\DMSystem.pdb
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\bin\Debug\net8.0\DMSystem.xml
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\bin\Debug\net8.0\Microsoft.OpenApi.dll
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\DMSystem.csproj.AssemblyReference.cache
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\DMSystem.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\DMSystem.AssemblyInfoInputs.cache
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\DMSystem.AssemblyInfo.cs
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\DMSystem.csproj.CoreCompileInputs.cache
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\DMSystem.MvcApplicationPartsAssemblyInfo.cs
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\DMSystem.MvcApplicationPartsAssemblyInfo.cache
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\DMSystem.sourcelink.json
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\staticwebassets.build.json
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\staticwebassets.development.json
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\staticwebassets\msbuild.DMSystem.Microsoft.AspNetCore.StaticWebAssets.props
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\staticwebassets\msbuild.build.DMSystem.props
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.DMSystem.props
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.DMSystem.props
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\staticwebassets.pack.json
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\scopedcss\bundle\DMSystem.styles.css
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\DMSystem.csproj.Up2Date
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\DMSystem.dll
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\refint\DMSystem.dll
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\DMSystem.xml
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\DMSystem.pdb
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\DMSystem.genruntimeconfig.cache
-C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\ref\DMSystem.dll
