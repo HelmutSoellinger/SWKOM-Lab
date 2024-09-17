@@ -20,10 +20,17 @@
         </member>
         <member name="M:DMSystem.Controllers.DocumentController.PutDocument(System.Int32,DMSystem.Document)">
             <summary>
-            Updates a specific Document
+            Updates a Document via Id
             </summary>
             <param name="id"></param>
             <param name="document"></param>
+            <returns></returns>
+        </member>
+        <member name="M:DMSystem.Controllers.DocumentController.DeleteDocument(System.Int32)">
+            <summary>
+            Deletes a Document via Id
+            </summary>
+            <param name="id"></param>
             <returns></returns>
         </member>
     </members>

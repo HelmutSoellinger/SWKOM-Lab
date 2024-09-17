@@ -1,0 +1,6 @@
+services:
+  dmsystem:
+    image: ${DOCKER_REGISTRY-}dmsystem
+    build:
+      context: .
+      dockerfile: DMSystem/Dockerfile

@@ -68,7 +68,7 @@ namespace DMSystem.Controllers
         }
 
         /// <summary>
-        /// Updates a specific Document
+        /// Updates a Document via Id
         /// </summary>
         /// <param name="id"></param>
         /// <param name="document"></param>
@@ -87,6 +87,25 @@ namespace DMSystem.Controllers
             existingDoc.Author = document.Author;
             existingDoc.Description = document.Description;
             existingDoc.Content = document.Content;
+            return NoContent();
+        }
+
+
+        /// <summary>
+        /// Deletes a Document via Id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete("{id}")]
+        public IActionResult DeleteDocument(int id)
+        {
+            var doc = _documents.FirstOrDefault(t => t.Id == id);
+            if (doc == null)
+            {
+                return NotFound();
+            }
+
+            _documents.Remove(doc);
             return NoContent();
         }
     }
