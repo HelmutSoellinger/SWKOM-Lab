@@ -1,6 +1,21 @@
+version: '3'
 services:
   dmsystem:
     image: ${DOCKER_REGISTRY-}dmsystem
     build:
       context: .
       dockerfile: DMSystem/Dockerfile
+    ports:
+      - "8080:8080" # Assuming your REST API server is running on port 8080 inside the container
+
+  # New Nginx service to serve the UI and proxy API requests
+  nginx:
+    image: nginx:latest
+    container_name: nginx_ui
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf     # Bind your custom Nginx config file
+      - ./ui:/usr/share/nginx/html             # Serve static files (HTML, CSS, JS) for the UI
+    ports:
+      - "80:80"                                # Expose Nginx on port 80
+    depends_on:
+      - dmsystem                              # Ensure Nginx starts after the API server
