@@ -6,16 +6,24 @@ services:
       context: .
       dockerfile: DMSystem/Dockerfile
     ports:
-      - "8080:8080" # Assuming your REST API server is running on port 8080 inside the container
+      - "8080:8080"                          # Assuming your REST API server runs on port 8080 inside the container
+    networks:
+      - webnet                               # Attach dmsystem to the shared network
+    restart: always                          # Restart if the service crashes
 
-  # New Nginx service to serve the UI and proxy API requests
   nginx:
     image: nginx:latest
     container_name: nginx_ui
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf     # Bind your custom Nginx config file
-      - ./ui:/usr/share/nginx/html             # Serve static files (HTML, CSS, JS) for the UI
+      - ./nginx.conf:/etc/nginx/nginx.conf   # Bind custom Nginx config file for reverse proxy setup
+      - ./ui:/usr/share/nginx/html           # Serve static UI files from the ./ui directory
     ports:
-      - "80:80"                                # Expose Nginx on port 80
+      - "80:80"                              # Expose Nginx on port 80 for external access
     depends_on:
-      - dmsystem                              # Ensure Nginx starts after the API server
+      - dmsystem                             # Ensure Nginx starts after the API server
+    networks:
+      - webnet                               # Attach Nginx to the same network as the API
+    restart: always                          # Ensure the service restarts if it crashes
+
+networks:
+  webnet:                                    # Define the shared network for communication
