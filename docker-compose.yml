@@ -1,29 +1,27 @@
-version: '3'
-services:
-  dmsystem:
-    image: ${DOCKER_REGISTRY-}dmsystem
-    build:
-      context: .
-      dockerfile: DMSystem/Dockerfile
-    ports:
-      - "8080:8080"                          # Assuming your REST API server runs on port 8080 inside the container
-    networks:
-      - webnet                               # Attach dmsystem to the shared network
-    restart: always                          # Restart if the service crashes
+version: '3.8'
 
+services:
   nginx:
     image: nginx:latest
-    container_name: nginx_ui
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf   # Bind custom Nginx config file for reverse proxy setup
-      - ./ui:/usr/share/nginx/html           # Serve static UI files from the ./ui directory
+    container_name: nginx
     ports:
-      - "80:80"                              # Expose Nginx on port 80 for external access
+      - "80:80"  # Expose NGINX on port 80 of the host
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf  # Mount the NGINX configuration file
     depends_on:
-      - dmsystem                             # Ensure Nginx starts after the API server
-    networks:
-      - webnet                               # Attach Nginx to the same network as the API
-    restart: always                          # Ensure the service restarts if it crashes
+      - web-app
+      - web-api
 
-networks:
-  webnet:                                    # Define the shared network for communication
+  web-app:
+    build:
+      context: .  # Path to your WebUI service
+      dockerfile: WebUI/Dockerfile  # Ensure this is named correctly
+    ports:
+      - "3000:3000"  # Expose WebUI on port 3000 of the host
+
+  web-api:
+    build:
+      context: .  # Path to your API service
+      dockerfile: DMSystem/Dockerfile  # Ensure this is named correctly
+    ports:
+      - "5000:5000"  # Expose API on port 5000 of the host

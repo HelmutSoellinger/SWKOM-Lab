@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Management</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <h1 id="homeBtn">Document Management System</h1>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#" id="navList">Document List</a></li>
+            <li><a href="#" id="navAdd">Add Document</a></li>
+        </ul>
+    </nav>
+
+    <div class="section" id="listSection">
+        <h2>Document List</h2>
+        <div class="filter-search">
+            <input type="text" id="filterName" placeholder="Enter document name" />
+            <button id="filterBtn">Search</button>
+        </div>
+        <table id="documentsTable">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Author</th>
+                    <th>Last Modified</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Documents will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section" id="addSection" style="display:none;">
+        <h2>Add New Document</h2>
+        <form id="addDocumentForm">
+            <label for="docName">Document Name</label>
+            <input type="text" id="docName" placeholder="Document Name" required />
+
+            <label for="docAuthor">Author</label>
+            <input type="text" id="docAuthor" placeholder="Author" required />
+
+            <label for="docDescription">Description</label>
+            <textarea id="docDescription" placeholder="Description" required></textarea>
+
+            <label for="docContent">Upload PDF</label>
+            <input type="file" id="docContent" accept=".pdf" required />
+
+            <button type="submit" id="addDocBtn">Add Document</button>
+        </form>
+    </div>
+
+    <footer>
+        <p>Created by Lang and Soellinger, 2024</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
