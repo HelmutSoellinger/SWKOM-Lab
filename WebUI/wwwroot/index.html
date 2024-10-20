@@ -43,20 +43,20 @@
 
     <div class="section" id="addSection" style="display:none;">
         <h2>Add New Document</h2>
-        <form id="addDocumentForm">
-            <label for="docName">Document Name</label>
-            <input type="text" id="docName" placeholder="Document Name" required />
+        <form id="addDocumentForm" method="post" enctype="multipart/form-data">
+            <label for="name">Document Name</label>
+            <input type="text" id="name" name="name" required />
 
-            <label for="docAuthor">Author</label>
-            <input type="text" id="docAuthor" placeholder="Author" required />
+            <label for="author">Author</label>
+            <input type="text" id="author" name="author" required />
 
-            <label for="docDescription">Description</label>
-            <textarea id="docDescription" placeholder="Description" required></textarea>
+            <label for="description">Description</label>
+            <textarea id="description" name="description"></textarea>
 
-            <label for="docContent">Upload PDF</label>
-            <input type="file" id="docContent" accept=".pdf" required />
+            <label for="pdfFile">Upload PDF</label>
+            <input type="file" id="pdfFile" name="pdfFile" accept=".pdf" required />
 
-            <button type="submit" id="addDocBtn">Add Document</button>
+            <button type="submit">Submit</button>
         </form>
     </div>
 
