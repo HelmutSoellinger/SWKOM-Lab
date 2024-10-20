@@ -4,31 +4,18 @@
 
 namespace DMSystem.DAL.Migrations
 {
-    /// <inheritdoc />
     public partial class PdfFormatMigration : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<byte[]>(
-                name: "Content",
-                table: "Documents",
-                type: "bytea",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "text");
+            // Alter the Content column to bytea with explicit casting
+            migrationBuilder.Sql("ALTER TABLE \"Documents\" ALTER COLUMN \"Content\" TYPE bytea USING \"Content\"::bytea;");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<string>(
-                name: "Content",
-                table: "Documents",
-                type: "text",
-                nullable: false,
-                oldClrType: typeof(byte[]),
-                oldType: "bytea");
+            // Reverse the migration by changing the Content column back to text
+            migrationBuilder.Sql("ALTER TABLE \"Documents\" ALTER COLUMN \"Content\" TYPE text USING \"Content\"::text;");
         }
     }
 }

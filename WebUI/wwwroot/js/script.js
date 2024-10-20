@@ -53,8 +53,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${doc.name}</td>
                         <td>${doc.author}</td>
                         <td>${doc.lastModified}</td>
-                        <td>${doc.description || 'N/A'}</td>
-                        <td><button onclick="deleteDocument(${doc.id})">Delete</button></td>
+                        <td>${doc.description}</td>
+                        <td>
+                            <a href="${apiBaseUrl}/${doc.id}/download" target="_blank">Download</a>
+                            <button onclick="deleteDocument(${doc.id})">Delete</button>
+                        </td>
                     `;
                     tableBody.appendChild(row);
                 });
@@ -71,19 +74,19 @@ document.addEventListener('DOMContentLoaded', () => {
         loadDocuments(filterName);
     });
 
-    // Add new document 
+    // Add new document
     document.getElementById('addDocumentForm').addEventListener('submit', (event) => {
         event.preventDefault();
 
         const formData = new FormData();
-        formData.append('name', document.getElementById('name').value);
-        formData.append('author', document.getElementById('author').value);
-        formData.append('description', document.getElementById('description').value);
-        formData.append('pdfFile', document.getElementById('pdfFile').files[0]);  // Append the uploaded PDF file
+        formData.append('name', document.getElementById('docName').value);
+        formData.append('author', document.getElementById('docAuthor').value);
+        formData.append('description', document.getElementById('docDescription').value);
+        formData.append('pdfFile', document.getElementById('docContent').files[0]); // Handle file upload
 
         fetch(apiBaseUrl, {
             method: 'POST',
-            body: formData,  // Send the form data, including the file
+            body: formData,
         })
             .then(response => {
                 if (!response.ok) {
@@ -92,9 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return response.json();
             })
             .then(() => {
-                loadDocuments();  // Reload documents after adding the new one
-                document.getElementById('addDocumentForm').reset();  // Reset the form after submission
-                showSection('list'); // Switch back to the list section
+                loadDocuments(); // Reload documents after adding
+                document.getElementById('addDocumentForm').reset(); // Reset the form
             })
             .catch((error) => {
                 console.error('Error adding document:', error);
@@ -118,7 +120,4 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
         }
     }
-
-    // Load documents initially when the page is refreshed
-    loadDocuments();
 });

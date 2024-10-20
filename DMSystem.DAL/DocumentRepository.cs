@@ -18,9 +18,22 @@ namespace DMSystem.DAL
         // Add Document
         public async Task<Document> Add(Document document)
         {
-            await _context.Documents.AddAsync(document);
-            await _context.SaveChangesAsync(); // Save changes to the database
-            return document; // Return the added document
+            try
+            {
+                await _context.Documents.AddAsync(document);
+                await _context.SaveChangesAsync();
+                return document;
+            }
+            catch (DbUpdateException dbEx)
+            {
+                // Log the exception (you could use a logging library like Serilog or NLog)
+                throw new Exception("An error occurred while adding the document to the database.", dbEx);
+            }
+            catch (Exception ex)
+            {
+                // General exception handling
+                throw new Exception("An unexpected error occurred.", ex);
+            }
         }
 
         // Update Document

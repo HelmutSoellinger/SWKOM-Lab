@@ -11,6 +11,8 @@ services:
     depends_on:
       - web-app
       - web-api
+    networks:
+      - postgres
 
   web-app:
     build:
@@ -18,6 +20,10 @@ services:
       dockerfile: WebUI/Dockerfile  # Ensure this is named correctly
     ports:
       - "3000:3000"  # Expose WebUI on port 3000 of the host
+    depends_on:
+      - postgres
+    networks:
+      - postgres
 
   web-api:
     build:
@@ -25,12 +31,17 @@ services:
       dockerfile: DMSystem/Dockerfile  # Ensure this is named correctly
     ports:
       - "5000:5000"  # Expose API on port 5000 of the host
+    depends_on:
+      - postgres
+    networks:
+      - postgres
 
   postgres:
     image: postgis/postgis:15-3.3
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-groupb}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-testtest}
+      POSTGRES_DB: dm_system
       PGDATA: /data/postgres
     volumes:
       - postgres:/data/postgres
