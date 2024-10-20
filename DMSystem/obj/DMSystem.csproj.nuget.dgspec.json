@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem\\DMSystem.csproj": {}
+    "C:\\Users\\Helmut\\Desktop\\FH\\SWKOM\\DMSystem\\DMSystem.csproj": {}
   },
   "projects": {
-    "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj": {
+    "C:\\Users\\Helmut\\Desktop\\FH\\SWKOM\\DMSystem.DAL\\DMSystem.DAL.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj",
+        "projectUniqueName": "C:\\Users\\Helmut\\Desktop\\FH\\SWKOM\\DMSystem.DAL\\DMSystem.DAL.csproj",
         "projectName": "DMSystem.DAL",
-        "projectPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj",
-        "packagesPath": "C:\\Users\\jay\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.DAL\\obj\\",
+        "projectPath": "C:\\Users\\Helmut\\Desktop\\FH\\SWKOM\\DMSystem.DAL\\DMSystem.DAL.csproj",
+        "packagesPath": "C:\\Users\\Helmut\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Helmut\\Desktop\\FH\\SWKOM\\DMSystem.DAL\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\jay\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\Helmut\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -77,25 +73,21 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem\\DMSystem.csproj": {
+    "C:\\Users\\Helmut\\Desktop\\FH\\SWKOM\\DMSystem\\DMSystem.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem\\DMSystem.csproj",
+        "projectUniqueName": "C:\\Users\\Helmut\\Desktop\\FH\\SWKOM\\DMSystem\\DMSystem.csproj",
         "projectName": "DMSystem",
-        "projectPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem\\DMSystem.csproj",
-        "packagesPath": "C:\\Users\\jay\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem\\obj\\",
+        "projectPath": "C:\\Users\\Helmut\\Desktop\\FH\\SWKOM\\DMSystem\\DMSystem.csproj",
+        "packagesPath": "C:\\Users\\Helmut\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Helmut\\Desktop\\FH\\SWKOM\\DMSystem\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\jay\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\Helmut\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -110,8 +102,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj": {
-                "projectPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj"
+              "C:\\Users\\Helmut\\Desktop\\FH\\SWKOM\\DMSystem.DAL\\DMSystem.DAL.csproj": {
+                "projectPath": "C:\\Users\\Helmut\\Desktop\\FH\\SWKOM\\DMSystem.DAL\\DMSystem.DAL.csproj"
               }
             }
           }
@@ -139,7 +131,7 @@
             },
             "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": {
               "target": "Package",
-              "version": "[1.19.6, )"
+              "version": "[1.21.0, )"
             },
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
@@ -147,7 +139,7 @@
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
-              "version": "[6.6.2, )"
+              "version": "[6.9.0, )"
             }
           },
           "imports": [
@@ -169,7 +161,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
