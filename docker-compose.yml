@@ -12,7 +12,7 @@ services:
       - web-app
       - web-api
     networks:
-      - postgres
+      - dm_network  # Changed network name
 
   web-app:
     build:
@@ -22,8 +22,10 @@ services:
       - "3000:3000"  # Expose WebUI on port 3000 of the host
     depends_on:
       - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production 
     networks:
-      - postgres
+      - dm_network  # Changed network name
 
   web-api:
     build:
@@ -33,14 +35,16 @@ services:
       - "5000:5000"  # Expose API on port 5000 of the host
     depends_on:
       - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production 
     networks:
-      - postgres
+      - dm_network  # Changed network name
 
   postgres:
     image: postgis/postgis:15-3.3
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-groupb}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-testtest}
+      POSTGRES_USER: ${POSTGRES_USER:-groupb} 
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-testtest}  
       POSTGRES_DB: dm_system
       PGDATA: /data/postgres
     volumes:
@@ -48,26 +52,26 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - postgres
+      - dm_network  # Changed network name
     restart: unless-stopped
 
   pgadmin:
     container_name: pgadmin_container
     image: dpage/pgadmin4:6.18
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}  
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}  
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
       - pgadmin:/var/lib/pgadmin
     ports:
       - "${PGADMIN_PORT:-5050}:80"
     networks:
-      - postgres
+      - dm_network  # Changed network name
     restart: unless-stopped
 
 networks:
-  postgres:
+  dm_network:  # Changed network name
     driver: bridge
 
 volumes:

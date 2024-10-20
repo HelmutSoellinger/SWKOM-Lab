@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Base API URL
-    const apiBaseUrl = 'http://localhost/api/Document'; // Endpoint for documents
+    const apiBaseUrl = 'http://localhost/api/Document'; // Use the service name
 
     // Navbar Event Listeners
     document.getElementById('navList').addEventListener('click', (event) => {
