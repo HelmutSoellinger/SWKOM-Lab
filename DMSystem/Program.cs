@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
-
 using DMSystem.DAL;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using DMSystem.Mappings;  // Namespace for your AutoMapper profiles
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,9 @@ builder.Services.AddDbContext<DALContext>(options =>
 
 // Register the Document Repository
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
+
+// Register AutoMapper and scan for profiles (such as DocumentProfile)
+builder.Services.AddAutoMapper(typeof(DocumentProfile).Assembly);  // Register all profiles in the current assembly
 
 // Add other services to the container.
 builder.Services.AddControllers();

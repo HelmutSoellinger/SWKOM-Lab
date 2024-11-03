@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using DMSystem.DTOs;
 
 namespace DMSystem.Controllers
 {
@@ -16,11 +18,13 @@ namespace DMSystem.Controllers
     {
         private readonly IDocumentRepository _documentRepository;
         private readonly ILogger<DocumentController> _logger;
+        private readonly IMapper _mapper; // Inject AutoMapper
 
-        public DocumentController(IDocumentRepository documentRepository, ILogger<DocumentController> logger)
+        public DocumentController(IDocumentRepository documentRepository, ILogger<DocumentController> logger, IMapper mapper)
         {
             _documentRepository = documentRepository; // Inject the repository
             _logger = logger;
+            _mapper = mapper;  // Inject AutoMapper
         }
 
         /// <summary>
@@ -29,10 +33,14 @@ namespace DMSystem.Controllers
         /// <param name="name"></param>
         /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Document>>> Get([FromQuery] string? name)
+        public async Task<ActionResult<IEnumerable<DocumentDTO>>> Get([FromQuery] string? name)
         {
             var docs = await _documentRepository.GetAllDocumentsAsync(name);
-            return Ok(docs);
+
+            // Map the list of Documents to DocumentDTOs
+            var docDTOs = _mapper.Map<IEnumerable<DocumentDTO>>(docs);
+
+            return Ok(docDTOs);
         }
 
         /// <summary>
@@ -44,7 +52,7 @@ namespace DMSystem.Controllers
         /// <param name="pdfFile"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult<Document>> PostDocument(
+        public async Task<ActionResult<DocumentDTO>> PostDocument(
             [FromForm] string name,
             [FromForm] string author,
             [FromForm] string? description,
@@ -62,6 +70,7 @@ namespace DMSystem.Controllers
                 pdfContent = memoryStream.ToArray();  // Convert PDF file to byte array
             }
 
+            // Create a new Document entity
             var newDocument = new Document
             {
                 Name = name,
@@ -73,19 +82,22 @@ namespace DMSystem.Controllers
 
             await _documentRepository.Add(newDocument);  // Add document to the database
 
-            return CreatedAtAction(nameof(Get), new { id = newDocument.Id }, newDocument);
+            // Map the entity to a DTO
+            var newDocumentDTO = _mapper.Map<DocumentDTO>(newDocument);
+
+            return CreatedAtAction(nameof(Get), new { id = newDocument.Id }, newDocumentDTO);
         }
 
         /// <summary>
         /// Updates a Document via Id
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="doc"></param>
+        /// <param name="docDTO"></param>
         /// <returns></returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutDocument(int id, Document doc)
+        public async Task<IActionResult> PutDocument(int id, DocumentDTO docDTO)
         {
-            if (id != doc.Id)
+            if (id != docDTO.Id)
             {
                 return BadRequest("Document ID mismatch");
             }
@@ -96,11 +108,8 @@ namespace DMSystem.Controllers
                 return NotFound();
             }
 
-            existingDoc.Name = doc.Name;
-            existingDoc.LastModified = doc.LastModified;
-            existingDoc.Author = doc.Author;
-            existingDoc.Description = doc.Description;
-            existingDoc.Content = doc.Content;
+            // Map the DTO to the entity
+            _mapper.Map(docDTO, existingDoc); // Updates existingDoc with the properties from docDTO
 
             try
             {

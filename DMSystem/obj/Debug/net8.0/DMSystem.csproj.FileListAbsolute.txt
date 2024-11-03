@@ -182,3 +182,4 @@ C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\b
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
+C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\AutoMapper.dll
