@@ -11,6 +11,8 @@ using AutoMapper;
 using DMSystem.DTOs;
 using DMSystem.Messaging;
 using FluentValidation;
+using FluentValidation.Results;
+using Microsoft.AspNetCore.Http;
 
 namespace DMSystem.Controllers
 {
@@ -22,14 +24,14 @@ namespace DMSystem.Controllers
         private readonly ILogger<DocumentController> _logger;
         private readonly IMapper _mapper;
         private readonly IRabbitMQPublisher<Document> _rabbitMqPublisher;
-        private readonly IValidator<Document> _validator;
+        private readonly IValidator<DocumentDTO> _validator;
 
         public DocumentController(
             IDocumentRepository documentRepository,
             ILogger<DocumentController> logger,
             IMapper mapper,
             IRabbitMQPublisher<Document> rabbitMqPublisher,
-            IValidator<Document> validator)
+            IValidator<DocumentDTO> validator)
         {
             _documentRepository = documentRepository;
             _logger = logger;
@@ -39,10 +41,10 @@ namespace DMSystem.Controllers
         }
 
         /// <summary>
-        /// Returns all Documents. Possible Filters: name
+        /// Returns all Documents. Optional filter by name.
         /// </summary>
         /// <param name="name"></param>
-        /// <returns></returns>
+        /// <returns>List of Documents</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DocumentDTO>>> Get([FromQuery] string? name)
         {
@@ -52,61 +54,59 @@ namespace DMSystem.Controllers
         }
 
         /// <summary>
-        /// Creates a new Document with a PDF
+        /// Creates a new Document with an associated PDF file.
         /// </summary>
-        /// <param name="createDocumentDto"></param>
-        /// <returns></returns>
+        /// <param name="createDocumentDto">Document information</param>
+        /// <param name="pdfFile">PDF file</param>
+        /// <returns>Created Document</returns>
         [HttpPost]
         public async Task<ActionResult<DocumentDTO>> PostDocument(
-            [FromForm] Document createDocumentDto,
+            [FromForm] DocumentDTO createDocument,
             [FromForm] IFormFile pdfFile)
         {
-            var validationResult = await _validator.ValidateAsync(createDocumentDto);
+            var validationResult = await _validator.ValidateAsync(createDocument);
 
             if (!validationResult.IsValid)
             {
                 return BadRequest(validationResult.Errors);
             }
 
-            var description = createDocumentDto.Description ?? string.Empty;
+            if (pdfFile == null || pdfFile.Length == 0)
+            {
+                return BadRequest("A PDF file is required.");
+            }
 
             byte[] pdfContent;
             using (var memoryStream = new MemoryStream())
             {
                 await pdfFile.CopyToAsync(memoryStream);
-                pdfContent = memoryStream.ToArray();  // Convert PDF file to byte array
+                pdfContent = memoryStream.ToArray();
             }
 
-            var newDocument = new Document
-            {
-                Name = createDocumentDto.Name,
-                Author = createDocumentDto.Author,
-                LastModified = DateOnly.FromDateTime(DateTime.Today),
-                Description = description,
-                Content = pdfContent
-            };
+            var newDocument = _mapper.Map<Document>(createDocument);
+            newDocument.Content = pdfContent;
+            newDocument.LastModified = DateOnly.FromDateTime(DateTime.Today);
 
             await _documentRepository.Add(newDocument);
 
             var newDocumentDTO = _mapper.Map<DocumentDTO>(newDocument);
-
             await _rabbitMqPublisher.PublishMessageAsync(newDocument, RabbitMQQueues.OrderValidationQueue);
 
             return CreatedAtAction(nameof(Get), new { id = newDocument.Id }, newDocumentDTO);
         }
 
         /// <summary>
-        /// Updates a Document via Id
+        /// Updates a Document by Id
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="docDTO"></param>
-        /// <returns></returns>
+        /// <param name="id">Document Id</param>
+        /// <param name="docDTO">Updated Document data</param>
+        /// <returns>Status code indicating success or failure</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDocument(int id, DocumentDTO docDTO)
         {
             if (id != docDTO.Id)
             {
-                return BadRequest("Document ID mismatch");
+                return BadRequest("Document ID mismatch.");
             }
 
             var existingDoc = await _documentRepository.GetByIdAsync(id);
@@ -124,15 +124,16 @@ namespace DMSystem.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                return StatusCode(500, "Error updating document");
+                _logger.LogError($"Concurrency error while updating document with ID {id}");
+                return StatusCode(500, "Error updating document due to concurrency issues.");
             }
         }
 
         /// <summary>
-        /// Deletes a Document via Id
+        /// Deletes a Document by Id
         /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
+        /// <param name="id">Document Id</param>
+        /// <returns>Status code indicating success or failure</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDocument(int id)
         {

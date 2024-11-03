@@ -5,28 +5,35 @@ using DMSystem.DAL;
 using DMSystem.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
-using DMSystem.Mappings;  // Namespace for your AutoMapper profiles
+using DMSystem.Mappings; // Namespace for AutoMapper profiles
 using DMSystem.Messaging;
 using DMSystem.DTOs;
 using FluentValidation;
-using Microsoft.AspNetCore.Identity;
-
+using FluentValidation.AspNetCore;
+using Microsoft.Extensions.Hosting;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Configure database context
 builder.Services.AddDbContext<DALContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))); // Use your connection string
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register the Document Repository
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 
-// Register AutoMapper and scan for profiles (such as DocumentProfile)
-builder.Services.AddAutoMapper(typeof(DocumentProfile).Assembly);  // Register all profiles in the current assembly
+// Register AutoMapper and scan for profiles (e.g., DocumentProfile)
+builder.Services.AddAutoMapper(typeof(DocumentProfile).Assembly); // Registers all profiles in the assembly
 
+// Register FluentValidation and add validators
+builder.Services.AddControllers()
+    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<DocumentDTOValidator>());
 
-// Add other services to the container.
-builder.Services.AddControllers();
+// Register RabbitMQ settings and services
+builder.Services.Configure<RabbitMQSetting>(builder.Configuration.GetSection("RabbitMQ"));
+builder.Services.AddSingleton<IRabbitMQPublisher<Document>, RabbitMQPublisher<Document>>();
+builder.Services.AddHostedService<OrderValidationMessageConsumerService>();
+
+// Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -35,31 +42,20 @@ builder.Services.AddSwaggerGen(c =>
     c.IncludeXmlComments(xmlPath);
 });
 
-builder.Services.AddValidatorsFromAssemblyContaining<DocumentDTOValidator>();
-
 // Configure CORS policy
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        builder =>
-        {
-            builder.AllowAnyOrigin()
-                   .AllowAnyMethod()
-                   .AllowAnyHeader();
-        });
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
 });
-
-
-// Add RabbitMQ settings
-builder.Services.Configure<RabbitMQSetting>(builder.Configuration.GetSection("RabbitMQ"));
-
-// Register RabbitMQ publisher for Document messages
-builder.Services.AddSingleton<IRabbitMQPublisher<Document>, RabbitMQPublisher<Document>>();
-builder.Services.AddHostedService<OrderValidationMessageConsumerService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -68,7 +64,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Ensure the database is created.
+// Ensure the database is created and migrated
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<DALContext>();
