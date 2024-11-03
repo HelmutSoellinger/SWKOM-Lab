@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using DMSystem.DTOs;
+using DMSystem.Messaging;
+using FluentValidation;
 
 namespace DMSystem.Controllers
 {
@@ -18,13 +20,22 @@ namespace DMSystem.Controllers
     {
         private readonly IDocumentRepository _documentRepository;
         private readonly ILogger<DocumentController> _logger;
-        private readonly IMapper _mapper; // Inject AutoMapper
+        private readonly IMapper _mapper;
+        private readonly IRabbitMQPublisher<Document> _rabbitMqPublisher;
+        private readonly IValidator<Document> _validator;
 
-        public DocumentController(IDocumentRepository documentRepository, ILogger<DocumentController> logger, IMapper mapper)
+        public DocumentController(
+            IDocumentRepository documentRepository,
+            ILogger<DocumentController> logger,
+            IMapper mapper,
+            IRabbitMQPublisher<Document> rabbitMqPublisher,
+            IValidator<Document> validator)
         {
-            _documentRepository = documentRepository; // Inject the repository
+            _documentRepository = documentRepository;
             _logger = logger;
-            _mapper = mapper;  // Inject AutoMapper
+            _mapper = mapper;
+            _rabbitMqPublisher = rabbitMqPublisher;
+            _validator = validator;
         }
 
         /// <summary>
@@ -36,32 +47,28 @@ namespace DMSystem.Controllers
         public async Task<ActionResult<IEnumerable<DocumentDTO>>> Get([FromQuery] string? name)
         {
             var docs = await _documentRepository.GetAllDocumentsAsync(name);
-
-            // Map the list of Documents to DocumentDTOs
             var docDTOs = _mapper.Map<IEnumerable<DocumentDTO>>(docs);
-
             return Ok(docDTOs);
         }
 
         /// <summary>
         /// Creates a new Document with a PDF
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="author"></param>
-        /// <param name="description"></param>
-        /// <param name="pdfFile"></param>
+        /// <param name="createDocumentDto"></param>
         /// <returns></returns>
         [HttpPost]
         public async Task<ActionResult<DocumentDTO>> PostDocument(
-            [FromForm] string name,
-            [FromForm] string author,
-            [FromForm] string? description,
+            [FromForm] Document createDocumentDto,
             [FromForm] IFormFile pdfFile)
         {
-            if (pdfFile == null || pdfFile.Length == 0)
+            var validationResult = await _validator.ValidateAsync(createDocumentDto);
+
+            if (!validationResult.IsValid)
             {
-                return BadRequest("No PDF file uploaded.");
+                return BadRequest(validationResult.Errors);
             }
+
+            var description = createDocumentDto.Description ?? string.Empty;
 
             byte[] pdfContent;
             using (var memoryStream = new MemoryStream())
@@ -70,20 +77,20 @@ namespace DMSystem.Controllers
                 pdfContent = memoryStream.ToArray();  // Convert PDF file to byte array
             }
 
-            // Create a new Document entity
             var newDocument = new Document
             {
-                Name = name,
-                Author = author,
+                Name = createDocumentDto.Name,
+                Author = createDocumentDto.Author,
                 LastModified = DateOnly.FromDateTime(DateTime.Today),
                 Description = description,
-                Content = pdfContent  // Save the binary content
+                Content = pdfContent
             };
 
-            await _documentRepository.Add(newDocument);  // Add document to the database
+            await _documentRepository.Add(newDocument);
 
-            // Map the entity to a DTO
             var newDocumentDTO = _mapper.Map<DocumentDTO>(newDocument);
+
+            await _rabbitMqPublisher.PublishMessageAsync(newDocument, RabbitMQQueues.OrderValidationQueue);
 
             return CreatedAtAction(nameof(Get), new { id = newDocument.Id }, newDocumentDTO);
         }
@@ -108,8 +115,7 @@ namespace DMSystem.Controllers
                 return NotFound();
             }
 
-            // Map the DTO to the entity
-            _mapper.Map(docDTO, existingDoc); // Updates existingDoc with the properties from docDTO
+            _mapper.Map(docDTO, existingDoc);
 
             try
             {

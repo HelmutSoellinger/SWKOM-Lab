@@ -2,9 +2,15 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using DMSystem.DAL;
+using DMSystem.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using DMSystem.Mappings;  // Namespace for your AutoMapper profiles
+using DMSystem.Messaging;
+using DMSystem.DTOs;
+using FluentValidation;
+using Microsoft.AspNetCore.Identity;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +24,7 @@ builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 // Register AutoMapper and scan for profiles (such as DocumentProfile)
 builder.Services.AddAutoMapper(typeof(DocumentProfile).Assembly);  // Register all profiles in the current assembly
 
+
 // Add other services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -27,6 +34,8 @@ builder.Services.AddSwaggerGen(c =>
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     c.IncludeXmlComments(xmlPath);
 });
+
+builder.Services.AddValidatorsFromAssemblyContaining<DocumentDTOValidator>();
 
 // Configure CORS policy
 builder.Services.AddCors(options =>
@@ -39,6 +48,14 @@ builder.Services.AddCors(options =>
                    .AllowAnyHeader();
         });
 });
+
+
+// Add RabbitMQ settings
+builder.Services.Configure<RabbitMQSetting>(builder.Configuration.GetSection("RabbitMQ"));
+
+// Register RabbitMQ publisher for Document messages
+builder.Services.AddSingleton<IRabbitMQPublisher<Document>, RabbitMQPublisher<Document>>();
+builder.Services.AddHostedService<OrderValidationMessageConsumerService>();
 
 var app = builder.Build();
 

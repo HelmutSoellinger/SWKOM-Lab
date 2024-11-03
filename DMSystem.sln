@@ -18,6 +18,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DMSystem.DAL", "DMSystem.DA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DMSystem.Tests", "DMSystem.Tests\DMSystem.Tests.csproj", "{76AABD9B-D6ED-46E3-ACC9-B56499CED156}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DMSystem.Messaging", "DMSystem.Messaging\DMSystem.Messaging.csproj", "{45DA0419-38E9-4DBA-AD56-CC5DAD7BD88E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{76AABD9B-D6ED-46E3-ACC9-B56499CED156}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76AABD9B-D6ED-46E3-ACC9-B56499CED156}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76AABD9B-D6ED-46E3-ACC9-B56499CED156}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45DA0419-38E9-4DBA-AD56-CC5DAD7BD88E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45DA0419-38E9-4DBA-AD56-CC5DAD7BD88E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45DA0419-38E9-4DBA-AD56-CC5DAD7BD88E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45DA0419-38E9-4DBA-AD56-CC5DAD7BD88E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -39,6 +39,7 @@ services:
       ASPNETCORE_ENVIRONMENT: Production 
     networks:
       - dm_network  # Changed network name
+    restart: unless-stopped
 
   postgres:
     image: postgis/postgis:15-3.3
@@ -68,6 +69,19 @@ services:
       - "${PGADMIN_PORT:-5050}:80"
     networks:
       - dm_network  # Changed network name
+    restart: unless-stopped
+
+  rabbitmq:  # Added RabbitMQ service
+    image: rabbitmq:management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"  # RabbitMQ default port
+      - "15672:15672"  # RabbitMQ Management UI
+    networks:
+      - dm_network  # Changed network name
+    environment:
+      RABBITMQ_DEFAULT_USER: groupb  # Default username
+      RABBITMQ_DEFAULT_PASS: testtest  # Default password
     restart: unless-stopped
 
 networks:
