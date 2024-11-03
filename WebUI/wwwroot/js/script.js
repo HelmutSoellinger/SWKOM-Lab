@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Base API URL
     const apiBaseUrl = 'http://localhost/api/Document'; // Use the service name
 
+    // Load documents when the website loads
+    loadDocuments();
+
     // Navbar Event Listeners
     document.getElementById('navList').addEventListener('click', (event) => {
         event.preventDefault();
@@ -90,17 +93,38 @@ document.addEventListener('DOMContentLoaded', () => {
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    // Log the response status and attempt to parse JSON body for error details
+                    console.error('Response status:', response.status);
+                    return response.json().then((data) => {
+                        console.log('Full error response:', data); // Log full error response for debugging
+                        if (data.errors) {
+                            throw data.errors; // Pass the validation errors to the catch block
+                        }
+                        throw new Error('An unexpected error occurred.');
+                    });
                 }
                 return response.json();
             })
             .then(() => {
-                loadDocuments(); // Reload documents after adding
-                document.getElementById('addDocumentForm').reset(); // Reset the form
+                // Successfully added document, reset form, show list, and reload documents
+                document.getElementById('addDocumentForm').reset();
+                showSection('list');
+                loadDocuments();
+                alert('Document added successfully!');
             })
-            .catch((error) => {
-                console.error('Error adding document:', error);
-                alert('Error adding document. Please try again later.');
+            .catch((errors) => {
+                if (Array.isArray(errors)) {
+                    // Display validation errors
+                    let errorMessages = 'Please fix the following errors:\n';
+                    errors.forEach(error => {
+                        errorMessages += `• ${error.Property}: ${error.Message}\n`;
+                    });
+                    alert(errorMessages);
+                } else {
+                    // Handle unexpected errors
+                    console.error('Error adding document:', errors);
+                    alert('Error adding document. Please try again later.');
+                }
             });
     });
 

@@ -12,7 +12,7 @@ namespace DMSystem.DTOs
         [Required]
         public string Author { get; set; }
         [Required]
-        public DateOnly LastModified { get; set; }
+        public DateOnly LastModified { get; set; } = DateOnly.FromDateTime(DateTime.Today);
         public string? Description { get; set; } = string.Empty;
     }
 
