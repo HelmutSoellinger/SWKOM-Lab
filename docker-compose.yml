@@ -1,91 +1,103 @@
 version: '3.8'
 
+# Define a project name explicitly to prevent folder influence
+name: dms_project
+
 services:
   nginx:
     image: nginx:latest
     container_name: nginx
     ports:
-      - "80:80"  # Expose NGINX on port 80 of the host
+      - "80:80"  # Publicly expose port 80 for the frontend
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf  # Mount the NGINX configuration file
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf  # Mount NGINX configuration
     depends_on:
       - web-app
       - web-api
     networks:
-      - dm_network  # Changed network name
+      - dms_network
+    restart: unless-stopped
 
   web-app:
+    image: dms_project-web-app
+    container_name: web-app
     build:
-      context: .  # Path to your WebUI service
-      dockerfile: WebUI/Dockerfile  # Ensure this is named correctly
-    ports:
-      - "3000:3000"  # Expose WebUI on port 3000 of the host
+      context: .
+      dockerfile: WebUI/Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:3000  # Ensure the app binds to all interfaces on port 3000
+    expose:
+      - "3000"  # Expose port 3000 for internal Docker network communication
     depends_on:
       - postgres
-    environment:
-      ASPNETCORE_ENVIRONMENT: Production 
     networks:
-      - dm_network  # Changed network name
+      - dms_network
+    restart: unless-stopped
 
   web-api:
+    image: dms_project-web-api
+    container_name: web-api
     build:
-      context: .  # Path to your API service
-      dockerfile: DMSystem/Dockerfile  # Ensure this is named correctly
-    ports:
-      - "5000:5000"  # Expose API on port 5000 of the host
+      context: .
+      dockerfile: DMSystem/Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:5000  # Ensure the app binds to all interfaces on port 5000
+    expose:
+      - "5000"  # Expose port 5000 for internal Docker network communication
     depends_on:
       - postgres
-    environment:
-      ASPNETCORE_ENVIRONMENT: Production 
+      - rabbitmq
     networks:
-      - dm_network  # Changed network name
+      - dms_network
     restart: unless-stopped
 
   postgres:
     image: postgis/postgis:15-3.3
+    container_name: postgres
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-groupb} 
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-testtest}  
+      POSTGRES_USER: groupb
+      POSTGRES_PASSWORD: testtest
       POSTGRES_DB: dm_system
       PGDATA: /data/postgres
     volumes:
-      - postgres:/data/postgres
-    ports:
-      - "5432:5432"
+      - postgres:/data/postgres  # Persist database data
+    expose:
+      - "5432"  # Expose PostgreSQL port internally
     networks:
-      - dm_network  # Changed network name
+      - dms_network
+    restart: unless-stopped
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: groupb
+      RABBITMQ_DEFAULT_PASS: testtest
+    ports:
+      - "8081:15672"  # Management UI port
+      - "5672:5672"   # AMQP port for application
+    networks:
+      - dms_network
     restart: unless-stopped
 
   pgadmin:
-    container_name: pgadmin_container
     image: dpage/pgadmin4:6.18
+    container_name: pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}  
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}  
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"  # Expose pgAdmin web interface
     volumes:
       - pgadmin:/var/lib/pgadmin
-    ports:
-      - "${PGADMIN_PORT:-5050}:80"
     networks:
-      - dm_network  # Changed network name
-    restart: unless-stopped
-
-  rabbitmq:  # Added RabbitMQ service
-    image: rabbitmq:management
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"  # RabbitMQ default port
-      - "15672:15672"  # RabbitMQ Management UI
-    networks:
-      - dm_network  # Changed network name
-    environment:
-      RABBITMQ_DEFAULT_USER: groupb  # Default username
-      RABBITMQ_DEFAULT_PASS: testtest  # Default password
+      - dms_network
     restart: unless-stopped
 
 networks:
-  dm_network:  # Changed network name
+  dms_network:
+    name: dms_network  # Explicitly name the network
     driver: bridge
 
 volumes:
