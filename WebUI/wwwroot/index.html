@@ -1,69 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document Management</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Document Management System</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/document-list.css">
+    <link rel="stylesheet" href="css/add-document.css">
 </head>
+
 <body>
     <header>
-        <h1 id="homeBtn">Document Management System</h1>
+        <h1>Document Management System</h1>
     </header>
-
     <nav>
         <ul>
             <li><a href="#" id="navList">Document List</a></li>
             <li><a href="#" id="navAdd">Add Document</a></li>
         </ul>
     </nav>
+    <main>
+        <section id="listSection" class="hidden">
+            <div class="list-header">
+                <h2>Documents</h2>
+                <div class="filter-search">
+                    <input type="text" id="filterName" placeholder="Filter by name">
+                    <button id="filterBtn">Search</button>
+                </div>
+            </div>
+            <table id="documentsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Author</th>
+                        <th>Last Modified</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
 
-    <div class="section" id="listSection">
-        <h2>Document List</h2>
-        <div class="filter-search">
-            <input type="text" id="filterName" placeholder="Enter document name" />
-            <button id="filterBtn">Search</button>
-        </div>
-        <table id="documentsTable">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Name</th>
-                    <th>Author</th>
-                    <th>Last Modified</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Documents will be loaded here -->
-            </tbody>
-        </table>
-    </div>
+        <!-- Add Section Wrapper -->
+        <section id="addSection" class="hidden">
+            <h2>Add New Document</h2>
 
-    <div class="section" id="addSection" style="display:none;">
-        <h2>Add New Document</h2>
-        <form id="addDocumentForm">
-            <label for="docName">Document Name</label>
-            <input type="text" id="docName" placeholder="Document Name" required />
+            <!-- Error box to display validation errors -->
+            <div id="addErrorMessages" class="error-box hidden">
+                <h3>Validation Errors</h3>
+                <ul id="addErrorList"></ul>
+                <button id="addCloseErrorBtn">Close</button>
+            </div>
 
-            <label for="docAuthor">Author</label>
-            <input type="text" id="docAuthor" placeholder="Author" required />
-
-            <label for="docDescription">Description</label>
-            <textarea id="docDescription" placeholder="Description"></textarea>
-
-            <label for="docContent">Upload PDF</label>
-            <input type="file" id="docContent" accept=".pdf" required />
-
-            <button type="submit" id="addDocBtn">Add Document</button>
-        </form>
-    </div>
-
+            <form id="addDocumentForm">
+                <label for="docName">Name:</label>
+                <input type="text" id="docName" name="name">
+                <label for="docAuthor">Author:</label>
+                <input type="text" id="docAuthor" name="author">
+                <label for="docDescription">Description:</label>
+                <textarea id="docDescription" name="description"></textarea>
+                <label for="docContent">Upload PDF:</label>
+                <input type="file" id="docContent" name="pdfFile" accept=".pdf">
+                <button type="submit">Add Document</button>
+            </form>
+        </section>
+    </main>
     <footer>
         <p>Created by Lang and Soellinger, 2024</p>
     </footer>
 
-    <script src="js/script.js"></script>
+    <!-- JavaScript includes -->
+    <script src="js/utilities.js"></script>
+    <script src="js/onLoad.js"></script>
+    <script src="js/addDocument.js"></script>
+    <script src="js/documentList.js"></script>
 </body>
+
 </html>
