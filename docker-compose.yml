@@ -42,6 +42,10 @@ services:
       dockerfile: DMSystem/Dockerfile
     environment:
       - ASPNETCORE_URLS=http://0.0.0.0:5000  # Ensure the app binds to all interfaces on port 5000
+      - LOG4NET_CONFIG_FILE=/app/log4net.config  # Set Log4Net config file environment variable
+    volumes:
+      - ./DMSystem/log4net.config:/app/log4net.config  # Mount Log4Net configuration file
+      - ./DMSystem/Logs:/app/Logs  # Persist log files from the API
     expose:
       - "5000"  # Expose port 5000 for internal Docker network communication
     depends_on:

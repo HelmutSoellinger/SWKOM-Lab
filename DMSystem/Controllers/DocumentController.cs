@@ -56,7 +56,7 @@ namespace DMSystem.Controllers
         /// <summary>
         /// Creates a new Document with an associated PDF file.
         /// </summary>
-        /// <param name="createDocumentDto">Document information</param>
+        /// <param name="createDocument">Document information</param>
         /// <param name="pdfFile">PDF file</param>
         /// <returns>Created Document</returns>
         [HttpPost]
@@ -64,53 +64,79 @@ namespace DMSystem.Controllers
             [FromForm] DocumentDTO createDocument,
             [FromForm] IFormFile pdfFile)
         {
-            // Validate the DTO
-            var validationResult = await _validator.ValidateAsync(createDocument);
-
-            if (!validationResult.IsValid)
+            try
             {
-                // Prepare structured error response with property names and messages
-                var errorMessages = validationResult.Errors
-                    .Select(error => new
+                // Validate the DTO using FluentValidation
+                var validationResult = await _validator.ValidateAsync(createDocument);
+
+                if (!validationResult.IsValid)
+                {
+                    var errorMessages = validationResult.Errors
+                        .Select(error => new
+                        {
+                            Property = error.PropertyName,
+                            Message = error.ErrorMessage
+                        })
+                        .ToList();
+
+                    return BadRequest(new { errors = errorMessages });
+                }
+
+                // Check for the PDF file
+                if (pdfFile == null || pdfFile.Length == 0)
+                {
+                    return BadRequest(new
                     {
-                        Property = error.PropertyName,
-                        Message = error.ErrorMessage
-                    })
-                    .ToList();
+                        errors = new[]
+                        {
+                    new { Property = "pdfFile", Message = "A PDF file is required." }
+                }
+                    });
+                }
 
-                return BadRequest(new { errors = errorMessages });
+                // Process the file and add the document to the repository
+                byte[] pdfContent;
+                using (var memoryStream = new MemoryStream())
+                {
+                    await pdfFile.CopyToAsync(memoryStream);
+                    pdfContent = memoryStream.ToArray();
+                }
+
+                var newDocument = _mapper.Map<Document>(createDocument);
+                newDocument.Content = pdfContent;
+
+                // Set LastModified to the current date if it's not provided
+                if (newDocument.LastModified == default)
+                {
+                    newDocument.LastModified = DateTime.UtcNow; // Default to current UTC time
+                }
+
+                // Ensure the description is not null
+                if (string.IsNullOrEmpty(newDocument.Description))
+                {
+                    newDocument.Description = string.Empty;
+                }
+
+                // Add the new document to the repository
+                await _documentRepository.Add(newDocument);
+
+                // Publish message to RabbitMQ
+                await _rabbitMqPublisher.PublishMessageAsync(newDocument, RabbitMQQueues.OrderValidationQueue);
+
+                var newDocumentDTO = _mapper.Map<DocumentDTO>(newDocument);
+                return CreatedAtAction(nameof(Get), new { id = newDocument.Id }, newDocumentDTO);
             }
-
-            // Check for the PDF file
-            if (pdfFile == null || pdfFile.Length == 0)
+            catch (Exception ex)
             {
-                return BadRequest(new { errors = new[] { new { Property = "pdfFile", Message = "A PDF file is required." } } });
+                // Log the exception for debugging
+                Console.Error.WriteLine($"Error in PostDocument: {ex.Message}");
+                Console.Error.WriteLine(ex.StackTrace);
+
+                return StatusCode(500, new
+                {
+                    errors = new[] { new { Property = "Server", Message = "An unexpected error occurred." } }
+                });
             }
-
-            // Process the file and add the document to the repository
-            byte[] pdfContent;
-            using (var memoryStream = new MemoryStream())
-            {
-                await pdfFile.CopyToAsync(memoryStream);
-                pdfContent = memoryStream.ToArray();
-            }
-
-            var newDocument = _mapper.Map<Document>(createDocument);
-            newDocument.Content = pdfContent;
-            newDocument.LastModified = DateOnly.FromDateTime(DateTime.Today);
-            if(newDocument.Description == null)
-            {
-                newDocument.Description = string.Empty;
-            }
-
-            await _documentRepository.Add(newDocument);
-
-            // Publish message to RabbitMQ
-            await _rabbitMqPublisher.PublishMessageAsync(newDocument, RabbitMQQueues.OrderValidationQueue);
-
-            // Map and return the created document
-            var newDocumentDTO = _mapper.Map<DocumentDTO>(newDocument);
-            return CreatedAtAction(nameof(Get), new { id = newDocument.Id }, newDocumentDTO);
         }
 
         /// <summary>

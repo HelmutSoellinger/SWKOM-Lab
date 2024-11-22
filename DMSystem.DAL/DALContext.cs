@@ -24,8 +24,9 @@ namespace DMSystem.DAL
 
                 entity.Property(d => d.Name)
                     .IsRequired()
-                    .HasMaxLength(100); // Define required field and max length
+                    .HasMaxLength(100);
 
+                // Correct DateOnly to DateTime conversion
                 entity.Property(d => d.LastModified)
                     .IsRequired();
 
@@ -34,10 +35,10 @@ namespace DMSystem.DAL
 
                 entity.Property(d => d.Content)
                     .IsRequired()
-                    .HasColumnType("bytea"); // Specify the column type for storing binary data
+                    .HasColumnType("bytea"); // PostgreSQL-specific binary type
 
                 entity.Property(d => d.Description)
-                    .IsRequired(false); // Make Description optional
+                    .IsRequired(false); // Optional
             });
         }
     }

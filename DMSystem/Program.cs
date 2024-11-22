@@ -11,8 +11,19 @@ using DMSystem.DTOs;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Hosting;
+using log4net;
+using log4net.Config;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Log4Net
+var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
+
+// Example Log4Net instance for logging
+var logger = LogManager.GetLogger(typeof(Program));
+logger.Info("Initializing application...");
 
 // Configure database context
 builder.Services.AddDbContext<DALContext>(options =>
@@ -67,8 +78,16 @@ app.UseHttpsRedirection();
 // Ensure the database is created and migrated
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<DALContext>();
-    dbContext.Database.Migrate();
+    try
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<DALContext>();
+        dbContext.Database.Migrate();
+        logger.Info("Database migration completed successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.Error("An error occurred during database migration.", ex);
+    }
 }
 
 // Use CORS before Authorization
@@ -77,5 +96,8 @@ app.UseCors("AllowAll");
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Example usage of Log4Net in Program.cs
+logger.Info("Application has started.");
 
 app.Run();

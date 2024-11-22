@@ -8,17 +8,17 @@ namespace DMSystem.DAL.Models
 
         [Required]
         [MaxLength(100)]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required]
-        public DateOnly LastModified { get; set; }
+        public DateTime LastModified { get; set; }
 
         [Required]
-        public string Author { get; set; }
+        public string Author { get; set; } = string.Empty;
 
         public string? Description { get; set; }
 
         [Required]
-        public byte[] Content { get; set; }  // Store PDF as binary data (byte array)
+        public byte[] Content { get; set; } = Array.Empty<byte>();
     }
 }

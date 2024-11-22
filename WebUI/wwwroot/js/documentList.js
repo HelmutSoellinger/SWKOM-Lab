@@ -30,11 +30,39 @@
             // Attach event listeners to delete buttons
             document.querySelectorAll('.delete-btn').forEach(button => {
                 button.addEventListener('click', () => {
-                    deleteDocument(button.dataset.id);
+                    const documentId = button.dataset.id;
+                    if (documentId) {
+                        deleteDocument(documentId);
+                    }
                 });
             });
         })
         .catch(() => {
             showErrorModal([{ Property: 'Network', Message: 'Error loading documents' }]);
+        });
+}
+
+/**
+ * Deletes a document by ID using the API endpoint.
+ * @param {string} documentId The ID of the document to delete.
+ */
+function deleteDocument(documentId) {
+    const deleteUrl = `${apiBaseUrl}/${documentId}`;
+
+    fetch(deleteUrl, { method: 'DELETE' })
+        .then((response) => {
+            if (!response.ok) {
+                if (response.status === 404) {
+                    showErrorModal([{ Property: 'Document', Message: 'Document not found' }]);
+                } else {
+                    throw new Error('Failed to delete document');
+                }
+            } else {
+                // Reload the list after successful deletion
+                loadDocuments();
+            }
+        })
+        .catch(() => {
+            showErrorModal([{ Property: 'Network', Message: 'Error deleting document' }]);
         });
 }

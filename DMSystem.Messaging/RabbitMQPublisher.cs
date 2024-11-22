@@ -36,24 +36,18 @@ namespace DMSystem.Messaging
                                   arguments: null);
         }
 
-        public async Task PublishMessageAsync(T message, string queueName = RabbitMQQueues.OrderValidationQueue)
+        public Task PublishMessageAsync(T message, string queueName = RabbitMQQueues.OrderValidationQueue)
         {
             var messageJson = JsonConvert.SerializeObject(message);
             var body = Encoding.UTF8.GetBytes(messageJson);
 
             var properties = _channel.CreateBasicProperties();
-            properties.Persistent = true; // Ensures the message is durable
+            properties.Persistent = true;
 
-            try
-            {
-                // Directly call BasicPublish without wrapping in Task.Run
-                _channel.BasicPublish(exchange: "", routingKey: queueName, basicProperties: properties, body: body);
-                _logger.LogInformation($"Message published to queue {queueName}: {messageJson}");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Error publishing message: {ex.Message}");
-            }
+            _channel.BasicPublish(exchange: "", routingKey: queueName, basicProperties: properties, body: body);
+            _logger.LogInformation($"Message published to queue {queueName}: {messageJson}");
+
+            return Task.CompletedTask; // No await needed
         }
 
         public void Dispose()

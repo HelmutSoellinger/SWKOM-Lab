@@ -1,18 +1,20 @@
-﻿using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using System.Text;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Hosting;
+using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DMSystem.Messaging
 {
     public class OrderValidationMessageConsumerService : BackgroundService
     {
         private readonly RabbitMQSetting _rabbitMqSetting;
-        private IConnection _connection;
-        private IModel _channel;
+        private IConnection _connection = null!;
+        private IModel _channel = null!;
         private readonly ILogger<OrderValidationMessageConsumerService> _logger;
 
         public OrderValidationMessageConsumerService(IOptions<RabbitMQSetting> rabbitMqSetting, ILogger<OrderValidationMessageConsumerService> logger)
@@ -32,58 +34,77 @@ namespace DMSystem.Messaging
                 Password = _rabbitMqSetting.Password
             };
 
-            try
+            int retryAttempts = 5;
+            for (int i = 0; i < retryAttempts; i++)
             {
-                _connection = factory.CreateConnection();
-                _channel = _connection.CreateModel();
+                try
+                {
+                    _connection = factory.CreateConnection();
+                    _channel = _connection.CreateModel();
 
-                // Declare queue
-                _channel.QueueDeclare(queue: RabbitMQQueues.OrderValidationQueue,
-                                      durable: true,
-                                      exclusive: false,
-                                      autoDelete: false,
-                                      arguments: null);
+                    _channel.QueueDeclare(queue: RabbitMQQueues.OrderValidationQueue,
+                                          durable: true,
+                                          exclusive: false,
+                                          autoDelete: false,
+                                          arguments: null);
 
-                var consumer = new EventingBasicConsumer(_channel);
-                consumer.Received += Consumer_Received;
-                _channel.BasicConsume(queue: RabbitMQQueues.OrderValidationQueue, autoAck: false, consumer: consumer);
-            }
-            catch (BrokerUnreachableException ex)
-            {
-                _logger.LogError($"RabbitMQ connection failed: {ex.Message}");
-                // Consider implementing retry logic here
+                    var consumer = new EventingBasicConsumer(_channel);
+                    consumer.Received += Consumer_Received;
+                    _channel.BasicConsume(queue: RabbitMQQueues.OrderValidationQueue, autoAck: false, consumer: consumer);
+
+                    _logger.LogInformation("RabbitMQ connection established successfully.");
+                    return;
+                }
+                catch (BrokerUnreachableException ex)
+                {
+                    _logger.LogError($"RabbitMQ connection attempt {i + 1} failed: {ex.Message}");
+                    if (i == retryAttempts - 1) throw;
+                    Thread.Sleep(2000); // Retry delay
+                }
             }
         }
 
-        private void Consumer_Received(object sender, BasicDeliverEventArgs ea)
+        private void Consumer_Received(object? sender, BasicDeliverEventArgs ea)
         {
             var body = ea.Body.ToArray();
             var message = Encoding.UTF8.GetString(body);
 
             try
             {
-                // Process the message here
                 _logger.LogInformation($" [x] Received {message}");
-
-                // Acknowledge the message
                 _channel.BasicAck(ea.DeliveryTag, false);
             }
             catch (Exception ex)
             {
                 _logger.LogError($" [!] Error processing message: {ex.Message}");
-                // Optionally handle requeueing or other strategies
             }
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            return Task.CompletedTask; // The work is done in the consumer
+            stoppingToken.Register(() =>
+            {
+                _logger.LogInformation("RabbitMQ Consumer is stopping.");
+                Dispose();
+            });
+
+            return Task.CompletedTask;
         }
 
         public override void Dispose()
         {
-            _channel?.Close();
-            _connection?.Close();
+            if (_channel?.IsOpen == true)
+            {
+                _channel.Close();
+                _channel.Dispose();
+            }
+
+            if (_connection?.IsOpen == true)
+            {
+                _connection.Close();
+                _connection.Dispose();
+            }
+
             base.Dispose();
         }
     }

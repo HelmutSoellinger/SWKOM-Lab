@@ -14,10 +14,7 @@ namespace DMSystem.DTOs
         [Required]
         public string Author { get; set; }
 
-        [Required]
-        public DateOnly LastModified { get; set; } = DateOnly.FromDateTime(DateTime.Today);
-
-        public string? Description { get; set; } = string.Empty; // Default to empty string
+        public string? Description { get; set; }
     }
 
     public class DocumentDTOValidator : AbstractValidator<DocumentDTO>
@@ -31,10 +28,6 @@ namespace DMSystem.DTOs
             RuleFor(document => document.Author)
                 .NotEmpty().WithMessage("Author is required.");
 
-            RuleFor(document => document.LastModified)
-                .NotEmpty().WithMessage("LastModified date is required.");
-
-            // Allow Description to be null or empty
             RuleFor(document => document.Description)
                 .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.")
                 .When(document => !string.IsNullOrEmpty(document.Description));

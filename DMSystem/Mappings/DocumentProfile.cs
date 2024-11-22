@@ -8,10 +8,11 @@ namespace DMSystem.Mappings
     {
         public DocumentProfile()
         {
-            // Map from Document entity to DocumentDTO and vice versa
-            CreateMap<Document, DocumentDTO>();
             CreateMap<DocumentDTO, Document>()
-                .ForMember(dest => dest.Content, opt => opt.Ignore()); // Ignore Content in the reverse mapping
+                .ForMember(dest => dest.Content, opt => opt.Ignore()) // Content is handled manually
+                .ForMember(dest => dest.LastModified, opt => opt.Ignore()); // LastModified is set in backend
+
+            CreateMap<Document, DocumentDTO>();
         }
     }
 }

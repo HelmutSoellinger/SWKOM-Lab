@@ -1,17 +1,17 @@
 ﻿document.getElementById('addDocumentForm').addEventListener('submit', async (event) => {
-    event.preventDefault();
+    event.preventDefault(); // Prevent the default form submission behavior
 
-    // Construct form data with document details and PDF file
+    // Collect form data
     const formData = new FormData();
-    const docName = document.getElementById('docName').value;
-    const docAuthor = document.getElementById('docAuthor').value;
-    const docDescription = document.getElementById('docDescription').value;
-    const pdfFile = document.getElementById('docContent').files[0];
+    const docName = document.getElementById('docName').value; // Document Name
+    const docAuthor = document.getElementById('docAuthor').value; // Document Author
+    const docDescription = document.getElementById('docDescription').value; // Document Description
+    const pdfFile = document.getElementById('docContent').files[0]; // PDF File
 
-    // Create an array to collect validation errors
+    // Array to store client-side validation errors
     const clientSideErrors = [];
 
-    // Client-side validation checks
+    // Client-side validation
     if (!docName) {
         clientSideErrors.push({ Property: 'Name', Message: 'Name is required.' });
     }
@@ -19,53 +19,62 @@
         clientSideErrors.push({ Property: 'Author', Message: 'Author is required.' });
     }
     if (!pdfFile) {
-        clientSideErrors.push({ Property: 'Upload PDF', Message: 'A PDF file is required.' });
+        clientSideErrors.push({ Property: 'PDF File', Message: 'A PDF file is required.' });
     }
 
-    // If there are client-side errors, display them and return
+    // If there are validation errors, display them and exit
     if (clientSideErrors.length > 0) {
         showAddSectionValidationErrors(clientSideErrors);
         return;
     }
 
+    // Append the form fields to the FormData object
     formData.append('name', docName);
     formData.append('author', docAuthor);
-    formData.append('description', docDescription);
-    formData.append('pdfFile', pdfFile);
+    formData.append('description', docDescription || ''); // Default empty description if none provided
+    formData.append('pdfFile', pdfFile); // File itself
+    // The backend sets LastModified, so we don't send it here.
 
-    // Debugging: Log formData values
+    // Debugging: Log the formData content (useful for development)
     formData.forEach((value, key) => {
-        console.log(`FormData key: ${key}, value: ${value}`);
+        console.log(`FormData key: ${key}, value:`, value);
     });
 
     try {
-        // Post form data to the backend
+        // Make the POST request to the backend API
         const response = await fetch(apiBaseUrl, {
             method: 'POST',
             body: formData,
         });
 
+        // If the response is not OK, handle errors
         if (!response.ok) {
-            const data = await response.json();
-            if (data.errors) {
+            const data = await response.json().catch(() => null); // Safely parse JSON if available
+            if (data && data.errors) {
                 showAddSectionValidationErrors(convertServerErrors(data.errors));
-                throw data.errors;
+                throw data.errors; // Throw to skip success logic
             }
             throw new Error('Unexpected error occurred');
         }
 
-        // If the POST is successful, reset the form
-        event.target.reset(); // Reset form on success
-        showSection('list'); // Navigate to "Document List" section
-        loadDocuments(); // Reload documents list
-
+        // If successful, reset the form and reload documents
+        event.target.reset(); // Clear form inputs
+        showSection('list'); // Switch to the "Document List" section
+        loadDocuments(); // Refresh the document list
     } catch (errors) {
+        // Handle errors and display them in the UI
         console.error('Errors:', errors);
-        showAddSectionValidationErrors([{ Property: 'Unknown', Message: 'An unexpected error occurred' }]);
+        showAddSectionValidationErrors([
+            { Property: 'Unknown', Message: 'An unexpected error occurred. Please try again.' },
+        ]);
     }
 });
 
-// Function to convert server-side errors to a standard format
+/**
+ * Converts server-side validation errors into a consistent format for the frontend.
+ * @param {Object} serverErrors - Errors returned from the server.
+ * @returns {Array} Array of formatted error objects.
+ */
 function convertServerErrors(serverErrors) {
     const errorList = [];
     Object.keys(serverErrors).forEach((property) => {
@@ -76,30 +85,34 @@ function convertServerErrors(serverErrors) {
     return errorList;
 }
 
-// Function to show validation errors in the add section
+/**
+ * Displays validation errors in the "Add Document" section.
+ * @param {Array} errors - Array of error objects with `Property` and `Message` fields.
+ */
 function showAddSectionValidationErrors(errors) {
     const addErrorBox = document.getElementById('addErrorMessages');
     const addErrorList = document.getElementById('addErrorList');
 
-    // Clear existing errors
+    // Clear any existing errors
     addErrorList.innerHTML = '';
 
-    // Append each error to the error list
+    // Populate the error list
     errors.forEach((error) => {
         const li = document.createElement('li');
         li.textContent = `${error.Property}: ${error.Message}`;
         addErrorList.appendChild(li);
     });
 
-    // Make the error box visible
-    console.log("Removing 'hidden' class from error box");
+    // Show the error box
     addErrorBox.classList.remove('hidden');
-    addErrorBox.style.display = 'block';  // Explicitly set display to block
-    console.log("Error box display style after update: ", window.getComputedStyle(addErrorBox).display);
+    addErrorBox.style.display = 'block'; // Ensure it's visible
 }
 
-// Close button to hide the error messages when needed
+/**
+ * Hides the error box for the "Add Document" section.
+ */
 document.getElementById('addCloseErrorBtn').addEventListener('click', () => {
-    document.getElementById('addErrorMessages').classList.add('hidden');
-    document.getElementById('addErrorMessages').style.display = 'none'; // Hide the error box
+    const addErrorBox = document.getElementById('addErrorMessages');
+    addErrorBox.classList.add('hidden');
+    addErrorBox.style.display = 'none'; // Explicitly hide it
 });
