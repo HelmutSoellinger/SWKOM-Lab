@@ -26,16 +26,16 @@ namespace DMSystem.DAL
                     .IsRequired()
                     .HasMaxLength(100);
 
-                // Correct DateOnly to DateTime conversion
                 entity.Property(d => d.LastModified)
                     .IsRequired();
 
                 entity.Property(d => d.Author)
                     .IsRequired();
 
-                entity.Property(d => d.Content)
+                // Replace Content with FilePath
+                entity.Property(d => d.FilePath)
                     .IsRequired()
-                    .HasColumnType("bytea"); // PostgreSQL-specific binary type
+                    .HasMaxLength(500); // Adjust max length as needed
 
                 entity.Property(d => d.Description)
                     .IsRequired(false); // Optional

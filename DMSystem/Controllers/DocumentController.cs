@@ -87,37 +87,23 @@ namespace DMSystem.Controllers
                 {
                     return BadRequest(new
                     {
-                        errors = new[]
-                        {
-                    new { Property = "pdfFile", Message = "A PDF file is required." }
-                }
+                        errors = new[] { new { Property = "pdfFile", Message = "A PDF file is required." } }
                     });
                 }
 
-                // Process the file and add the document to the repository
-                byte[] pdfContent;
-                using (var memoryStream = new MemoryStream())
+                // Save the file to the server
+                var filePath = Path.Combine("UploadedFiles", $"{Guid.NewGuid()}_{pdfFile.FileName}");
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                using (var stream = new FileStream(filePath, FileMode.Create))
                 {
-                    await pdfFile.CopyToAsync(memoryStream);
-                    pdfContent = memoryStream.ToArray();
+                    await pdfFile.CopyToAsync(stream);
                 }
 
+                // Create a new document
                 var newDocument = _mapper.Map<Document>(createDocument);
-                newDocument.Content = pdfContent;
+                newDocument.FilePath = filePath;
+                newDocument.LastModified = DateTime.UtcNow;
 
-                // Set LastModified to the current date if it's not provided
-                if (newDocument.LastModified == default)
-                {
-                    newDocument.LastModified = DateTime.UtcNow; // Default to current UTC time
-                }
-
-                // Ensure the description is not null
-                if (string.IsNullOrEmpty(newDocument.Description))
-                {
-                    newDocument.Description = string.Empty;
-                }
-
-                // Add the new document to the repository
                 await _documentRepository.Add(newDocument);
 
                 // Publish message to RabbitMQ
@@ -128,10 +114,7 @@ namespace DMSystem.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception for debugging
-                Console.Error.WriteLine($"Error in PostDocument: {ex.Message}");
-                Console.Error.WriteLine(ex.StackTrace);
-
+                _logger.LogError(ex, "Error occurred while creating a document.");
                 return StatusCode(500, new
                 {
                     errors = new[] { new { Property = "Server", Message = "An unexpected error occurred." } }
@@ -185,6 +168,12 @@ namespace DMSystem.Controllers
             if (doc == null)
             {
                 return NotFound();
+            }
+
+            // Delete the file from the server
+            if (!string.IsNullOrEmpty(doc.FilePath) && System.IO.File.Exists(doc.FilePath))
+            {
+                System.IO.File.Delete(doc.FilePath);
             }
 
             await _documentRepository.Remove(doc);

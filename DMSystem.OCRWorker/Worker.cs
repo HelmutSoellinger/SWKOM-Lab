@@ -1,8 +1,11 @@
 using DMSystem.Messaging;
+using DMSystem.OCR;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,11 +17,13 @@ namespace DMSystem.OCRWorker
         private readonly RabbitMQSetting _rabbitMQSetting;
         private IConnection _connection;
         private IModel _channel;
+        private readonly OcrProcessor _ocrProcessor;
 
         public Worker(ILogger<Worker> logger, IOptions<RabbitMQSetting> rabbitMQSetting)
         {
             _logger = logger;
             _rabbitMQSetting = rabbitMQSetting.Value; // Load RabbitMQ settings from DI
+            _ocrProcessor = new OcrProcessor(); // Initialize OCR Processor
         }
 
         public override Task StartAsync(CancellationToken cancellationToken)
@@ -41,21 +46,52 @@ namespace DMSystem.OCRWorker
             _channel = _connection.CreateModel();
 
             _channel.QueueDeclare(
-                queue: _rabbitMQSetting.QueueName, // Use the QueueName from settings
+                queue: _rabbitMQSetting.QueueName,
                 durable: true,
                 exclusive: false,
                 autoDelete: false,
                 arguments: null
             );
 
+            _logger.LogInformation("RabbitMQ initialized successfully.");
+        }
+
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
             var consumer = new EventingBasicConsumer(_channel);
-            consumer.Received += (model, ea) =>
+            consumer.Received += async (model, ea) =>
             {
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
                 _logger.LogInformation($"Received message: {message}");
 
-                // TODO: Add OCR processing logic here
+                try
+                {
+                    // Deserialize message for processing
+                    var request = JsonSerializer.Deserialize<OcrRequest>(message);
+
+                    if (request != null && !string.IsNullOrEmpty(request.PdfUrl))
+                    {
+                        // Fetch PDF content from the provided URL
+                        var pdfContent = await FetchPdfContent(request.PdfUrl);
+
+                        // Perform OCR
+                        var ocrResult = _ocrProcessor.PerformOcr(pdfContent);
+
+                        // Prepare and send the result back
+                        var resultMessage = new OcrResult
+                        {
+                            DocumentId = request.DocumentId,
+                            OcrText = ocrResult
+                        };
+
+                        SendOcrResult(resultMessage);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Error processing message: {ex.Message}");
+                }
             };
 
             _channel.BasicConsume(
@@ -64,18 +100,32 @@ namespace DMSystem.OCRWorker
                 consumer: consumer
             );
 
-            _logger.LogInformation("RabbitMQ initialized successfully.");
+            return Task.CompletedTask;
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        private async Task<byte[]> FetchPdfContent(string pdfUrl)
         {
-            stoppingToken.Register(() =>
-            {
-                _logger.LogInformation("Worker is stopping...");
-                Dispose();
-            });
+            using var httpClient = new HttpClient();
+            _logger.LogInformation($"Fetching PDF from {pdfUrl}");
+            var response = await httpClient.GetAsync(pdfUrl);
 
-            return Task.CompletedTask;
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+
+        private void SendOcrResult(OcrResult result)
+        {
+            var resultJson = JsonSerializer.Serialize(result);
+            var resultBytes = Encoding.UTF8.GetBytes(resultJson);
+
+            _channel.BasicPublish(
+                exchange: "",
+                routingKey: "ocrResultsQueue", // Assuming "ocrResultsQueue" for sending results
+                basicProperties: null,
+                body: resultBytes
+            );
+
+            _logger.LogInformation($"OCR result for DocumentId {result.DocumentId} sent to queue.");
         }
 
         public override void Dispose()
@@ -94,5 +144,19 @@ namespace DMSystem.OCRWorker
 
             base.Dispose();
         }
+    }
+
+    // Message for OCR requests
+    public class OcrRequest
+    {
+        public string DocumentId { get; set; } = string.Empty;
+        public string PdfUrl { get; set; } = string.Empty;
+    }
+
+    // Message for OCR results
+    public class OcrResult
+    {
+        public string DocumentId { get; set; } = string.Empty;
+        public string OcrText { get; set; } = string.Empty;
     }
 }

@@ -58,14 +58,19 @@
             <form id="addDocumentForm">
                 <label for="docName">Name:</label>
                 <input type="text" id="docName" name="name">
+
                 <label for="docAuthor">Author:</label>
                 <input type="text" id="docAuthor" name="author">
+
                 <label for="docDescription">Description:</label>
                 <textarea id="docDescription" name="description"></textarea>
-                <label for="docContent">Upload PDF:</label>
-                <input type="file" id="docContent" name="pdfFile" accept=".pdf">
+
+                <label for="docFile">Select PDF:</label>
+                <input type="file" id="docFile" name="file" accept="application/pdf">
+
                 <button type="submit">Add Document</button>
             </form>
+
         </section>
     </main>
     <footer>

@@ -65,6 +65,9 @@ services:
       - RABBITMQ__HOSTNAME=rabbitmq
       - RABBITMQ__QUEUENAME=ocrProcessingQueue
       - TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
+      - OCR_PDF_STORAGE=/data/pdf_storage  # Directory for storing/retrieving PDFs
+    volumes:
+      - ./pdf_storage:/data/pdf_storage  # Mount volume for PDF storage
     depends_on:
       - rabbitmq
     networks:
@@ -123,3 +126,4 @@ networks:
 volumes:
   postgres:
   pgadmin:
+  pdf_storage:  # Add volume for storing PDFs

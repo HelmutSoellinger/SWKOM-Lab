@@ -19,6 +19,7 @@ namespace DMSystem.DAL.Models
         public string? Description { get; set; }
 
         [Required]
-        public byte[] Content { get; set; } = Array.Empty<byte>();
+        [MaxLength(500)] // Adjust max length as needed
+        public string FilePath { get; set; } = string.Empty;
     }
 }

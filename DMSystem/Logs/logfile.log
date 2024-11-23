@@ -25,3 +25,54 @@
 2024-11-23 18:58:26,920 [1] INFO  Program - Initializing application...
 2024-11-23 18:58:28,305 [1] INFO  Program - Database migration completed successfully.
 2024-11-23 18:58:28,386 [1] INFO  Program - Application has started.
+2024-11-23 19:17:45,300 [1] INFO  Program - Initializing application...
+2024-11-23 19:17:47,051 [1] ERROR Program - An error occurred during database migration.
+System.InvalidOperationException: An error was generated for warning 'Microsoft.EntityFrameworkCore.Migrations.PendingModelChangesWarning': The model for context 'DALContext' has pending changes. Add a new migration before updating the database. This exception can be suppressed or logged by passing event ID 'RelationalEventId.PendingModelChangesWarning' to the 'ConfigureWarnings' method in 'DbContext.OnConfiguring' or 'AddDbContext'.
+   at Microsoft.EntityFrameworkCore.Diagnostics.EventDefinition`1.Log[TLoggerCategory](IDiagnosticsLogger`1 logger, TParam arg)
+   at Microsoft.EntityFrameworkCore.Diagnostics.RelationalLoggerExtensions.PendingModelChangesWarning(IDiagnosticsLogger`1 diagnostics, Type contextType)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.Migrate(String targetMigration)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlMigrator.Migrate(String targetMigration)
+   at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.Migrate(DatabaseFacade databaseFacade)
+   at Program.<Main>$(String[] args) in /src/DMSystem/Program.cs:line 84
+2024-11-23 19:17:47,211 [1] INFO  Program - Application has started.
+2024-11-23 19:17:50,323 [1] INFO  Program - Initializing application...
+2024-11-23 19:17:52,851 [1] ERROR Program - An error occurred during database migration.
+System.InvalidOperationException: An error was generated for warning 'Microsoft.EntityFrameworkCore.Migrations.PendingModelChangesWarning': The model for context 'DALContext' has pending changes. Add a new migration before updating the database. This exception can be suppressed or logged by passing event ID 'RelationalEventId.PendingModelChangesWarning' to the 'ConfigureWarnings' method in 'DbContext.OnConfiguring' or 'AddDbContext'.
+   at Microsoft.EntityFrameworkCore.Diagnostics.EventDefinition`1.Log[TLoggerCategory](IDiagnosticsLogger`1 logger, TParam arg)
+   at Microsoft.EntityFrameworkCore.Diagnostics.RelationalLoggerExtensions.PendingModelChangesWarning(IDiagnosticsLogger`1 diagnostics, Type contextType)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.Migrate(String targetMigration)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlMigrator.Migrate(String targetMigration)
+   at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.Migrate(DatabaseFacade databaseFacade)
+   at Program.<Main>$(String[] args) in /src/DMSystem/Program.cs:line 84
+2024-11-23 19:17:53,003 [1] INFO  Program - Application has started.
+2024-11-23 19:17:56,100 [1] INFO  Program - Initializing application...
+2024-11-23 19:17:57,313 [1] ERROR Program - An error occurred during database migration.
+System.InvalidOperationException: An error was generated for warning 'Microsoft.EntityFrameworkCore.Migrations.PendingModelChangesWarning': The model for context 'DALContext' has pending changes. Add a new migration before updating the database. This exception can be suppressed or logged by passing event ID 'RelationalEventId.PendingModelChangesWarning' to the 'ConfigureWarnings' method in 'DbContext.OnConfiguring' or 'AddDbContext'.
+   at Microsoft.EntityFrameworkCore.Diagnostics.EventDefinition`1.Log[TLoggerCategory](IDiagnosticsLogger`1 logger, TParam arg)
+   at Microsoft.EntityFrameworkCore.Diagnostics.RelationalLoggerExtensions.PendingModelChangesWarning(IDiagnosticsLogger`1 diagnostics, Type contextType)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.Migrate(String targetMigration)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlMigrator.Migrate(String targetMigration)
+   at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.Migrate(DatabaseFacade databaseFacade)
+   at Program.<Main>$(String[] args) in /src/DMSystem/Program.cs:line 84
+2024-11-23 19:17:57,411 [1] INFO  Program - Application has started.
+2024-11-23 20:02:54,164 [1] INFO  Program - Initializing application...
+2024-11-23 20:02:57,723 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 20:02:57,922 [1] INFO  Program - Application has started.
+2024-11-23 20:03:00,720 [1] INFO  Program - Initializing application...
+2024-11-23 20:03:02,763 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 20:03:02,853 [1] INFO  Program - Application has started.
+2024-11-23 20:03:05,241 [1] INFO  Program - Initializing application...
+2024-11-23 20:03:06,559 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 20:03:06,759 [1] INFO  Program - Application has started.
+2024-11-23 20:05:06,057 [1] INFO  Program - Initializing application...
+2024-11-23 20:05:07,662 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 20:05:07,856 [1] INFO  Program - Application has started.
+2024-11-23 20:05:10,705 [1] INFO  Program - Initializing application...
+2024-11-23 20:05:12,219 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 20:05:12,312 [1] INFO  Program - Application has started.
+2024-11-23 20:17:09,799 [1] INFO  Program - Initializing application...
+2024-11-23 20:17:11,587 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 20:17:11,706 [1] INFO  Program - Application has started.
+2024-11-23 20:17:14,254 [1] INFO  Program - Initializing application...
+2024-11-23 20:17:15,770 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 20:17:15,858 [1] INFO  Program - Application has started.

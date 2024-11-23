@@ -3,6 +3,7 @@ using System;
 using DMSystem.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DMSystem.DAL.Migrations
 {
     [DbContext(typeof(DALContext))]
-    partial class DALContextModelSnapshot : ModelSnapshot
+    [Migration("20241123193403_UpdateDocumentToUseFilePath")]
+    partial class UpdateDocumentToUseFilePath
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
