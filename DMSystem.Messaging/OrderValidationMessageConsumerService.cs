@@ -13,16 +13,23 @@ namespace DMSystem.Messaging
     public class OrderValidationMessageConsumerService : BackgroundService
     {
         private readonly RabbitMQSetting _rabbitMqSetting;
-        private IConnection _connection = null!;
-        private IModel _channel = null!;
+        private IConnection? _connection;
+        private IModel? _channel;
         private readonly ILogger<OrderValidationMessageConsumerService> _logger;
 
-        public OrderValidationMessageConsumerService(IOptions<RabbitMQSetting> rabbitMqSetting, ILogger<OrderValidationMessageConsumerService> logger)
+        public OrderValidationMessageConsumerService(
+            IOptions<RabbitMQSetting> rabbitMqSetting,
+            ILogger<OrderValidationMessageConsumerService> logger)
         {
             _rabbitMqSetting = rabbitMqSetting.Value;
             _logger = logger;
+        }
 
+        public override Task StartAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Starting RabbitMQ consumer service...");
             InitializeRabbitMQ();
+            return Task.CompletedTask;
         }
 
         private void InitializeRabbitMQ()
@@ -34,33 +41,31 @@ namespace DMSystem.Messaging
                 Password = _rabbitMqSetting.Password
             };
 
-            int retryAttempts = 5;
-            for (int i = 0; i < retryAttempts; i++)
+            try
             {
-                try
-                {
-                    _connection = factory.CreateConnection();
-                    _channel = _connection.CreateModel();
+                _connection = factory.CreateConnection();
+                _channel = _connection.CreateModel();
 
-                    _channel.QueueDeclare(queue: RabbitMQQueues.OrderValidationQueue,
-                                          durable: true,
-                                          exclusive: false,
-                                          autoDelete: false,
-                                          arguments: null);
+                // Declare the queue
+                _channel.QueueDeclare(queue: RabbitMQQueues.OrderValidationQueue,
+                                      durable: true,
+                                      exclusive: false,
+                                      autoDelete: false,
+                                      arguments: null);
 
-                    var consumer = new EventingBasicConsumer(_channel);
-                    consumer.Received += Consumer_Received;
-                    _channel.BasicConsume(queue: RabbitMQQueues.OrderValidationQueue, autoAck: false, consumer: consumer);
+                var consumer = new EventingBasicConsumer(_channel);
+                consumer.Received += Consumer_Received;
 
-                    _logger.LogInformation("RabbitMQ connection established successfully.");
-                    return;
-                }
-                catch (BrokerUnreachableException ex)
-                {
-                    _logger.LogError($"RabbitMQ connection attempt {i + 1} failed: {ex.Message}");
-                    if (i == retryAttempts - 1) throw;
-                    Thread.Sleep(2000); // Retry delay
-                }
+                _channel.BasicConsume(queue: RabbitMQQueues.OrderValidationQueue,
+                                      autoAck: false,
+                                      consumer: consumer);
+
+                _logger.LogInformation("RabbitMQ connection and consumer initialized.");
+            }
+            catch (BrokerUnreachableException ex)
+            {
+                _logger.LogError($"Failed to connect to RabbitMQ: {ex.Message}");
+                throw;
             }
         }
 
@@ -72,19 +77,32 @@ namespace DMSystem.Messaging
             try
             {
                 _logger.LogInformation($" [x] Received {message}");
-                _channel.BasicAck(ea.DeliveryTag, false);
+
+                // Process the message (your business logic here)
+                ProcessMessage(message);
+
+                // Acknowledge message
+                _channel?.BasicAck(ea.DeliveryTag, false);
             }
             catch (Exception ex)
             {
-                _logger.LogError($" [!] Error processing message: {ex.Message}");
+                _logger.LogError($"Error processing message: {ex.Message}");
+                // Reject the message and requeue it
+                _channel?.BasicNack(ea.DeliveryTag, false, true);
             }
+        }
+
+        private void ProcessMessage(string message)
+        {
+            // Add your business logic here
+            _logger.LogInformation($"Processing message: {message}");
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             stoppingToken.Register(() =>
             {
-                _logger.LogInformation("RabbitMQ Consumer is stopping.");
+                _logger.LogInformation("RabbitMQ Consumer is stopping...");
                 Dispose();
             });
 

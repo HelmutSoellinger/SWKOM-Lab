@@ -55,6 +55,22 @@ services:
       - dms_network
     restart: unless-stopped
 
+  ocr-worker:
+    image: dms_project-ocr-worker
+    container_name: ocr-worker
+    build:
+      context: .
+      dockerfile: DMSystem.OCRWorker/Dockerfile
+    environment:
+      - RABBITMQ__HOSTNAME=rabbitmq
+      - RABBITMQ__QUEUENAME=ocrProcessingQueue
+      - TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
+    depends_on:
+      - rabbitmq
+    networks:
+      - dms_network
+    restart: unless-stopped
+
   postgres:
     image: postgis/postgis:15-3.3
     container_name: postgres
