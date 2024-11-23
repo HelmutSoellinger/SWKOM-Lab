@@ -19,7 +19,7 @@
         clientSideErrors.push({ Property: 'Author', Message: 'Author is required.' });
     }
     if (!pdfFile) {
-        clientSideErrors.push({ Property: 'PDF File', Message: 'A PDF file is required.' });
+        clientSideErrors.push({ Property: 'Upload PDF', Message: 'A PDF file is required.' });
     }
 
     // If there are validation errors, display them and exit
