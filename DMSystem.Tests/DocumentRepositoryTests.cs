@@ -1,147 +1,189 @@
-﻿using DMSystem.DAL;
-using DMSystem.DAL.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using DMSystem.DAL;
+using DMSystem.DAL.Models;
 
-namespace DMSystem.Tests
+public class DocumentRepositoryTests
 {
-    public class DocumentRepositoryTests
+    private readonly DbContextOptions<DALContext> _dbContextOptions;
+
+    public DocumentRepositoryTests()
     {
-        private DALContext GetInMemoryDbContext(string databaseName)
+        // Set up in-memory database for testing
+        _dbContextOptions = new DbContextOptionsBuilder<DALContext>()
+            .UseInMemoryDatabase(databaseName: "TestDatabase")
+            .Options;
+    }
+
+    [Fact]
+    public async Task Add_ShouldAddDocumentToDatabase()
+    {
+        // Arrange
+        using var context = new DALContext(_dbContextOptions);
+        var repository = new DocumentRepository(context);
+        var newDocument = new Document
         {
-            var options = new DbContextOptionsBuilder<DALContext>()
-                .UseInMemoryDatabase(databaseName)
-                .Options;
+            Name = "Test Document",
+            Author = "John Doe",
+            LastModified = DateTime.UtcNow,
+            Description = "A test document",
+            FilePath = "/uploadedfiles/test.pdf"
+        };
 
-            return new DALContext(options);
-        }
+        // Act
+        var result = await repository.Add(newDocument);
 
-        [Fact]
-        public async Task AddDocument_ShouldAddNewDocument()
+        // Assert
+        var documentInDb = await context.Documents.FindAsync(result.Id);
+        Assert.NotNull(documentInDb);
+        Assert.Equal("Test Document", documentInDb.Name);
+    }
+
+    [Fact]
+    public async Task Update_ShouldUpdateDocumentInDatabase()
+    {
+        // Arrange
+        using var context = new DALContext(_dbContextOptions);
+        var repository = new DocumentRepository(context);
+        var document = new Document
         {
-            // Arrange
-            var context = GetInMemoryDbContext("AddDocument_TestDatabase");
-            var repository = new DocumentRepository(context);
+            Name = "Original Document",
+            Author = "John Doe",
+            LastModified = DateTime.UtcNow,
+            Description = "A test document",
+            FilePath = "/uploadedfiles/original.pdf"
+        };
 
-            var document = new Document
-            {
-                Name = "Test Document",
-                LastModified = DateOnly.FromDateTime(System.DateTime.Now),
-                Author = "Test Author",
-                Description = "Test Description",
-                Content = new byte[] { 1, 2, 3, 4 }
-            };
+        await repository.Add(document);
 
-            // Act
-            var result = await repository.Add(document);
+        // Act
+        document.Name = "Updated Document";
+        document.Description = "Updated description";
+        var updatedDocument = await repository.Update(document);
 
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal("Test Document", result.Name);
-            Assert.Equal("Test Author", result.Author);
-        }
+        // Assert
+        var documentInDb = await context.Documents.FindAsync(updatedDocument.Id);
+        Assert.NotNull(documentInDb);
+        Assert.Equal("Updated Document", documentInDb.Name);
+        Assert.Equal("Updated description", documentInDb.Description);
+    }
 
-        [Fact]
-        public async Task GetAllDocuments_ShouldReturnAllDocuments()
+    [Fact]
+    public async Task Remove_ShouldDeleteDocumentFromDatabase()
+    {
+        // Arrange
+        using var context = new DALContext(_dbContextOptions);
+        var repository = new DocumentRepository(context);
+        var document = new Document
         {
-            // Arrange
-            var context = GetInMemoryDbContext("GetAllDocuments_TestDatabase");
-            var repository = new DocumentRepository(context);
+            Name = "Document to Delete",
+            Author = "John Doe",
+            LastModified = DateTime.UtcNow,
+            Description = "A test document",
+            FilePath = "/uploadedfiles/delete.pdf"
+        };
 
-            var documents = new List<Document>
-            {
-                new Document { Name = "Document 1", LastModified = DateOnly.FromDateTime(System.DateTime.Now), Author = "Author 1", Content = new byte[] { 1, 2 } },
-                new Document { Name = "Document 2", LastModified = DateOnly.FromDateTime(System.DateTime.Now), Author = "Author 2", Content = new byte[] { 3, 4 } }
-            };
+        await repository.Add(document);
 
-            foreach (var doc in documents)
-            {
-                await repository.Add(doc);
-            }
+        // Act
+        await repository.Remove(document);
 
-            // Act
-            var result = await repository.GetAllDocumentsAsync(null);
+        // Assert
+        var documentInDb = await context.Documents.FindAsync(document.Id);
+        Assert.Null(documentInDb);
+    }
 
-            // Assert
-            Assert.Equal(2, result.Count); // Expecting 2 documents
-        }
-
-        [Fact]
-        public async Task GetDocumentById_ShouldReturnCorrectDocument()
+    [Fact]
+    public async Task GetByIdAsync_ShouldReturnDocumentById()
+    {
+        // Arrange
+        using var context = new DALContext(_dbContextOptions);
+        var repository = new DocumentRepository(context);
+        var document = new Document
         {
-            // Arrange
-            var context = GetInMemoryDbContext("GetDocumentById_TestDatabase");
-            var repository = new DocumentRepository(context);
+            Name = "Find By ID",
+            Author = "John Doe",
+            LastModified = DateTime.UtcNow,
+            Description = "A test document",
+            FilePath = "/uploadedfiles/findbyid.pdf"
+        };
 
-            var document = new Document
-            {
-                Name = "Document for ID Test",
-                LastModified = DateOnly.FromDateTime(System.DateTime.Now),
-                Author = "Test Author",
-                Content = new byte[] { 1, 2, 3 }
-            };
+        var addedDocument = await repository.Add(document);
 
-            var addedDocument = await repository.Add(document);
+        // Act
+        var result = await repository.GetByIdAsync(addedDocument.Id);
 
-            // Act
-            var result = await repository.GetByIdAsync(addedDocument.Id);
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("Find By ID", result.Name);
+    }
 
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal("Document for ID Test", result.Name);
-            Assert.Equal("Test Author", result.Author);
-        }
+    [Fact]
+    public async Task GetAllDocumentsAsync_ShouldReturnAllDocuments()
+    {
+        // Arrange
+        using var context = new DALContext(_dbContextOptions);
+        context.Database.EnsureDeleted(); // Clear the database
+        context.Database.EnsureCreated(); // Recreate the schema
+        var repository = new DocumentRepository(context);
 
-        [Fact]
-        public async Task UpdateDocument_ShouldUpdateDocument()
+        await repository.Add(new Document
         {
-            // Arrange
-            var context = GetInMemoryDbContext("UpdateDocument_TestDatabase");
-            var repository = new DocumentRepository(context);
+            Name = "Document 1",
+            Author = "Author 1",
+            LastModified = DateTime.UtcNow,
+            FilePath = "/uploadedfiles/doc1.pdf"
+        });
 
-            var document = new Document
-            {
-                Name = "Document to Update",
-                LastModified = DateOnly.FromDateTime(System.DateTime.Now),
-                Author = "Initial Author",
-                Content = new byte[] { 1, 2, 3 }
-            };
-
-            var addedDocument = await repository.Add(document);
-
-            // Act
-            addedDocument.Author = "Updated Author";
-            var updatedDocument = await repository.Update(addedDocument);
-
-            // Assert
-            Assert.Equal("Updated Author", updatedDocument.Author);
-        }
-
-        [Fact]
-        public async Task RemoveDocument_ShouldRemoveDocument()
+        await repository.Add(new Document
         {
-            // Arrange
-            var context = GetInMemoryDbContext("RemoveDocument_TestDatabase");
-            var repository = new DocumentRepository(context);
+            Name = "Document 2",
+            Author = "Author 2",
+            LastModified = DateTime.UtcNow,
+            FilePath = "/uploadedfiles/doc2.pdf"
+        });
 
-            var document = new Document
-            {
-                Name = "Document to Remove",
-                LastModified = DateOnly.FromDateTime(System.DateTime.Now),
-                Author = "Test Author",
-                Content = new byte[] { 1, 2, 3 }
-            };
+        // Act
+        var result = await repository.GetAllDocumentsAsync(null);
 
-            var addedDocument = await repository.Add(document);
+        // Assert
+        Assert.Equal(2, result.Count);
+    }
 
-            // Act
-            await repository.Remove(addedDocument);
+    [Fact]
+    public async Task GetDocumentsByName_ShouldReturnMatchingDocuments()
+    {
+        // Arrange
+        using var context = new DALContext(_dbContextOptions);
+        context.Database.EnsureDeleted(); // Clear the database
+        context.Database.EnsureCreated(); // Recreate the schema
+        var repository = new DocumentRepository(context);
 
-            // Assert
-            var result = await repository.GetByIdAsync(addedDocument.Id);
-            Assert.Null(result); // Document should be null after removal
-        }
+        await repository.Add(new Document
+        {
+            Name = "Test Document 1",
+            Author = "Author 1",
+            LastModified = DateTime.UtcNow,
+            FilePath = "/uploadedfiles/test1.pdf"
+        });
+
+        await repository.Add(new Document
+        {
+            Name = "Another Document",
+            Author = "Author 2",
+            LastModified = DateTime.UtcNow,
+            FilePath = "/uploadedfiles/test2.pdf"
+        });
+
+        // Act
+        var result = await repository.GetDocumentsByName("Test");
+
+        // Assert
+        Assert.Single(result);
+        Assert.Equal("Test Document 1", result.First().Name);
     }
 }
