@@ -1,24 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem\\DMSystem.csproj": {}
+    "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem\\DMSystem.csproj": {}
   },
   "projects": {
-    "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj": {
+    "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj",
+        "projectUniqueName": "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj",
         "projectName": "DMSystem.DAL",
-        "projectPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj",
-        "packagesPath": "C:\\Users\\jay\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.DAL\\obj\\",
+        "projectPath": "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj",
+        "packagesPath": "C:\\Users\\Helmut\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem.DAL\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\jay\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\Helmut\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -77,25 +73,21 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.Messaging\\DMSystem.Messaging.csproj": {
+    "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem.Messaging\\DMSystem.Messaging.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.Messaging\\DMSystem.Messaging.csproj",
+        "projectUniqueName": "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem.Messaging\\DMSystem.Messaging.csproj",
         "projectName": "DMSystem.Messaging",
-        "projectPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.Messaging\\DMSystem.Messaging.csproj",
-        "packagesPath": "C:\\Users\\jay\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.Messaging\\obj\\",
+        "projectPath": "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem.Messaging\\DMSystem.Messaging.csproj",
+        "packagesPath": "C:\\Users\\Helmut\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem.Messaging\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\jay\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\Helmut\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -164,25 +156,21 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem\\DMSystem.csproj": {
+    "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem\\DMSystem.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem\\DMSystem.csproj",
+        "projectUniqueName": "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem\\DMSystem.csproj",
         "projectName": "DMSystem",
-        "projectPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem\\DMSystem.csproj",
-        "packagesPath": "C:\\Users\\jay\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem\\obj\\",
+        "projectPath": "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem\\DMSystem.csproj",
+        "packagesPath": "C:\\Users\\Helmut\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\jay\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\Helmut\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -197,11 +185,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj": {
-                "projectPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj"
+              "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj": {
+                "projectPath": "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj"
               },
-              "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.Messaging\\DMSystem.Messaging.csproj": {
-                "projectPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.Messaging\\DMSystem.Messaging.csproj"
+              "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem.Messaging\\DMSystem.Messaging.csproj": {
+                "projectPath": "C:\\Users\\Helmut\\Desktop\\FH\\SemesterProject\\DMSystem.Messaging\\DMSystem.Messaging.csproj"
               }
             }
           }
@@ -283,7 +271,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
