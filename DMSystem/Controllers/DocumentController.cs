@@ -23,14 +23,14 @@ namespace DMSystem.Controllers
         private readonly IDocumentRepository _documentRepository;
         private readonly ILogger<DocumentController> _logger;
         private readonly IMapper _mapper;
-        private readonly IRabbitMQPublisher<Document> _rabbitMqPublisher;
+        private readonly IRabbitMQPublisher<OCRRequest> _rabbitMqPublisher;
         private readonly IValidator<DocumentDTO> _validator;
 
         public DocumentController(
             IDocumentRepository documentRepository,
             ILogger<DocumentController> logger,
             IMapper mapper,
-            IRabbitMQPublisher<Document> rabbitMqPublisher,
+            IRabbitMQPublisher<OCRRequest> rabbitMqPublisher,
             IValidator<DocumentDTO> validator)
         {
             _documentRepository = documentRepository;
@@ -66,17 +66,12 @@ namespace DMSystem.Controllers
         {
             try
             {
-                // Validate the DTO using FluentValidation
+                // Validate the DTO
                 var validationResult = await _validator.ValidateAsync(createDocument);
-
                 if (!validationResult.IsValid)
                 {
                     var errorMessages = validationResult.Errors
-                        .Select(error => new
-                        {
-                            Property = error.PropertyName,
-                            Message = error.ErrorMessage
-                        })
+                        .Select(error => new { Property = error.PropertyName, Message = error.ErrorMessage })
                         .ToList();
 
                     return BadRequest(new { errors = errorMessages });
@@ -85,15 +80,15 @@ namespace DMSystem.Controllers
                 // Check for the PDF file
                 if (pdfFile == null || pdfFile.Length == 0)
                 {
-                    return BadRequest(new
-                    {
-                        errors = new[] { new { Property = "pdfFile", Message = "A PDF file is required." } }
-                    });
+                    return BadRequest(new { errors = new[] { new { Property = "pdfFile", Message = "A PDF file is required." } } });
                 }
 
-                // Save the file to the server
-                var filePath = Path.Combine("UploadedFiles", $"{Guid.NewGuid()}_{pdfFile.FileName}");
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                // Save the file
+                var originalFileName = pdfFile.FileName; // Get the original file name
+                var uniqueFileName = $"{Guid.NewGuid()}_{originalFileName}";
+                var filePath = Path.Combine("UploadedFiles", uniqueFileName);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath)); // Ensure directory exists
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await pdfFile.CopyToAsync(stream);
@@ -101,26 +96,31 @@ namespace DMSystem.Controllers
 
                 // Create a new document
                 var newDocument = _mapper.Map<Document>(createDocument);
-                newDocument.FilePath = filePath;
-                newDocument.LastModified = DateTime.UtcNow;
+                newDocument.FilePath = filePath; // Use the unique file path
+                newDocument.LastModified = DateTime.UtcNow; // Set the last modified time
+                newDocument.Description ??= string.Empty;
 
                 await _documentRepository.Add(newDocument);
 
-                // Publish message to RabbitMQ
-                await _rabbitMqPublisher.PublishMessageAsync(newDocument, RabbitMQQueues.OrderValidationQueue);
+                // Create and publish OcrRequest
+                var ocrRequest = new OCRRequest
+                {
+                    DocumentId = newDocument.Id.ToString(),
+                    PdfUrl = newDocument.FilePath // Pass the unique file path
+                };
+                await _rabbitMqPublisher.PublishMessageAsync(ocrRequest, RabbitMQQueues.OrderValidationQueue);
 
+                // Return the created document
                 var newDocumentDTO = _mapper.Map<DocumentDTO>(newDocument);
                 return CreatedAtAction(nameof(Get), new { id = newDocument.Id }, newDocumentDTO);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while creating a document.");
-                return StatusCode(500, new
-                {
-                    errors = new[] { new { Property = "Server", Message = "An unexpected error occurred." } }
-                });
+                return StatusCode(500, new { errors = new[] { new { Property = "Server", Message = "An unexpected error occurred." } } });
             }
         }
+
 
         /// <summary>
         /// Updates a Document by Id

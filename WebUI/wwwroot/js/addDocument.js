@@ -3,23 +3,36 @@
 
     // Collect form data
     const formData = new FormData();
-    const docName = document.getElementById('docName').value; // Document Name
-    const docAuthor = document.getElementById('docAuthor').value; // Document Author
-    const docDescription = document.getElementById('docDescription').value; // Document Description
-    const pdfFile = document.getElementById('docContent').files[0]; // PDF File
+    const docName = document.getElementById('docName').value.trim(); // Document Name
+    const docAuthor = document.getElementById('docAuthor').value.trim(); // Document Author
+    const docDescription = document.getElementById('docDescription').value.trim() || ""; // Document Description
+    const pdfFile = document.getElementById('docFile').files[0]; // PDF File
 
     // Array to store client-side validation errors
     const clientSideErrors = [];
 
-    // Client-side validation
+    // Client-side validation matching backend
     if (!docName) {
         clientSideErrors.push({ Property: 'Name', Message: 'Name is required.' });
+    } else if (docName.length > 100) {
+        clientSideErrors.push({ Property: 'Name', Message: 'Name cannot exceed 100 characters.' });
     }
+
     if (!docAuthor) {
         clientSideErrors.push({ Property: 'Author', Message: 'Author is required.' });
+    } else if (docAuthor.length > 100) {
+        clientSideErrors.push({ Property: 'Author', Message: 'Author cannot exceed 100 characters.' });
     }
+
     if (!pdfFile) {
         clientSideErrors.push({ Property: 'Upload PDF', Message: 'A PDF file is required.' });
+    }
+
+    if (docDescription.length > 500) {
+        clientSideErrors.push({
+            Property: 'Description',
+            Message: 'Description cannot exceed 500 characters.',
+        });
     }
 
     // If there are validation errors, display them and exit
@@ -28,41 +41,34 @@
         return;
     }
 
-    // Append the form fields to the FormData object
+    // Append validated fields to FormData
     formData.append('name', docName);
     formData.append('author', docAuthor);
-    formData.append('description', docDescription || ''); // Default empty description if none provided
-    formData.append('pdfFile', pdfFile); // File itself
-    // The backend sets LastModified, so we don't send it here.
-
-    // Debugging: Log the formData content (useful for development)
-    formData.forEach((value, key) => {
-        console.log(`FormData key: ${key}, value:`, value);
-    });
+    formData.append('description', docDescription);
+    formData.append('pdfFile', pdfFile);
 
     try {
-        // Make the POST request to the backend API
+        // Send validated data to the backend
         const response = await fetch(apiBaseUrl, {
             method: 'POST',
             body: formData,
         });
 
-        // If the response is not OK, handle errors
         if (!response.ok) {
             const data = await response.json().catch(() => null); // Safely parse JSON if available
             if (data && data.errors) {
                 showAddSectionValidationErrors(convertServerErrors(data.errors));
-                throw data.errors; // Throw to skip success logic
+                throw data.errors; // Skip success logic
             }
             throw new Error('Unexpected error occurred');
         }
 
-        // If successful, reset the form and reload documents
+        // Reset form and refresh list on success
         event.target.reset(); // Clear form inputs
         showSection('list'); // Switch to the "Document List" section
         loadDocuments(); // Refresh the document list
+        alert('Document successfully added!'); // Show confirmation message
     } catch (errors) {
-        // Handle errors and display them in the UI
         console.error('Errors:', errors);
         showAddSectionValidationErrors([
             { Property: 'Unknown', Message: 'An unexpected error occurred. Please try again.' },
@@ -71,9 +77,9 @@
 });
 
 /**
- * Converts server-side validation errors into a consistent format for the frontend.
- * @param {Object} serverErrors - Errors returned from the server.
- * @returns {Array} Array of formatted error objects.
+ * Converts backend validation errors into a consistent frontend format.
+ * @param {Object} serverErrors - Errors returned from the backend.
+ * @returns {Array} Formatted error objects.
  */
 function convertServerErrors(serverErrors) {
     const errorList = [];
@@ -93,19 +99,16 @@ function showAddSectionValidationErrors(errors) {
     const addErrorBox = document.getElementById('addErrorMessages');
     const addErrorList = document.getElementById('addErrorList');
 
-    // Clear any existing errors
-    addErrorList.innerHTML = '';
+    addErrorList.innerHTML = ''; // Clear any existing errors
 
-    // Populate the error list
     errors.forEach((error) => {
         const li = document.createElement('li');
         li.textContent = `${error.Property}: ${error.Message}`;
         addErrorList.appendChild(li);
     });
 
-    // Show the error box
     addErrorBox.classList.remove('hidden');
-    addErrorBox.style.display = 'block'; // Ensure it's visible
+    addErrorBox.style.display = 'block'; // Ensure visibility
 }
 
 /**
@@ -114,5 +117,5 @@ function showAddSectionValidationErrors(errors) {
 document.getElementById('addCloseErrorBtn').addEventListener('click', () => {
     const addErrorBox = document.getElementById('addErrorMessages');
     addErrorBox.classList.add('hidden');
-    addErrorBox.style.display = 'none'; // Explicitly hide it
+    addErrorBox.style.display = 'none';
 });

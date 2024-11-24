@@ -9,11 +9,10 @@ namespace DMSystem.Mappings
         public DocumentProfile()
         {
             CreateMap<DocumentDTO, Document>()
-                .ForMember(dest => dest.FilePath, opt => opt.MapFrom(src => src.FilePath)) // Map FilePath
-                .ForMember(dest => dest.LastModified, opt => opt.Ignore()); // LastModified is set in backend
+                .ForMember(dest => dest.LastModified, opt => opt.Ignore());
 
             CreateMap<Document, DocumentDTO>()
-                .ForMember(dest => dest.FilePath, opt => opt.MapFrom(src => src.FilePath)); // Map FilePath
+                .ForMember(dest => dest.LastModified, opt => opt.MapFrom(src => src.LastModified));
         }
     }
 }

@@ -1,60 +1,40 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using System.IO;
-using DMSystem.DAL;
-using DMSystem.DAL.Models;
+using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
-using DMSystem.Mappings; // Namespace for AutoMapper profiles
-using DMSystem.Messaging;
-using DMSystem.DTOs;
 using FluentValidation;
 using FluentValidation.AspNetCore;
-using Microsoft.Extensions.Hosting;
 using log4net;
 using log4net.Config;
+using System.IO;
 using System.Reflection;
+using DMSystem.DAL;
+using DMSystem.DAL.Models;
+using DMSystem.Mappings;
+using DMSystem.Messaging;
+using DMSystem.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Log4Net
+// Configure Log4Net for logging
 var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
 XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
-
-// Example Log4Net instance for logging
 var logger = LogManager.GetLogger(typeof(Program));
 logger.Info("Initializing application...");
 
-// Configure database context
+// Configure services
 builder.Services.AddDbContext<DALContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))); // Database context
 
-// Register the Document Repository
-builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
-
-// Register AutoMapper and scan for profiles (e.g., DocumentProfile)
-builder.Services.AddAutoMapper(typeof(DocumentProfile).Assembly); // Registers all profiles in the assembly
-
-// Register FluentValidation and add validators
+builder.Services.AddScoped<IDocumentRepository, DocumentRepository>(); // Document Repository
+builder.Services.AddAutoMapper(typeof(DocumentProfile).Assembly); // AutoMapper profiles
 builder.Services.AddControllers()
-    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<DocumentDTOValidator>());
-
-// Register RabbitMQ settings and services
-builder.Services.Configure<RabbitMQSetting>(builder.Configuration.GetSection("RabbitMQ"));
-builder.Services.AddSingleton<IRabbitMQPublisher<Document>, RabbitMQPublisher<Document>>();
-builder.Services.AddHostedService<OrderValidationMessageConsumerService>();
-
-// Configure Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    c.IncludeXmlComments(xmlPath);
-});
-
-// Configure CORS policy
-builder.Services.AddCors(options =>
+    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<DocumentDTOValidator>()); // FluentValidation
+builder.Services.Configure<RabbitMQSetting>(builder.Configuration.GetSection("RabbitMQ")); // RabbitMQ settings
+builder.Services.AddSingleton<IRabbitMQPublisher<OCRRequest>, RabbitMQPublisher<OCRRequest>>(); // RabbitMQ Publisher
+builder.Services.AddHostedService<OrderValidationMessageConsumerService>(); // RabbitMQ Consumer
+builder.Services.AddCors(options => // CORS policy
 {
     options.AddPolicy("AllowAll", policy =>
     {
@@ -63,25 +43,48 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
+builder.Services.AddEndpointsApiExplorer(); // API Explorer
+builder.Services.AddSwaggerGen(c => // Swagger configuration
+{
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+});
 
+// Build the application
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// Configure Middleware
+
+// Enable Swagger in Development
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// Use HTTPS Redirection
 app.UseHttpsRedirection();
 
-// Ensure the database is created and migrated
+// Apply CORS policy before Authorization middleware
+app.UseCors("AllowAll");
+
+// Authorization Middleware
+app.UseAuthorization();
+
+// Map Controllers
+app.MapControllers();
+
+// Health Check Endpoint
+app.MapGet("/health", () => Results.Ok("Healthy")).WithTags("Health Check");
+
+// Ensure Database Migration is Applied
 using (var scope = app.Services.CreateScope())
 {
     try
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<DALContext>();
-        dbContext.Database.Migrate();
+        dbContext.Database.Migrate(); // Apply migrations
         logger.Info("Database migration completed successfully.");
     }
     catch (Exception ex)
@@ -90,14 +93,10 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Use CORS before Authorization
-app.UseCors("AllowAll");
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-// Example usage of Log4Net in Program.cs
+// Log application start
 logger.Info("Application has started.");
+
+// Explicitly bind the application to 0.0.0.0:5000
+app.Urls.Add("http://0.0.0.0:5000");
 
 app.Run();
