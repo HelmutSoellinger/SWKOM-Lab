@@ -29,7 +29,7 @@ services:
     expose:
       - "3000"  # Expose port 3000 for internal Docker network communication
     depends_on:
-      - postgres
+      - postgres  # PostgreSQL should be up before starting web-app
     networks:
       - dms_network
     restart: unless-stopped
@@ -41,13 +41,13 @@ services:
       context: .
       dockerfile: DMSystem/Dockerfile
     environment:
-      - ASPNETCORE_URLS=http://0.0.0.0:5000  # Ensure the app binds to all interfaces on port 5000
-      - LOG4NET_CONFIG_FILE=/app/log4net.config  # Set Log4Net config file environment variable
+      - ASPNETCORE_URLS=http://0.0.0.0:5000
     volumes:
-      - ./DMSystem/log4net.config:/app/log4net.config  # Mount Log4Net configuration file
-      - ./DMSystem/Logs:/app/Logs  # Persist log files from the API
+      - shared-config:/app/config  # Use shared volume for appsettings.json
+      - ./DMSystem/log4net.config:/app/log4net.config
+      - ./DMSystem/Logs:/app/Logs
     expose:
-      - "5000"  # Expose port 5000 for internal Docker network communication
+      - "5000"
     depends_on:
       - postgres
       - rabbitmq
@@ -62,14 +62,16 @@ services:
       context: .
       dockerfile: DMSystem.OCRWorker/Dockerfile
     environment:
-      - RABBITMQ__HOSTNAME=rabbitmq
-      - RABBITMQ__QUEUENAME=ocrProcessingQueue
-      - TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
-      - OCR_PDF_STORAGE=/data/pdf_storage  # Directory for storing/retrieving PDFs
+      - TESSDATA_PREFIX=/app/tessdata
+      - OCR_PDF_STORAGE=/data/pdf_storage
     volumes:
+      - shared-config:/app/config  # Use shared volume for appsettings.json
       - ./pdf_storage:/data/pdf_storage  # Mount volume for PDF storage
+      - ./DMSystem.OCRWorker/tessdata:/app/tessdata  # Ensure tessdata is available
     depends_on:
       - rabbitmq
+      - web-api
+      - postgres
     networks:
       - dms_network
     restart: unless-stopped
@@ -114,16 +116,19 @@ services:
       - "5050:80"  # Expose pgAdmin web interface
     volumes:
       - pgadmin:/var/lib/pgadmin
+    depends_on:
+      - postgres  # Ensure PostgreSQL is up before starting pgAdmin
     networks:
       - dms_network
     restart: unless-stopped
 
 networks:
   dms_network:
-    name: dms_network  # Explicitly name the network
+    name: dms_network
     driver: bridge
 
 volumes:
+  shared-config:  # Shared volume for appsettings.json
   postgres:
   pgadmin:
-  pdf_storage:  # Add volume for storing PDFs
+  pdf_storage:

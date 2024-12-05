@@ -14,7 +14,7 @@ namespace DMSystem.DTOs
         [Required]
         public string Author { get; set; }
 
-        public string? Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         [Required]
         public DateTime LastModified { get; set; }
@@ -24,17 +24,13 @@ namespace DMSystem.DTOs
     {
         public DocumentDTOValidator()
         {
-            RuleFor(document => document.Name)
+            RuleFor(d => d.Name)
                 .NotEmpty().WithMessage("Name is required.")
                 .MaximumLength(100).WithMessage("Name cannot exceed 100 characters.");
-
-            RuleFor(document => document.Author)
-                .NotEmpty().WithMessage("Author is required.")
-                .MaximumLength(100).WithMessage("Author cannot exceed 100 characters.");
-
-            RuleFor(document => document.Description)
-                .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.")
-                .When(document => !string.IsNullOrEmpty(document.Description));
+            RuleFor(d => d.Author)
+                .NotEmpty().WithMessage("Author is required.");
+            RuleFor(d => d.Description)
+                .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
         }
     }
 }

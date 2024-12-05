@@ -42,14 +42,14 @@
     }
 
     // Append validated fields to FormData
-    formData.append('name', docName);
-    formData.append('author', docAuthor);
-    formData.append('description', docDescription);
+    formData.append('Name', docName);
+    formData.append('Author', docAuthor);
+    formData.append('Description', docDescription);
     formData.append('pdfFile', pdfFile);
 
     try {
         // Send validated data to the backend
-        const response = await fetch(apiBaseUrl, {
+        const response = await fetch(apiBaseUrl, { // Adjusting URL as needed
             method: 'POST',
             body: formData,
         });

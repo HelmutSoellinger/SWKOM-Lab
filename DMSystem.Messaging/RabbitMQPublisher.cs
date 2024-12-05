@@ -1,12 +1,13 @@
 ﻿using RabbitMQ.Client;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;  // Or use System.Text.Json if preferred
+using Newtonsoft.Json; // Or System.Text.Json if preferred
 using Microsoft.Extensions.Logging;
 
 namespace DMSystem.Messaging
 {
-    public class RabbitMQPublisher<T> : IRabbitMQPublisher<T>
+    public class RabbitMQPublisher<T> : IRabbitMQPublisher<T>, IDisposable
     {
         private readonly RabbitMQSetting _rabbitMqSetting;
         private readonly IConnection _connection;
@@ -28,15 +29,23 @@ namespace DMSystem.Messaging
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
 
-            // Optional: Declare the queue only once
-            _channel.QueueDeclare(queue: RabbitMQQueues.OrderValidationQueue,
+            // Declare queues dynamically
+            _channel.QueueDeclare(queue: _rabbitMqSetting.OcrQueue,
                                   durable: true,
                                   exclusive: false,
                                   autoDelete: false,
                                   arguments: null);
+
+            _channel.QueueDeclare(queue: _rabbitMqSetting.OcrResultsQueue,
+                                  durable: true,
+                                  exclusive: false,
+                                  autoDelete: false,
+                                  arguments: null);
+
+            _logger.LogInformation($"RabbitMQPublisher initialized for {_rabbitMqSetting.HostName}");
         }
 
-        public Task PublishMessageAsync(T message, string queueName = RabbitMQQueues.OrderValidationQueue)
+        public Task PublishMessageAsync(T message, string queueName)
         {
             var messageJson = JsonConvert.SerializeObject(message);
             var body = Encoding.UTF8.GetBytes(messageJson);

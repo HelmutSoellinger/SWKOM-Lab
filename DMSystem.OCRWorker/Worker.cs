@@ -1,162 +1,130 @@
 using DMSystem.Messaging;
-using DMSystem.OCR;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Tesseract;
 
 namespace DMSystem.OCRWorker
 {
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private readonly RabbitMQSetting _rabbitMQSetting;
-        private IConnection _connection;
-        private IModel _channel;
-        private readonly OcrProcessor _ocrProcessor;
+        private readonly RabbitMQSetting _rabbitMqSettings;
+        private readonly IConnection _connection;
+        private readonly IModel _channel;
 
-        public Worker(ILogger<Worker> logger, IOptions<RabbitMQSetting> rabbitMQSetting)
+        public Worker(IOptions<RabbitMQSetting> rabbitMqOptions, ILogger<Worker> logger)
         {
             _logger = logger;
-            _rabbitMQSetting = rabbitMQSetting.Value; // Load RabbitMQ settings from DI
-            _ocrProcessor = new OcrProcessor(); // Initialize OCR Processor
-        }
+            _rabbitMqSettings = rabbitMqOptions.Value;
 
-        public override Task StartAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogInformation("Starting RabbitMQ worker...");
-            InitializeRabbitMQ();
-            return Task.CompletedTask;
-        }
-
-        private void InitializeRabbitMQ()
-        {
             var factory = new ConnectionFactory
             {
-                HostName = _rabbitMQSetting.HostName,
-                UserName = _rabbitMQSetting.UserName,
-                Password = _rabbitMQSetting.Password
+                HostName = _rabbitMqSettings.HostName,
+                UserName = _rabbitMqSettings.UserName,
+                Password = _rabbitMqSettings.Password
             };
 
             _connection = factory.CreateConnection();
             _channel = _connection.CreateModel();
 
-            _channel.QueueDeclare(
-                queue: _rabbitMQSetting.QueueName,
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                arguments: null
-            );
+            // Declare the necessary queues
+            _channel.QueueDeclare(_rabbitMqSettings.OcrQueue, durable: true, exclusive: false, autoDelete: false, arguments: null);
+            _channel.QueueDeclare(_rabbitMqSettings.OcrResultsQueue, durable: true, exclusive: false, autoDelete: false, arguments: null);
 
-            _logger.LogInformation("RabbitMQ initialized successfully.");
+            _logger.LogInformation($"Connected to RabbitMQ at {_rabbitMqSettings.HostName}. Queues declared: {_rabbitMqSettings.OcrQueue}, {_rabbitMqSettings.OcrResultsQueue}");
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _logger.LogInformation("OCR Worker started.");
+
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += async (model, ea) =>
             {
                 var body = ea.Body.ToArray();
                 var message = Encoding.UTF8.GetString(body);
-                _logger.LogInformation($"Received message: {message}");
 
                 try
                 {
-                    // Deserialize message for processing
-                    var request = JsonSerializer.Deserialize<OcrRequest>(message);
-
-                    if (request != null && !string.IsNullOrEmpty(request.PdfUrl))
+                    var ocrRequest = JsonSerializer.Deserialize<OCRRequest>(message);
+                    if (ocrRequest != null)
                     {
-                        // Fetch PDF content from the provided URL
-                        var pdfContent = await FetchPdfContent(request.PdfUrl);
+                        _logger.LogInformation($"Processing OCR for Document ID: {ocrRequest.DocumentId}");
 
-                        // Perform OCR
-                        var ocrResult = _ocrProcessor.PerformOcr(pdfContent);
+                        var ocrResultText = PerformOcr(ocrRequest.PdfUrl);
 
-                        // Prepare and send the result back
-                        var resultMessage = new OcrResult
+                        var resultMessage = new OCRResult
                         {
-                            DocumentId = request.DocumentId,
-                            OcrText = ocrResult
+                            DocumentId = ocrRequest.DocumentId,
+                            OcrText = ocrResultText
                         };
 
-                        SendOcrResult(resultMessage);
+                        SendResult(resultMessage);
+
+                        _logger.LogInformation($"OCR completed for Document ID: {ocrRequest.DocumentId}");
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError($"Error processing message: {ex.Message}");
+                    _logger.LogError(ex, "Error processing OCR request.");
                 }
             };
 
-            _channel.BasicConsume(
-                queue: _rabbitMQSetting.QueueName,
-                autoAck: true,
-                consumer: consumer
-            );
+            // Start consuming messages from the queue
+            _channel.BasicConsume(_rabbitMqSettings.OcrQueue, autoAck: true, consumer);
 
-            return Task.CompletedTask;
+            // Keep the service alive while listening to RabbitMQ
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                await Task.Delay(1000, stoppingToken);
+            }
         }
 
-        private async Task<byte[]> FetchPdfContent(string pdfUrl)
+        private string PerformOcr(string pdfFilePath)
         {
-            using var httpClient = new HttpClient();
-            _logger.LogInformation($"Fetching PDF from {pdfUrl}");
-            var response = await httpClient.GetAsync(pdfUrl);
+            var result = new StringBuilder();
 
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsByteArrayAsync();
+            using var engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default);
+            using var img = Pix.LoadFromFile(pdfFilePath);
+            using var page = engine.Process(img);
+            result.Append(page.GetText());
+
+            return result.ToString();
         }
 
-        private void SendOcrResult(OcrResult result)
+        private void SendResult(OCRResult result)
         {
-            var resultJson = JsonSerializer.Serialize(result);
-            var resultBytes = Encoding.UTF8.GetBytes(resultJson);
+            var message = JsonSerializer.Serialize(result);
+            var body = Encoding.UTF8.GetBytes(message);
 
-            _channel.BasicPublish(
-                exchange: "",
-                routingKey: "ocrResultsQueue", // Assuming "ocrResultsQueue" for sending results
-                basicProperties: null,
-                body: resultBytes
-            );
+            _channel.BasicPublish("", _rabbitMqSettings.OcrResultsQueue, null, body);
+        }
 
-            _logger.LogInformation($"OCR result for DocumentId {result.DocumentId} sent to queue.");
+        public override Task StopAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("OCR Worker is stopping.");
+
+            if (_channel.IsOpen)
+            {
+                _channel.Close();
+                _connection.Close();
+            }
+
+            return base.StopAsync(cancellationToken);
         }
 
         public override void Dispose()
         {
-            if (_channel?.IsOpen == true)
-            {
-                _channel.Close();
-                _channel.Dispose();
-            }
-
-            if (_connection?.IsOpen == true)
-            {
-                _connection.Close();
-                _connection.Dispose();
-            }
-
+            _channel?.Dispose();
+            _connection?.Dispose();
             base.Dispose();
         }
-    }
-
-    // Message for OCR requests
-    public class OcrRequest
-    {
-        public string DocumentId { get; set; } = string.Empty;
-        public string PdfUrl { get; set; } = string.Empty;
-    }
-
-    // Message for OCR results
-    public class OcrResult
-    {
-        public string DocumentId { get; set; } = string.Empty;
-        public string OcrText { get; set; } = string.Empty;
     }
 }

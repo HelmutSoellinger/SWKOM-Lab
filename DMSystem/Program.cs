@@ -10,7 +10,6 @@ using log4net.Config;
 using System.IO;
 using System.Reflection;
 using DMSystem.DAL;
-using DMSystem.DAL.Models;
 using DMSystem.Mappings;
 using DMSystem.Messaging;
 using DMSystem.DTOs;
@@ -31,10 +30,15 @@ builder.Services.AddScoped<IDocumentRepository, DocumentRepository>(); // Docume
 builder.Services.AddAutoMapper(typeof(DocumentProfile).Assembly); // AutoMapper profiles
 builder.Services.AddControllers()
     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<DocumentDTOValidator>()); // FluentValidation
+
 builder.Services.Configure<RabbitMQSetting>(builder.Configuration.GetSection("RabbitMQ")); // RabbitMQ settings
 builder.Services.AddSingleton<IRabbitMQPublisher<OCRRequest>, RabbitMQPublisher<OCRRequest>>(); // RabbitMQ Publisher
-builder.Services.AddHostedService<OrderValidationMessageConsumerService>(); // RabbitMQ Consumer
-builder.Services.AddCors(options => // CORS policy
+
+// Remove old consumer service if not in use
+// builder.Services.AddHostedService<OrderValidationMessageConsumerService>(); // Old RabbitMQ Consumer Service (remove if unused)
+
+// CORS Policy
+builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
@@ -43,8 +47,10 @@ builder.Services.AddCors(options => // CORS policy
               .AllowAnyHeader();
     });
 });
-builder.Services.AddEndpointsApiExplorer(); // API Explorer
-builder.Services.AddSwaggerGen(c => // Swagger configuration
+
+// Add API Explorer and Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
 {
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
@@ -55,30 +61,21 @@ builder.Services.AddSwaggerGen(c => // Swagger configuration
 var app = builder.Build();
 
 // Configure Middleware
-
-// Enable Swagger in Development
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Use HTTPS Redirection
 app.UseHttpsRedirection();
-
-// Apply CORS policy before Authorization middleware
 app.UseCors("AllowAll");
-
-// Authorization Middleware
 app.UseAuthorization();
-
-// Map Controllers
 app.MapControllers();
 
 // Health Check Endpoint
 app.MapGet("/health", () => Results.Ok("Healthy")).WithTags("Health Check");
 
-// Ensure Database Migration is Applied
+// Apply Database Migrations
 using (var scope = app.Services.CreateScope())
 {
     try
@@ -96,7 +93,7 @@ using (var scope = app.Services.CreateScope())
 // Log application start
 logger.Info("Application has started.");
 
-// Explicitly bind the application to 0.0.0.0:5000
+// Bind application to 0.0.0.0:5000
 app.Urls.Add("http://0.0.0.0:5000");
 
 app.Run();

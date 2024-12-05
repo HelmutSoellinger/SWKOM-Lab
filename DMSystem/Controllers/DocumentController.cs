@@ -41,10 +41,8 @@ namespace DMSystem.Controllers
         }
 
         /// <summary>
-        /// Returns all Documents. Optional filter by name.
+        /// Get all documents or filter by name if provided.
         /// </summary>
-        /// <param name="name"></param>
-        /// <returns>List of Documents</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DocumentDTO>>> Get([FromQuery] string? name)
         {
@@ -54,80 +52,130 @@ namespace DMSystem.Controllers
         }
 
         /// <summary>
-        /// Creates a new Document with an associated PDF file.
+        /// Create a new document with an uploaded PDF file.
         /// </summary>
-        /// <param name="createDocument">Document information</param>
-        /// <param name="pdfFile">PDF file</param>
-        /// <returns>Created Document</returns>
         [HttpPost]
-        public async Task<ActionResult<DocumentDTO>> PostDocument(
-            [FromForm] DocumentDTO createDocument,
-            [FromForm] IFormFile pdfFile)
+        public async Task<IActionResult> CreateDocument([FromForm] DocumentDTO documentDto, [FromForm] IFormFile? pdfFile)
         {
+            // Validate uploaded file
+            if (pdfFile == null || pdfFile.Length == 0)
+            {
+                ModelState.AddModelError("pdfFile", "No file uploaded.");
+                return BadRequest(ModelState);
+            }
+            if (!pdfFile.FileName.EndsWith(".pdf"))
+            {
+                ModelState.AddModelError("pdfFile", "Only PDF files are allowed.");
+                return BadRequest(ModelState);
+            }
+
+            // Validate the Document DTO using FluentValidation
+            var validationResult = await _validator.ValidateAsync(documentDto);
+            if (!validationResult.IsValid)
+            {
+                var errors = validationResult.Errors
+                    .Select(e => new { Property = e.PropertyName, Message = e.ErrorMessage })
+                    .ToList();
+                return BadRequest(new { errors });
+            }
+
+            // Save the PDF file
+            var filePath = Path.Combine("UploadedFiles", Guid.NewGuid() + "_" + pdfFile.FileName);
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+            await using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await pdfFile.CopyToAsync(stream);
+            }
+
+            // Create a new document in the DAL
+            var newDocument = _mapper.Map<Document>(documentDto);
+            newDocument.FilePath = filePath;
+            newDocument.LastModified = DateTime.UtcNow;
+            await _documentRepository.Add(newDocument);
+
+            // Publish OCR request to RabbitMQ
+            var ocrRequest = new OCRRequest
+            {
+                DocumentId = newDocument.Id.ToString(),
+                PdfUrl = filePath
+            };
+
             try
             {
-                // Validate the DTO
-                var validationResult = await _validator.ValidateAsync(createDocument);
-                if (!validationResult.IsValid)
-                {
-                    var errorMessages = validationResult.Errors
-                        .Select(error => new { Property = error.PropertyName, Message = error.ErrorMessage })
-                        .ToList();
-
-                    return BadRequest(new { errors = errorMessages });
-                }
-
-                // Check for the PDF file
-                if (pdfFile == null || pdfFile.Length == 0)
-                {
-                    return BadRequest(new { errors = new[] { new { Property = "pdfFile", Message = "A PDF file is required." } } });
-                }
-
-                // Save the file
-                var originalFileName = pdfFile.FileName; // Get the original file name
-                var uniqueFileName = $"{Guid.NewGuid()}_{originalFileName}";
-                var filePath = Path.Combine("UploadedFiles", uniqueFileName);
-
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath)); // Ensure directory exists
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await pdfFile.CopyToAsync(stream);
-                }
-
-                // Create a new document
-                var newDocument = _mapper.Map<Document>(createDocument);
-                newDocument.FilePath = filePath; // Use the unique file path
-                newDocument.LastModified = DateTime.UtcNow; // Set the last modified time
-                newDocument.Description ??= string.Empty;
-
-                await _documentRepository.Add(newDocument);
-
-                // Create and publish OcrRequest
-                var ocrRequest = new OCRRequest
-                {
-                    DocumentId = newDocument.Id.ToString(),
-                    PdfUrl = newDocument.FilePath // Pass the unique file path
-                };
-                await _rabbitMqPublisher.PublishMessageAsync(ocrRequest, RabbitMQQueues.OrderValidationQueue);
-
-                // Return the created document
-                var newDocumentDTO = _mapper.Map<DocumentDTO>(newDocument);
-                return CreatedAtAction(nameof(Get), new { id = newDocument.Id }, newDocumentDTO);
+                await _rabbitMqPublisher.PublishMessageAsync(ocrRequest, RabbitMQQueues.OcrQueue);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while creating a document.");
-                return StatusCode(500, new { errors = new[] { new { Property = "Server", Message = "An unexpected error occurred." } } });
+                _logger.LogError(ex, "Error while sending message to RabbitMQ.");
+                return StatusCode(500, new { message = "Error sending OCR request to queue." });
             }
+
+            // Return success response
+            var documentDtoResponse = _mapper.Map<DocumentDTO>(newDocument);
+            return CreatedAtAction(nameof(GetDocumentById), new { id = newDocument.Id }, documentDtoResponse);
         }
 
+        /// <summary>
+        /// Upload a new PDF for an existing document by ID.
+        /// </summary>
+        [HttpPut("{id}/upload")]
+        public async Task<IActionResult> UploadDocumentFile(int id, [FromForm] IFormFile? pdfFile)
+        {
+            // Validate uploaded file
+            if (pdfFile == null || pdfFile.Length == 0)
+            {
+                ModelState.AddModelError("pdfFile", "No file uploaded.");
+                return BadRequest(ModelState);
+            }
+            if (!pdfFile.FileName.EndsWith(".pdf"))
+            {
+                ModelState.AddModelError("pdfFile", "Only PDF files are allowed.");
+                return BadRequest(ModelState);
+            }
+
+            // Fetch the existing document
+            var existingDocument = await _documentRepository.GetByIdAsync(id);
+            if (existingDocument == null)
+            {
+                return NotFound(new { message = $"Document with ID {id} not found." });
+            }
+
+            // Save the PDF file
+            var filePath = Path.Combine("UploadedFiles", Guid.NewGuid() + "_" + pdfFile.FileName);
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+            await using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await pdfFile.CopyToAsync(stream);
+            }
+
+            // Update document file path
+            existingDocument.FilePath = filePath;
+            existingDocument.LastModified = DateTime.UtcNow;
+            await _documentRepository.Update(existingDocument);
+
+            // Publish OCR request to RabbitMQ
+            var ocrRequest = new OCRRequest
+            {
+                DocumentId = existingDocument.Id.ToString(),
+                PdfUrl = filePath
+            };
+
+            try
+            {
+                await _rabbitMqPublisher.PublishMessageAsync(ocrRequest, RabbitMQQueues.OcrQueue);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while sending message to RabbitMQ.");
+                return StatusCode(500, new { message = "Error sending OCR request to queue." });
+            }
+
+            return Ok(new { message = $"File uploaded and associated with Document ID {id}." });
+        }
 
         /// <summary>
-        /// Updates a Document by Id
+        /// Update an existing document by ID.
         /// </summary>
-        /// <param name="id">Document Id</param>
-        /// <param name="docDTO">Updated Document data</param>
-        /// <returns>Status code indicating success or failure</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDocument(int id, DocumentDTO docDTO)
         {
@@ -157,10 +205,8 @@ namespace DMSystem.Controllers
         }
 
         /// <summary>
-        /// Deletes a Document by Id
+        /// Delete a document by ID.
         /// </summary>
-        /// <param name="id">Document Id</param>
-        /// <returns>Status code indicating success or failure</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDocument(int id)
         {
@@ -178,6 +224,34 @@ namespace DMSystem.Controllers
 
             await _documentRepository.Remove(doc);
             return NoContent();
+        }
+
+        /// <summary>
+        /// Get a document by its ID.
+        /// </summary>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetDocumentById(int id)
+        {
+            try
+            {
+                // Use the repository to fetch the document
+                var document = await _documentRepository.GetByIdAsync(id);
+                if (document == null)
+                {
+                    return NotFound(new { message = $"Document with ID {id} not found." });
+                }
+
+                // Map the document to its DTO representation
+                var documentDto = _mapper.Map<DocumentDTO>(document);
+
+                // Return the document DTO in the response
+                return Ok(documentDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while retrieving the document with ID {id}.");
+                return StatusCode(500, new { message = "An unexpected error occurred while retrieving the document." });
+            }
         }
     }
 }
