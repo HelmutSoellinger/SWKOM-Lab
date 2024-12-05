@@ -67,6 +67,14 @@ C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\DMSystem.xml
 C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\DMSystem.pdb
 C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\DMSystem.genruntimeconfig.cache
 C:\Users\Helmut\Desktop\FH\SWKOM\DMSystem\obj\Debug\net8.0\ref\DMSystem.dll
+C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.csproj.AssemblyReference.cache
+C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.AssemblyInfoInputs.cache
+C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.AssemblyInfo.cs
+C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.csproj.CoreCompileInputs.cache
+C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.MvcApplicationPartsAssemblyInfo.cs
+C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.sourcelink.json
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\log4net.config
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\appsettings.Development.json
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\appsettings.json
@@ -77,6 +85,7 @@ C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\b
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\DMSystem.pdb
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\DMSystem.xml
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\AutoMapper.dll
+C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\CommunityToolkit.HighPerformance.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\FluentValidation.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\FluentValidation.AspNetCore.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\FluentValidation.DependencyInjectionExtensions.dll
@@ -125,6 +134,7 @@ C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\b
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\Microsoft.Extensions.Options.ConfigurationExtensions.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\Microsoft.Extensions.Primitives.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\Microsoft.OpenApi.dll
+C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\Minio.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\Mono.TextTemplating.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\Newtonsoft.Json.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\Npgsql.dll
@@ -142,7 +152,9 @@ C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\b
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\System.Configuration.ConfigurationManager.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\System.Diagnostics.DiagnosticSource.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\System.Diagnostics.EventLog.dll
+C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\System.IO.Hashing.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\System.IO.Pipelines.dll
+C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\System.Reactive.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\System.Security.Permissions.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\System.Text.Encodings.Web.dll
@@ -220,14 +232,6 @@ C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\b
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\DMSystem.Messaging.dll
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\DMSystem.DAL.pdb
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\DMSystem.Messaging.pdb
-C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.csproj.AssemblyReference.cache
-C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.AssemblyInfoInputs.cache
-C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.AssemblyInfo.cs
-C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.csproj.CoreCompileInputs.cache
-C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.MvcApplicationPartsAssemblyInfo.cs
-C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.MvcApplicationPartsAssemblyInfo.cache
-C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.sourcelink.json
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\staticwebassets.build.json
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\staticwebassets.development.json
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\staticwebassets\msbuild.DMSystem.Microsoft.AspNetCore.StaticWebAssets.props

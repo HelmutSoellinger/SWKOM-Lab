@@ -13,6 +13,7 @@ using DMSystem.Messaging;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
+using DMSystem.Minio;
 
 namespace DMSystem.Controllers
 {
@@ -25,19 +26,22 @@ namespace DMSystem.Controllers
         private readonly IMapper _mapper;
         private readonly IRabbitMQPublisher<OCRRequest> _rabbitMqPublisher;
         private readonly IValidator<DocumentDTO> _validator;
+        private readonly MinioFileStorageService _fileStorageService;
 
         public DocumentController(
             IDocumentRepository documentRepository,
             ILogger<DocumentController> logger,
             IMapper mapper,
             IRabbitMQPublisher<OCRRequest> rabbitMqPublisher,
-            IValidator<DocumentDTO> validator)
+            IValidator<DocumentDTO> validator,
+            MinioFileStorageService fileStorageService)
         {
             _documentRepository = documentRepository;
             _logger = logger;
             _mapper = mapper;
             _rabbitMqPublisher = rabbitMqPublisher;
             _validator = validator;
+            _fileStorageService = fileStorageService;
         }
 
         /// <summary>
@@ -79,17 +83,22 @@ namespace DMSystem.Controllers
                 return BadRequest(new { errors });
             }
 
-            // Save the PDF file
-            var filePath = Path.Combine("UploadedFiles", Guid.NewGuid() + "_" + pdfFile.FileName);
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-            await using (var stream = new FileStream(filePath, FileMode.Create))
+            // Save the PDF file to MinIO
+            string objectName = Guid.NewGuid() + "_" + pdfFile.FileName;
+            using var fileStream = pdfFile.OpenReadStream();
+            try
             {
-                await pdfFile.CopyToAsync(stream);
+                await _fileStorageService.UploadFileAsync(objectName, fileStream, pdfFile.Length, pdfFile.ContentType);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading file to MinIO.");
+                return StatusCode(500, new { message = "Error uploading file to MinIO storage." });
             }
 
             // Create a new document in the DAL
             var newDocument = _mapper.Map<Document>(documentDto);
-            newDocument.FilePath = filePath;
+            newDocument.FilePath = objectName; // Store MinIO object name
             newDocument.LastModified = DateTime.UtcNow;
             await _documentRepository.Add(newDocument);
 
@@ -97,7 +106,7 @@ namespace DMSystem.Controllers
             var ocrRequest = new OCRRequest
             {
                 DocumentId = newDocument.Id.ToString(),
-                PdfUrl = filePath
+                PdfUrl = objectName
             };
 
             try
@@ -140,16 +149,21 @@ namespace DMSystem.Controllers
                 return NotFound(new { message = $"Document with ID {id} not found." });
             }
 
-            // Save the PDF file
-            var filePath = Path.Combine("UploadedFiles", Guid.NewGuid() + "_" + pdfFile.FileName);
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-            await using (var stream = new FileStream(filePath, FileMode.Create))
+            // Save the PDF file to MinIO
+            string objectName = Guid.NewGuid() + "_" + pdfFile.FileName;
+            using var fileStream = pdfFile.OpenReadStream();
+            try
             {
-                await pdfFile.CopyToAsync(stream);
+                await _fileStorageService.UploadFileAsync(objectName, fileStream, pdfFile.Length, pdfFile.ContentType);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading file to MinIO.");
+                return StatusCode(500, new { message = "Error uploading file to MinIO storage." });
             }
 
             // Update document file path
-            existingDocument.FilePath = filePath;
+            existingDocument.FilePath = objectName; // Store MinIO object name
             existingDocument.LastModified = DateTime.UtcNow;
             await _documentRepository.Update(existingDocument);
 
@@ -157,7 +171,7 @@ namespace DMSystem.Controllers
             var ocrRequest = new OCRRequest
             {
                 DocumentId = existingDocument.Id.ToString(),
-                PdfUrl = filePath
+                PdfUrl = objectName
             };
 
             try
@@ -174,37 +188,6 @@ namespace DMSystem.Controllers
         }
 
         /// <summary>
-        /// Update an existing document by ID.
-        /// </summary>
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutDocument(int id, DocumentDTO docDTO)
-        {
-            if (id != docDTO.Id)
-            {
-                return BadRequest("Document ID mismatch.");
-            }
-
-            var existingDoc = await _documentRepository.GetByIdAsync(id);
-            if (existingDoc == null)
-            {
-                return NotFound();
-            }
-
-            _mapper.Map(docDTO, existingDoc);
-
-            try
-            {
-                await _documentRepository.Update(existingDoc);
-                return NoContent();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                _logger.LogError($"Concurrency error while updating document with ID {id}");
-                return StatusCode(500, "Error updating document due to concurrency issues.");
-            }
-        }
-
-        /// <summary>
         /// Delete a document by ID.
         /// </summary>
         [HttpDelete("{id}")]
@@ -216,10 +199,15 @@ namespace DMSystem.Controllers
                 return NotFound();
             }
 
-            // Delete the file from the server
-            if (!string.IsNullOrEmpty(doc.FilePath) && System.IO.File.Exists(doc.FilePath))
+            // Delete the file from MinIO
+            try
             {
-                System.IO.File.Delete(doc.FilePath);
+                await _fileStorageService.DeleteFileAsync(doc.FilePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting file '{doc.FilePath}' from MinIO.");
+                return StatusCode(500, new { message = "Error deleting file from MinIO storage." });
             }
 
             await _documentRepository.Remove(doc);
@@ -234,23 +222,57 @@ namespace DMSystem.Controllers
         {
             try
             {
-                // Use the repository to fetch the document
                 var document = await _documentRepository.GetByIdAsync(id);
                 if (document == null)
                 {
                     return NotFound(new { message = $"Document with ID {id} not found." });
                 }
 
-                // Map the document to its DTO representation
                 var documentDto = _mapper.Map<DocumentDTO>(document);
-
-                // Return the document DTO in the response
                 return Ok(documentDto);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An error occurred while retrieving the document with ID {id}.");
                 return StatusCode(500, new { message = "An unexpected error occurred while retrieving the document." });
+            }
+        }
+
+        /// <summary>
+        /// Checks if a file associated with a document ID exists in the MinIO bucket.
+        /// </summary>
+        /// <param name="id">The unique ID of the document whose file needs to be checked.</param>
+        /// <returns>
+        /// HTTP 200 OK if the file exists in MinIO, with a message indicating success.
+        /// HTTP 404 Not Found if the file does not exist, with a message indicating the file is not found.
+        /// </returns>
+        [HttpGet("check-file/{id}")]
+        public async Task<IActionResult> CheckFileExists(int id)
+        {
+            try
+            {
+                // Retrieve the document by ID
+                var document = await _documentRepository.GetByIdAsync(id);
+                if (document == null)
+                {
+                    return NotFound(new { message = $"Document with ID {id} not found." });
+                }
+
+                // Check if the file exists in MinIO
+                var exists = await _fileStorageService.FileExistsAsync(document.FilePath);
+                if (exists)
+                {
+                    return Ok(new { message = "File exists in MinIO." });
+                }
+                else
+                {
+                    return NotFound(new { message = "File not found in MinIO." });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while checking file for Document ID {id}.");
+                return StatusCode(500, new { message = "An unexpected error occurred while checking the file." });
             }
         }
     }

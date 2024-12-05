@@ -13,6 +13,7 @@ using DMSystem.DAL;
 using DMSystem.Mappings;
 using DMSystem.Messaging;
 using DMSystem.DTOs;
+using DMSystem.Minio;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,8 +35,11 @@ builder.Services.AddControllers()
 builder.Services.Configure<RabbitMQSetting>(builder.Configuration.GetSection("RabbitMQ")); // RabbitMQ settings
 builder.Services.AddSingleton<IRabbitMQPublisher<OCRRequest>, RabbitMQPublisher<OCRRequest>>(); // RabbitMQ Publisher
 
-// Remove old consumer service if not in use
-// builder.Services.AddHostedService<OrderValidationMessageConsumerService>(); // Old RabbitMQ Consumer Service (remove if unused)
+// Configure MinIO settings
+builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("Minio")); // MinIO settings
+
+// Add MinIO FileStorage Service
+builder.Services.AddSingleton<MinioFileStorageService>();
 
 // CORS Policy
 builder.Services.AddCors(options =>
@@ -80,13 +84,19 @@ using (var scope = app.Services.CreateScope())
 {
     try
     {
+        // Apply database migrations
         var dbContext = scope.ServiceProvider.GetRequiredService<DALContext>();
-        dbContext.Database.Migrate(); // Apply migrations
+        dbContext.Database.Migrate();
         logger.Info("Database migration completed successfully.");
+
+        // Initialize MinIO bucket
+        var minioService = scope.ServiceProvider.GetRequiredService<MinioFileStorageService>();
+        await minioService.InitializeBucketAsync();
+        logger.Info("MinIO bucket initialization completed.");
     }
     catch (Exception ex)
     {
-        logger.Error("An error occurred during database migration.", ex);
+        logger.Error("An error occurred during application initialization.", ex);
     }
 }
 

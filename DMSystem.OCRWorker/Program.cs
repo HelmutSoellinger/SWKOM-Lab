@@ -1,4 +1,5 @@
 using DMSystem.Messaging;
+using DMSystem.Minio;
 using DMSystem.OCRWorker;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,11 +11,17 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("/app/config/appsettings.json", optional: false, reloadOnChange: true);
 
-// Register Worker Service
-builder.Services.AddHostedService<Worker>();
-
 // Register RabbitMQ settings
 builder.Services.Configure<RabbitMQSetting>(builder.Configuration.GetSection("RabbitMQ"));
+
+// Register MinIO settings
+builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("Minio"));
+
+// Register MinIO FileStorage Service
+builder.Services.AddSingleton<MinioFileStorageService>();
+
+// Register Worker Service
+builder.Services.AddHostedService<Worker>();
 
 // Add logging for better observability
 builder.Services.AddLogging(logging =>
