@@ -277,3 +277,15 @@ System.InvalidOperationException: An error was generated for warning 'Microsoft.
 2024-12-05 21:32:39,220 [1] INFO  Program - Database migration completed successfully.
 2024-12-05 21:32:39,406 [7] INFO  Program - MinIO bucket initialization completed.
 2024-12-05 21:32:39,415 [7] INFO  Program - Application has started.
+2024-12-06 09:50:54,562 [1] INFO  Program - Initializing application...
+2024-12-06 09:50:56,687 [1] INFO  Program - Database migration completed successfully.
+2024-12-06 09:50:56,832 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-06 09:50:56,838 [7] INFO  Program - Application has started.
+2024-12-06 16:44:47,149 [1] INFO  Program - Initializing application...
+2024-12-06 16:44:50,509 [1] INFO  Program - Database migration completed successfully.
+2024-12-06 16:44:50,759 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-06 16:44:50,771 [9] INFO  Program - Application has started.
+2024-12-06 16:57:12,106 [1] INFO  Program - Initializing application...
+2024-12-06 16:57:14,492 [1] INFO  Program - Database migration completed successfully.
+2024-12-06 16:57:14,664 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-06 16:57:14,671 [10] INFO  Program - Application has started.

@@ -90,6 +90,7 @@ namespace DMSystem.OCRWorker
                             OcrText = ocrResultText
                         };
 
+                        // Publish the result
                         SendResult(resultMessage);
 
                         _logger.LogInformation($"OCR completed for Document ID: {ocrRequest.DocumentId}");
@@ -189,10 +190,25 @@ namespace DMSystem.OCRWorker
         /// <param name="result">The OCR result to send.</param>
         private void SendResult(OCRResult result)
         {
-            var message = JsonSerializer.Serialize(result);
-            var body = Encoding.UTF8.GetBytes(message);
+            try
+            {
+                var message = JsonSerializer.Serialize(result);
+                var body = Encoding.UTF8.GetBytes(message);
 
-            _channel.BasicPublish("", _rabbitMqSettings.OcrResultsQueue, null, body);
+                // Publish to the result queue
+                _channel.BasicPublish(
+                    exchange: "",
+                    routingKey: _rabbitMqSettings.OcrResultsQueue,
+                    basicProperties: null,
+                    body: body);
+
+                _logger.LogInformation($"OCR Result published to queue for Document ID: {result.DocumentId}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error publishing OCR result.");
+                throw;
+            }
         }
 
         /// <summary>

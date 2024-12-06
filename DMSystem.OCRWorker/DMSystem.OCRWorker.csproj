@@ -24,11 +24,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Explicitly remove appsettings.json -->
     <None Remove="appsettings.json" />
     <None Remove="appsettings.Development.json" />
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Ensure no appsettings.json files are published -->
     <None Update="appsettings.json">
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>

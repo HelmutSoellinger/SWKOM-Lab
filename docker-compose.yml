@@ -29,7 +29,7 @@ services:
     expose:
       - "3000"  # Expose port 3000 for internal Docker network communication
     depends_on:
-      - postgres  # PostgreSQL should be up before starting web-app
+      - postgres
     networks:
       - dms_network
     restart: unless-stopped
@@ -65,9 +65,10 @@ services:
       - TESSDATA_PREFIX=/app/tessdata
       - OCR_PDF_STORAGE=/data/pdf_storage
       - MINIO_ENDPOINT=http://minio:9000
-      - MINIO_ACCESS_KEY=admin
-      - MINIO_SECRET_KEY=admin123
+      - MINIO_ACCESS_KEY=groupb
+      - MINIO_SECRET_KEY=testtest
       - MINIO_BUCKET_NAME=pdf-storage
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
     volumes:
       - shared-config:/app/config  # Use shared volume for appsettings.json
       - ./pdf_storage:/data/pdf_storage  # Mount volume for PDF storage
@@ -77,6 +78,26 @@ services:
       - web-api
       - postgres
       - minio
+      - elasticsearch
+    networks:
+      - dms_network
+    restart: unless-stopped
+
+  elasticsearch-indexer:
+    image: dms_project-elasticsearch-indexer
+    container_name: elasticsearch-indexer
+    build:
+      context: .
+      dockerfile: DMSystem.Elasticsearch/Dockerfile
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=groupb
+      - RABBITMQ_PASSWORD=testtest
+      - RABBITMQ_QUEUE=ocrResultsQueue
+    depends_on:
+      - rabbitmq
+      - elasticsearch
     networks:
       - dms_network
     restart: unless-stopped
@@ -122,7 +143,7 @@ services:
     volumes:
       - pgadmin:/var/lib/pgadmin
     depends_on:
-      - postgres  # Ensure PostgreSQL is up before starting pgAdmin
+      - postgres
     networks:
       - dms_network
     restart: unless-stopped
@@ -143,6 +164,26 @@ services:
       - dms_network
     restart: unless-stopped
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false  # Disable security for development
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"  # Set Java heap size
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"  # Elasticsearch API
+    networks:
+      - dms_network
+    restart: unless-stopped
+
 networks:
   dms_network:
     name: dms_network
@@ -154,3 +195,4 @@ volumes:
   pgadmin:
   pdf_storage:
   minio_data:  # Volume for MinIO data
+  esdata:  # Volume for Elasticsearch data
