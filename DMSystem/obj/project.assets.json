@@ -31,6 +31,35 @@
           }
         }
       },
+      "Elastic.Clients.Elasticsearch/8.16.3": {
+        "type": "package",
+        "dependencies": {
+          "Elastic.Transport": "0.5.6"
+        },
+        "compile": {
+          "lib/net8.0/Elastic.Clients.Elasticsearch.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Elastic.Clients.Elasticsearch.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Elastic.Transport/0.5.6": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0/Elastic.Transport.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0/Elastic.Transport.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
       "FluentValidation/11.11.0": {
         "type": "package",
         "compile": {
@@ -1433,11 +1462,11 @@
           }
         }
       },
-      "RabbitMQ.Client/6.4.0": {
+      "RabbitMQ.Client/6.8.1": {
         "type": "package",
         "dependencies": {
-          "System.Memory": "4.5.4",
-          "System.Threading.Channels": "4.7.1"
+          "System.Memory": "4.5.5",
+          "System.Threading.Channels": "7.0.0"
         },
         "compile": {
           "lib/netstandard2.0/RabbitMQ.Client.dll": {
@@ -2017,7 +2046,7 @@
           "lib/netstandard1.6/System.Linq.Expressions.dll": {}
         }
       },
-      "System.Memory/4.5.4": {
+      "System.Memory/4.5.5": {
         "type": "package",
         "compile": {
           "ref/netcoreapp2.1/_._": {}
@@ -2758,6 +2787,23 @@
           "bin/placeholder/DMSystem.DAL.dll": {}
         }
       },
+      "DMSystem.ElasticSearch/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "DMSystem.Messaging": "1.0.0",
+          "Elastic.Clients.Elasticsearch": "8.16.3",
+          "Microsoft.Extensions.Hosting": "9.0.0",
+          "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": "1.19.6",
+          "RabbitMQ.Client": "6.8.1"
+        },
+        "compile": {
+          "bin/placeholder/DMSystem.ElasticSearch.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DMSystem.ElasticSearch.dll": {}
+        }
+      },
       "DMSystem.Messaging/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
@@ -2766,7 +2812,7 @@
           "Microsoft.Extensions.Logging": "9.0.0",
           "Microsoft.Extensions.Options": "9.0.0",
           "Newtonsoft.Json": "13.0.3",
-          "RabbitMQ.Client": "6.4.0"
+          "RabbitMQ.Client": "6.8.1"
         },
         "compile": {
           "bin/placeholder/DMSystem.Messaging.dll": {}
@@ -2817,6 +2863,53 @@
         "lib/netstandard2.1/CommunityToolkit.HighPerformance.dll",
         "lib/netstandard2.1/CommunityToolkit.HighPerformance.pdb",
         "lib/netstandard2.1/CommunityToolkit.HighPerformance.xml"
+      ]
+    },
+    "Elastic.Clients.Elasticsearch/8.16.3": {
+      "sha512": "p1Ld3i3kosTxYsvnUIu5evq0zbGX2Uty8W7figuDpejvD9ebxKmRgsId4dZdPjHQ2L/z0t8+rTnBlZ3BsqLCmg==",
+      "type": "package",
+      "path": "elastic.clients.elasticsearch/8.16.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.txt",
+        "README.md",
+        "elastic.clients.elasticsearch.8.16.3.nupkg.sha512",
+        "elastic.clients.elasticsearch.nuspec",
+        "lib/net462/Elastic.Clients.Elasticsearch.dll",
+        "lib/net462/Elastic.Clients.Elasticsearch.xml",
+        "lib/net8.0/Elastic.Clients.Elasticsearch.dll",
+        "lib/net8.0/Elastic.Clients.Elasticsearch.xml",
+        "lib/netstandard2.0/Elastic.Clients.Elasticsearch.dll",
+        "lib/netstandard2.0/Elastic.Clients.Elasticsearch.xml",
+        "lib/netstandard2.1/Elastic.Clients.Elasticsearch.dll",
+        "lib/netstandard2.1/Elastic.Clients.Elasticsearch.xml",
+        "nuget-icon.png"
+      ]
+    },
+    "Elastic.Transport/0.5.6": {
+      "sha512": "4WGaVuBDvdLYgrXNchxXS0dLh92Vb5bH7dgVl0w6cHudXFKh67JZFY2se2LZ3SpUPsQWuv2UKQQRbJB/qbRJBQ==",
+      "type": "package",
+      "path": "elastic.transport/0.5.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "elastic.transport.0.5.6.nupkg.sha512",
+        "elastic.transport.nuspec",
+        "lib/net462/Elastic.Transport.dll",
+        "lib/net462/Elastic.Transport.pdb",
+        "lib/net462/Elastic.Transport.xml",
+        "lib/net8.0/Elastic.Transport.dll",
+        "lib/net8.0/Elastic.Transport.pdb",
+        "lib/net8.0/Elastic.Transport.xml",
+        "lib/netstandard2.0/Elastic.Transport.dll",
+        "lib/netstandard2.0/Elastic.Transport.pdb",
+        "lib/netstandard2.0/Elastic.Transport.xml",
+        "lib/netstandard2.1/Elastic.Transport.dll",
+        "lib/netstandard2.1/Elastic.Transport.pdb",
+        "lib/netstandard2.1/Elastic.Transport.xml",
+        "license.txt",
+        "nuget-icon.png"
       ]
     },
     "FluentValidation/11.11.0": {
@@ -5518,19 +5611,20 @@
         "postgresql.png"
       ]
     },
-    "RabbitMQ.Client/6.4.0": {
-      "sha512": "1znR1gGU+xYVSpO5z8nQolcUKA/yydnxQn7Ug9+RUXxTSLMm/eE58VKGwahPBjELXvDnX0k/kBrAitFLRjx9LA==",
+    "RabbitMQ.Client/6.8.1": {
+      "sha512": "jNsmGgmCNw2S/NzskeN2ijtGywtH4Sk/G6jWUTD5sY9SrC27Xz6BsLIiB8hdsfjeyWCa4j4GvCIGkpE8wrjU1Q==",
       "type": "package",
-      "path": "rabbitmq.client/6.4.0",
+      "path": "rabbitmq.client/6.8.1",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
+        "README.md",
         "icon.png",
-        "lib/net461/RabbitMQ.Client.dll",
-        "lib/net461/RabbitMQ.Client.xml",
+        "lib/net462/RabbitMQ.Client.dll",
+        "lib/net462/RabbitMQ.Client.xml",
         "lib/netstandard2.0/RabbitMQ.Client.dll",
         "lib/netstandard2.0/RabbitMQ.Client.xml",
-        "rabbitmq.client.6.4.0.nupkg.sha512",
+        "rabbitmq.client.6.8.1.nupkg.sha512",
         "rabbitmq.client.nuspec"
       ]
     },
@@ -6826,10 +6920,10 @@
         "system.linq.expressions.nuspec"
       ]
     },
-    "System.Memory/4.5.4": {
-      "sha512": "1MbJTHS1lZ4bS4FmsJjnuGJOu88ZzTT2rLvrhW7Ygic+pC0NWA+3hgAen0HRdsocuQXCkUTdFn9yHJJhsijDXw==",
+    "System.Memory/4.5.5": {
+      "sha512": "XIWiDvKPXaTveaB7HVganDlOCRoj03l+jrwNvcge/t8vhGYKvqV+dMv6G4SAX2NoNmN0wZfVPTAlFwZcZvVOUw==",
       "type": "package",
-      "path": "system.memory/4.5.4",
+      "path": "system.memory/4.5.5",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
@@ -6843,7 +6937,7 @@
         "lib/netstandard2.0/System.Memory.dll",
         "lib/netstandard2.0/System.Memory.xml",
         "ref/netcoreapp2.1/_._",
-        "system.memory.4.5.4.nupkg.sha512",
+        "system.memory.4.5.5.nupkg.sha512",
         "system.memory.nuspec",
         "useSharedDesignerContext.txt",
         "version.txt"
@@ -8708,6 +8802,11 @@
       "path": "../DMSystem.DAL/DMSystem.DAL.csproj",
       "msbuildProject": "../DMSystem.DAL/DMSystem.DAL.csproj"
     },
+    "DMSystem.ElasticSearch/1.0.0": {
+      "type": "project",
+      "path": "../DMSystem.ElasticSearch/DMSystem.ElasticSearch.csproj",
+      "msbuildProject": "../DMSystem.ElasticSearch/DMSystem.ElasticSearch.csproj"
+    },
     "DMSystem.Messaging/1.0.0": {
       "type": "project",
       "path": "../DMSystem.Messaging/DMSystem.Messaging.csproj",
@@ -8718,6 +8817,7 @@
     "net8.0": [
       "AutoMapper >= 13.0.1",
       "DMSystem.DAL >= 1.0.0",
+      "DMSystem.ElasticSearch >= 1.0.0",
       "DMSystem.Messaging >= 1.0.0",
       "FluentValidation >= 11.11.0",
       "FluentValidation.AspNetCore >= 11.3.0",
@@ -8728,7 +8828,7 @@
       "Microsoft.VisualStudio.Azure.Containers.Tools.Targets >= 1.21.0",
       "Minio >= 6.0.3",
       "Npgsql.EntityFrameworkCore.PostgreSQL >= 9.0.1",
-      "RabbitMQ.Client >= 6.4.0",
+      "RabbitMQ.Client >= 6.8.1",
       "Swashbuckle.AspNetCore >= 7.0.0",
       "log4net >= 3.0.3"
     ]
@@ -8768,6 +8868,9 @@
           "projectReferences": {
             "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj": {
               "projectPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj"
+            },
+            "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.ElasticSearch\\DMSystem.ElasticSearch.csproj": {
+              "projectPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.ElasticSearch\\DMSystem.ElasticSearch.csproj"
             },
             "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.Messaging\\DMSystem.Messaging.csproj": {
               "projectPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.Messaging\\DMSystem.Messaging.csproj"
@@ -8834,7 +8937,7 @@
           },
           "RabbitMQ.Client": {
             "target": "Package",
-            "version": "[6.4.0, )"
+            "version": "[6.8.1, )"
           },
           "Swashbuckle.AspNetCore": {
             "target": "Package",

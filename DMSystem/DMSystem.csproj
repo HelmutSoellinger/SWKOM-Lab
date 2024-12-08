@@ -25,12 +25,13 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
     <PackageReference Include="Minio" Version="6.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.1" />
-    <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DMSystem.DAL\DMSystem.DAL.csproj" />
+    <ProjectReference Include="..\DMSystem.ElasticSearch\DMSystem.ElasticSearch.csproj" />
     <ProjectReference Include="..\DMSystem.Messaging\DMSystem.Messaging.csproj" />
   </ItemGroup>
 </Project>

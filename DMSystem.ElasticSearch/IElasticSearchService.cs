@@ -10,5 +10,6 @@ namespace DMSystem.ElasticSearch
     public interface IElasticSearchService
     {
         Task IndexDocumentAsync(OCRResult ocrResult);
+        Task<IEnumerable<SearchResult>> SearchDocumentsAsync(string searchTerm);
     }
 }

@@ -14,6 +14,7 @@ using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using DMSystem.Minio;
+using DMSystem.ElasticSearch;
 
 namespace DMSystem.Controllers
 {
@@ -27,6 +28,7 @@ namespace DMSystem.Controllers
         private readonly IRabbitMQPublisher<OCRRequest> _rabbitMqPublisher;
         private readonly IValidator<DocumentDTO> _validator;
         private readonly MinioFileStorageService _fileStorageService;
+        private readonly IElasticSearchService _elasticSearchService; // Add this field
 
         public DocumentController(
             IDocumentRepository documentRepository,
@@ -34,7 +36,9 @@ namespace DMSystem.Controllers
             IMapper mapper,
             IRabbitMQPublisher<OCRRequest> rabbitMqPublisher,
             IValidator<DocumentDTO> validator,
-            MinioFileStorageService fileStorageService)
+            MinioFileStorageService fileStorageService,
+            IElasticSearchService elasticSearchService // Inject IElasticSearchService
+        )
         {
             _documentRepository = documentRepository;
             _logger = logger;
@@ -42,6 +46,7 @@ namespace DMSystem.Controllers
             _rabbitMqPublisher = rabbitMqPublisher;
             _validator = validator;
             _fileStorageService = fileStorageService;
+            _elasticSearchService = elasticSearchService; // Assign to the private field
         }
 
         /// <summary>
@@ -273,6 +278,38 @@ namespace DMSystem.Controllers
             {
                 _logger.LogError(ex, $"Error occurred while checking file for Document ID {id}.");
                 return StatusCode(500, new { message = "An unexpected error occurred while checking the file." });
+            }
+        }
+
+        /// <summary>
+        /// Searches documents in Elasticsearch by a given term.
+        /// Returns a list of document IDs and the number of matches for the search term in each document.
+        /// </summary>
+        /// <param name="searchTerm">The term to search for in the document OCR text.</param>
+        /// <returns>A list of documents with their IDs and match counts.</returns>
+        [HttpPost("search")]
+        public async Task<IActionResult> SearchDocuments([FromBody] string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return BadRequest(new { message = "Search term cannot be empty" });
+            }
+
+            try
+            {
+                var searchResults = await _elasticSearchService.SearchDocumentsAsync(searchTerm);
+
+                if (!searchResults.Any())
+                {
+                    return NotFound(new { message = "No documents found matching the search term." });
+                }
+
+                return Ok(searchResults);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred during document search.");
+                return StatusCode(500, new { message = "An error occurred while processing the search." });
             }
         }
     }

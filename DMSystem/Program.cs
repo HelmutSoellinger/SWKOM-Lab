@@ -14,6 +14,7 @@ using DMSystem.Mappings;
 using DMSystem.Messaging;
 using DMSystem.DTOs;
 using DMSystem.Minio;
+using DMSystem.ElasticSearch;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,14 @@ builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("Mini
 
 // Add MinIO FileStorage Service
 builder.Services.AddSingleton<MinioFileStorageService>();
+
+// Configure ElasticSearch settings and service
+var elasticSearchUrl = builder.Configuration.GetValue<string>("ElasticSearch:Url");
+if (string.IsNullOrWhiteSpace(elasticSearchUrl))
+{
+    throw new InvalidOperationException("ElasticSearch URL is not configured. Ensure it is set in appsettings.json or as an environment variable.");
+}
+builder.Services.AddSingleton<IElasticSearchService>(new ElasticSearchService(elasticSearchUrl)); // ElasticSearch service
 
 // CORS Policy
 builder.Services.AddCors(options =>
@@ -79,7 +88,7 @@ app.MapControllers();
 // Health Check Endpoint
 app.MapGet("/health", () => Results.Ok("Healthy")).WithTags("Health Check");
 
-// Apply Database Migrations
+// Apply Database Migrations and Initialize Services
 using (var scope = app.Services.CreateScope())
 {
     try

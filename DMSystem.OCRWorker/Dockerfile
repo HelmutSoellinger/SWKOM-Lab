@@ -35,6 +35,7 @@ COPY DMSystem.OCRWorker/*.csproj ./DMSystem.OCRWorker/
 COPY ../DMSystem.Messaging/*.csproj ./DMSystem.Messaging/
 COPY ../DMSystem.DAL/*.csproj ./DMSystem.DAL/
 COPY ../DMSystem/*.csproj ./DMSystem/
+COPY ../DMSystem.ElasticSearch/*.csproj ./DMSystem.ElasticSearch/
 
 # Restore dependencies
 RUN dotnet restore ./DMSystem.OCRWorker/DMSystem.OCRWorker.csproj
@@ -44,6 +45,7 @@ COPY DMSystem.OCRWorker/ ./DMSystem.OCRWorker/
 COPY ../DMSystem.Messaging/ ./DMSystem.Messaging/
 COPY ../DMSystem.DAL/ ./DMSystem.DAL/
 COPY ../DMSystem/ ./DMSystem/
+COPY ../DMSystem.ElasticSearch/ ./DMSystem.ElasticSearch/
 
 # Build and publish the application
 WORKDIR /src/DMSystem.OCRWorker

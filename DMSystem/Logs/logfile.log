@@ -289,3 +289,68 @@ System.InvalidOperationException: An error was generated for warning 'Microsoft.
 2024-12-06 16:57:14,492 [1] INFO  Program - Database migration completed successfully.
 2024-12-06 16:57:14,664 [10] INFO  Program - MinIO bucket initialization completed.
 2024-12-06 16:57:14,671 [10] INFO  Program - Application has started.
+2024-12-08 19:38:30,073 [1] INFO  Program - Initializing application...
+2024-12-08 19:38:35,607 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 19:38:35,920 [11] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 19:38:35,942 [11] INFO  Program - Application has started.
+2024-12-08 21:21:00,071 [1] INFO  Program - Initializing application...
+2024-12-08 21:21:01,410 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 21:27:28,976 [1] INFO  Program - Initializing application...
+2024-12-08 21:27:30,491 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 21:27:30,634 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 21:27:30,637 [7] INFO  Program - Application has started.
+2024-12-08 21:30:27,549 [1] INFO  Program - Initializing application...
+2024-12-08 21:30:29,803 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 21:30:29,976 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 21:30:29,985 [10] INFO  Program - Application has started.
+2024-12-08 21:36:06,862 [1] INFO  Program - Initializing application...
+2024-12-08 21:36:10,321 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 21:36:10,541 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 21:36:10,553 [10] INFO  Program - Application has started.
+2024-12-08 21:42:18,682 [1] INFO  Program - Initializing application...
+2024-12-08 21:42:20,564 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 21:42:20,704 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 21:42:20,713 [9] INFO  Program - Application has started.
+2024-12-08 21:44:25,012 [1] INFO  Program - Initializing application...
+2024-12-08 21:44:27,692 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 21:44:27,851 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 21:44:27,863 [9] INFO  Program - Application has started.
+2024-12-08 22:01:45,145 [1] INFO  Program - Initializing application...
+2024-12-08 22:01:48,233 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 22:01:48,372 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 22:01:48,380 [9] INFO  Program - Application has started.
+2024-12-08 22:10:56,023 [1] INFO  Program - Initializing application...
+2024-12-08 22:10:59,411 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 22:10:59,609 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 22:10:59,620 [9] INFO  Program - Application has started.
+2024-12-08 22:14:22,462 [1] INFO  Program - Initializing application...
+2024-12-08 22:14:27,693 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 22:14:28,020 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 22:14:28,042 [13] INFO  Program - Application has started.
+2024-12-08 22:17:33,891 [1] INFO  Program - Initializing application...
+2024-12-08 22:17:36,029 [1] ERROR Program - An error occurred during application initialization.
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 172.19.0.3:5432
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(SslMode sslMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|214_1(NpgsqlConnector conn, SslMode sslMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.Open()
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenDbConnection(Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternal(Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.Open(Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Migrations.HistoryRepository.GetAppliedMigrations()
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlHistoryRepository.GetAppliedMigrations()
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlMigrator.Migrate(String targetMigration)
+   at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.Migrate(DatabaseFacade databaseFacade)
+   at Program.<Main>$(String[] args) in /src/DMSystem/Program.cs:line 98
+2024-12-08 22:17:36,094 [1] INFO  Program - Application has started.
+2024-12-08 22:24:01,617 [1] INFO  Program - Initializing application...
+2024-12-08 22:24:03,867 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 22:24:04,015 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 22:24:04,024 [7] INFO  Program - Application has started.

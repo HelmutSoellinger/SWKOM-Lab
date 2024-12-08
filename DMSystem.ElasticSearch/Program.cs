@@ -1,30 +1,27 @@
 using DMSystem.ElasticSearch;
+using DMSystem.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.IO;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 // Add configuration from appsettings.json or environment variables
 builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("/app/config/appsettings.json", optional: true, reloadOnChange: true)
-    .AddEnvironmentVariables(); // Allow configuration overrides for containerized environments
+    .AddJsonFile("/app/config/appsettings.json", optional: false, reloadOnChange: true);
 
 // Configure Elasticsearch settings
-var elasticsearchUrl = builder.Configuration.GetValue<string>("ElasticSearch:Url")
-                       ?? Environment.GetEnvironmentVariable("ELASTICSEARCH_URL");
+var elasticsearchUrl = builder.Configuration.GetValue<string>("ElasticSearch:Url");
 
 if (string.IsNullOrWhiteSpace(elasticsearchUrl))
 {
-    throw new ArgumentNullException(nameof(elasticsearchUrl), "Elasticsearch URL is not configured. Ensure the 'ElasticSearch:Url' key is set in appsettings.json or the 'ELASTICSEARCH_URL' environment variable is defined.");
+    throw new ArgumentNullException(nameof(elasticsearchUrl), "Elasticsearch URL is not configured. Ensure it is set in appsettings.json or as an environment variable.");
 }
 
-// Log the Elasticsearch URL for debugging purposes
-Console.WriteLine($"Using Elasticsearch URL: {elasticsearchUrl}");
-
-// Register the Elasticsearch service
 builder.Services.AddSingleton<IElasticSearchService>(new ElasticSearchService(elasticsearchUrl));
+
+// Register RabbitMQ settings
+builder.Services.Configure<RabbitMQSetting>(builder.Configuration.GetSection("RabbitMQ"));
 
 // Register the worker service
 builder.Services.AddHostedService<Worker>();

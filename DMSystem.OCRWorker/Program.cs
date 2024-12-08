@@ -21,7 +21,7 @@ builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("Mini
 builder.Services.AddSingleton<MinioFileStorageService>();
 
 // Register Worker Service
-builder.Services.AddHostedService<Worker>();
+builder.Services.AddHostedService<DMSystem.OCRWorker.Worker>();
 
 // Add logging for better observability
 builder.Services.AddLogging(logging =>
