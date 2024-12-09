@@ -27,8 +27,8 @@ namespace DMSystem.Controllers
         private readonly IMapper _mapper;
         private readonly IRabbitMQPublisher<OCRRequest> _rabbitMqPublisher;
         private readonly IValidator<DocumentDTO> _validator;
-        private readonly MinioFileStorageService _fileStorageService;
-        private readonly IElasticSearchService _elasticSearchService; // Add this field
+        private readonly IFileStorageService _fileStorageService; 
+        private readonly IElasticSearchService _elasticSearchService;
 
         public DocumentController(
             IDocumentRepository documentRepository,
@@ -36,8 +36,8 @@ namespace DMSystem.Controllers
             IMapper mapper,
             IRabbitMQPublisher<OCRRequest> rabbitMqPublisher,
             IValidator<DocumentDTO> validator,
-            MinioFileStorageService fileStorageService,
-            IElasticSearchService elasticSearchService // Inject IElasticSearchService
+            IFileStorageService fileStorageService, 
+            IElasticSearchService elasticSearchService
         )
         {
             _documentRepository = documentRepository;
@@ -45,8 +45,8 @@ namespace DMSystem.Controllers
             _mapper = mapper;
             _rabbitMqPublisher = rabbitMqPublisher;
             _validator = validator;
-            _fileStorageService = fileStorageService;
-            _elasticSearchService = elasticSearchService; // Assign to the private field
+            _fileStorageService = fileStorageService; 
+            _elasticSearchService = elasticSearchService;
         }
 
         /// <summary>

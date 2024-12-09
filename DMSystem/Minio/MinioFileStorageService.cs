@@ -5,7 +5,7 @@ using System.IO;
 
 namespace DMSystem.Minio
 {
-    public class MinioFileStorageService
+    public class MinioFileStorageService : IFileStorageService
     {
         private readonly IMinioClient _minioClient; // MinIO client instance
         private readonly string _bucketName; // Name of the bucket

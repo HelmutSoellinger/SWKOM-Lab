@@ -39,8 +39,8 @@ builder.Services.AddSingleton<IRabbitMQPublisher<OCRRequest>, RabbitMQPublisher<
 // Configure MinIO settings
 builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("Minio")); // MinIO settings
 
-// Add MinIO FileStorage Service
-builder.Services.AddSingleton<MinioFileStorageService>();
+// Register MinIO FileStorage Service using the IFileStorageService interface
+builder.Services.AddSingleton<IFileStorageService, MinioFileStorageService>();
 
 // Configure ElasticSearch settings and service
 var elasticSearchUrl = builder.Configuration.GetValue<string>("ElasticSearch:Url");
@@ -99,8 +99,8 @@ using (var scope = app.Services.CreateScope())
         logger.Info("Database migration completed successfully.");
 
         // Initialize MinIO bucket
-        var minioService = scope.ServiceProvider.GetRequiredService<MinioFileStorageService>();
-        await minioService.InitializeBucketAsync();
+        var fileStorageService = scope.ServiceProvider.GetRequiredService<IFileStorageService>();
+        await fileStorageService.InitializeBucketAsync();
         logger.Info("MinIO bucket initialization completed.");
     }
     catch (Exception ex)
