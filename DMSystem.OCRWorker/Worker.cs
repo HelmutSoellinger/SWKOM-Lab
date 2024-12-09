@@ -117,7 +117,7 @@ namespace DMSystem.OCRWorker
         /// </summary>
         /// <param name="objectName">The name of the file in MinIO.</param>
         /// <returns>The extracted text from the file.</returns>
-        private async Task<string> PerformOcrAsync(string objectName)
+        public async Task<string> PerformOcrAsync(string objectName)
         {
             var result = new StringBuilder();
             var tempPdfPath = $"/tmp/{objectName}";
@@ -188,7 +188,7 @@ namespace DMSystem.OCRWorker
         /// Publishes the OCR result to the RabbitMQ results queue.
         /// </summary>
         /// <param name="result">The OCR result to send.</param>
-        private void SendResult(OCRResult result)
+        public void SendResult(OCRResult result)
         {
             try
             {

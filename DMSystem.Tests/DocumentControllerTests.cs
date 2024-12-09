@@ -6,7 +6,9 @@ using DMSystem.Controllers;
 using DMSystem.DAL;
 using DMSystem.DAL.Models;
 using DMSystem.DTOs;
+using DMSystem.ElasticSearch;
 using DMSystem.Messaging;
+using DMSystem.Minio;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
@@ -24,6 +26,8 @@ namespace DMSystem.Tests
         private readonly Mock<IMapper> _mockMapper;
         private readonly Mock<IRabbitMQPublisher<OCRRequest>> _mockPublisher;
         private readonly Mock<IValidator<DocumentDTO>> _mockValidator;
+        private readonly Mock<IFileStorageService> _mockFileStorageService;
+        private readonly Mock<IElasticSearchService> _mockElasticSearchService;
 
         public DocumentControllerTests()
         {
@@ -32,6 +36,8 @@ namespace DMSystem.Tests
             _mockMapper = new Mock<IMapper>();
             _mockPublisher = new Mock<IRabbitMQPublisher<OCRRequest>>();
             _mockValidator = new Mock<IValidator<DocumentDTO>>();
+            _mockFileStorageService = new Mock<IFileStorageService>();
+            _mockElasticSearchService = new Mock<IElasticSearchService>();
         }
 
         [Fact]
@@ -49,7 +55,9 @@ namespace DMSystem.Tests
                 _mockLogger.Object,
                 _mockMapper.Object,
                 _mockPublisher.Object,
-                _mockValidator.Object
+                _mockValidator.Object,
+                _mockFileStorageService.Object,
+                _mockElasticSearchService.Object
             );
 
             // Act
@@ -73,7 +81,9 @@ namespace DMSystem.Tests
                 _mockLogger.Object,
                 _mockMapper.Object,
                 _mockPublisher.Object,
-                _mockValidator.Object
+                _mockValidator.Object,
+                _mockFileStorageService.Object,
+                _mockElasticSearchService.Object
             );
 
             // Act
@@ -119,7 +129,9 @@ namespace DMSystem.Tests
                 _mockLogger.Object,
                 _mockMapper.Object,
                 _mockPublisher.Object,
-                _mockValidator.Object
+                _mockValidator.Object,
+                _mockFileStorageService.Object,
+                _mockElasticSearchService.Object
             );
 
             // Act
@@ -143,7 +155,9 @@ namespace DMSystem.Tests
                 _mockLogger.Object,
                 _mockMapper.Object,
                 _mockPublisher.Object,
-                _mockValidator.Object
+                _mockValidator.Object,
+                _mockFileStorageService.Object,
+                _mockElasticSearchService.Object
             );
 
             // Act
@@ -182,7 +196,9 @@ namespace DMSystem.Tests
                 _mockLogger.Object,
                 _mockMapper.Object,
                 _mockPublisher.Object,
-                _mockValidator.Object
+                _mockValidator.Object,
+                _mockFileStorageService.Object,
+                _mockElasticSearchService.Object
             );
 
             // Act
