@@ -27,6 +27,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DMSystem.DAL\DMSystem.DAL.csproj" />
+    <ProjectReference Include="..\DMSystem.ElasticSearch\DMSystem.ElasticSearch.csproj" />
+    <ProjectReference Include="..\DMSystem.OCRWorker\DMSystem.OCRWorker.csproj" />
     <ProjectReference Include="..\DMSystem\DMSystem.csproj" />
   </ItemGroup>
 
