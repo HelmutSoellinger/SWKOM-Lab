@@ -3,8 +3,6 @@ using DMSystem.Minio;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -20,96 +18,68 @@ namespace DMSystem.OCRWorker
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private readonly RabbitMQSetting _rabbitMqSettings;
-        private readonly IConnection _connection;
-        private readonly IModel _channel;
+        private readonly IRabbitMQService _rabbitMqService;
         private readonly MinioFileStorageService _fileStorageService;
+        private readonly string _ocrQueueName;
+        private readonly string _ocrResultsQueueName;
 
         /// <summary>
         /// Initializes the worker with required services and configurations.
         /// </summary>
-        /// <param name="rabbitMqOptions">RabbitMQ settings injected via IOptions.</param>
+        /// <param name="rabbitMqSettings">RabbitMQ settings injected via IOptions.</param>
         /// <param name="fileStorageService">MinIO file storage service for managing files.</param>
+        /// <param name="rabbitMqService">Centralized RabbitMQ service.</param>
         /// <param name="logger">Logger for logging operations.</param>
         public Worker(
-            IOptions<RabbitMQSetting> rabbitMqOptions,
+            IOptions<RabbitMQSettings> rabbitMqSettings,
             MinioFileStorageService fileStorageService,
+            IRabbitMQService rabbitMqService,
             ILogger<Worker> logger)
         {
             _logger = logger;
-            _rabbitMqSettings = rabbitMqOptions.Value;
+            _rabbitMqService = rabbitMqService;
             _fileStorageService = fileStorageService;
 
-            // Initialize RabbitMQ connection and channel
-            var factory = new ConnectionFactory
-            {
-                HostName = _rabbitMqSettings.HostName,
-                UserName = _rabbitMqSettings.UserName,
-                Password = _rabbitMqSettings.Password
-            };
-
-            _connection = factory.CreateConnection();
-            _channel = _connection.CreateModel();
-
-            // Declare queues for OCR requests and results
-            _channel.QueueDeclare(_rabbitMqSettings.OcrQueue, durable: true, exclusive: false, autoDelete: false, arguments: null);
-            _channel.QueueDeclare(_rabbitMqSettings.OcrResultsQueue, durable: true, exclusive: false, autoDelete: false, arguments: null);
-
-            _logger.LogInformation($"Connected to RabbitMQ at {_rabbitMqSettings.HostName}. Queues declared: {_rabbitMqSettings.OcrQueue}, {_rabbitMqSettings.OcrResultsQueue}");
+            // Extract queue names from config
+            _ocrQueueName = rabbitMqSettings.Value.Queues["OcrQueue"];
+            _ocrResultsQueueName = rabbitMqSettings.Value.Queues["OcrResultsQueue"];
         }
 
         /// <summary>
         /// Executes the background service for processing OCR messages.
         /// </summary>
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("OCR Worker started.");
+            _logger.LogInformation("OCR Worker started. Listening on queue: {Queue}", _ocrQueueName);
 
             // Set up RabbitMQ consumer for incoming OCR requests
-            var consumer = new EventingBasicConsumer(_channel);
-            consumer.Received += async (model, ea) =>
+            _rabbitMqService.ConsumeQueue<OCRRequest>(_ocrQueueName, async request =>
             {
-                var body = ea.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
-
                 try
                 {
-                    // Deserialize the OCR request
-                    var ocrRequest = JsonSerializer.Deserialize<OCRRequest>(message);
-                    if (ocrRequest != null)
+                    _logger.LogInformation("Processing OCR for Document ID: {DocumentId}", request.DocumentId);
+
+                    // Perform OCR on the document
+                    var ocrResultText = await PerformOcrAsync(request.PdfUrl);
+
+                    // Publish OCR result
+                    var resultMessage = new OCRResult
                     {
-                        _logger.LogInformation($"Processing OCR for Document ID: {ocrRequest.DocumentId}");
+                        DocumentId = request.DocumentId,
+                        OcrText = ocrResultText
+                    };
+                    await SendResultAsync(resultMessage);
 
-                        // Perform OCR on the document
-                        var ocrResultText = await PerformOcrAsync(ocrRequest.PdfUrl);
-
-                        // Publish OCR result to the results queue
-                        var resultMessage = new OCRResult
-                        {
-                            DocumentId = ocrRequest.DocumentId,
-                            OcrText = ocrResultText
-                        };
-
-                        // Publish the result
-                        SendResult(resultMessage);
-
-                        _logger.LogInformation($"OCR completed for Document ID: {ocrRequest.DocumentId}");
-                    }
+                    _logger.LogInformation("OCR completed for Document ID: {DocumentId}", request.DocumentId);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error processing OCR request.");
+                    _logger.LogError(ex, "Error processing OCR request for Document ID: {DocumentId}", request.DocumentId);
+                    // Consider handling retries or DLQs if needed
                 }
-            };
+            });
 
-            // Start consuming messages from the OCR queue
-            _channel.BasicConsume(_rabbitMqSettings.OcrQueue, autoAck: true, consumer);
-
-            // Keep the service running
-            while (!stoppingToken.IsCancellationRequested)
-            {
-                await Task.Delay(1000, stoppingToken);
-            }
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -149,7 +119,7 @@ namespace DMSystem.OCRWorker
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error performing OCR on file: {objectName}");
+                _logger.LogError(ex, "Error performing OCR on file: {ObjectName}", objectName);
                 throw;
             }
             finally
@@ -166,20 +136,18 @@ namespace DMSystem.OCRWorker
 
         /// <summary>
         /// Converts a PDF file into individual images for OCR processing.
+        /// Replace this placeholder with actual PDF-to-image conversion logic.
         /// </summary>
-        /// <param name="pdfFilePath">The path to the PDF file.</param>
-        /// <param name="outputDirectory">The directory to store the output images.</param>
         private void ConvertPdfToImages(string pdfFilePath, string outputDirectory)
         {
             try
             {
-                // Use a PDF-to-image conversion library (e.g., Ghostscript.NET)
-                // Replace this placeholder with the actual conversion logic
-                // Each page of the PDF should be converted to an image stored in outputDirectory
+                // Implement your PDF-to-image conversion here
+                // Example: Ghostscript.NET, ImageMagick, or any suitable library
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error converting PDF to images: {pdfFilePath}");
+                _logger.LogError(ex, "Error converting PDF to images: {PdfFilePath}", pdfFilePath);
                 throw;
             }
         }
@@ -188,21 +156,12 @@ namespace DMSystem.OCRWorker
         /// Publishes the OCR result to the RabbitMQ results queue.
         /// </summary>
         /// <param name="result">The OCR result to send.</param>
-        public void SendResult(OCRResult result)
+        public async Task SendResultAsync(OCRResult result)
         {
             try
             {
-                var message = JsonSerializer.Serialize(result);
-                var body = Encoding.UTF8.GetBytes(message);
-
-                // Publish to the result queue
-                _channel.BasicPublish(
-                    exchange: "",
-                    routingKey: _rabbitMqSettings.OcrResultsQueue,
-                    basicProperties: null,
-                    body: body);
-
-                _logger.LogInformation($"OCR Result published to queue for Document ID: {result.DocumentId}");
+                await _rabbitMqService.PublishMessageAsync(result, _ocrResultsQueueName);
+                _logger.LogInformation("OCR Result published for Document ID: {DocumentId}", result.DocumentId);
             }
             catch (Exception ex)
             {
@@ -211,30 +170,10 @@ namespace DMSystem.OCRWorker
             }
         }
 
-        /// <summary>
-        /// Cleans up resources when stopping the service.
-        /// </summary>
-        public override Task StopAsync(CancellationToken cancellationToken)
+        public override async Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("OCR Worker is stopping.");
-
-            if (_channel.IsOpen)
-            {
-                _channel.Close();
-                _connection.Close();
-            }
-
-            return base.StopAsync(cancellationToken);
-        }
-
-        /// <summary>
-        /// Disposes of the RabbitMQ connection and channel.
-        /// </summary>
-        public override void Dispose()
-        {
-            _channel?.Dispose();
-            _connection?.Dispose();
-            base.Dispose();
+            await base.StopAsync(cancellationToken);
         }
     }
 }

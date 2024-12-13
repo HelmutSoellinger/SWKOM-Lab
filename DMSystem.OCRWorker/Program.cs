@@ -11,8 +11,9 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("/app/config/appsettings.json", optional: false, reloadOnChange: true);
 
-// Register RabbitMQ settings
-builder.Services.Configure<RabbitMQSetting>(builder.Configuration.GetSection("RabbitMQ"));
+// Register RabbitMQ settings and service
+builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection("RabbitMQ"));
+builder.Services.AddSingleton<IRabbitMQService, RabbitMQService>(); // Ensure RabbitMQService is implemented as shown in previous examples.
 
 // Register MinIO settings
 builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("Minio"));
@@ -21,7 +22,7 @@ builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("Mini
 builder.Services.AddSingleton<MinioFileStorageService>();
 
 // Register Worker Service
-builder.Services.AddHostedService<DMSystem.OCRWorker.Worker>();
+builder.Services.AddHostedService<Worker>();
 
 // Add logging for better observability
 builder.Services.AddLogging(logging =>

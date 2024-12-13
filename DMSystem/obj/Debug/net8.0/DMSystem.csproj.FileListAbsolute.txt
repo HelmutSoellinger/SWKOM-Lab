@@ -236,7 +236,6 @@ C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\o
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.AssemblyInfoInputs.cache
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.AssemblyInfo.cs
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.csproj.CoreCompileInputs.cache
-C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.MvcApplicationPartsAssemblyInfo.cs
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.MvcApplicationPartsAssemblyInfo.cache
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.sourcelink.json
 C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\staticwebassets.build.json

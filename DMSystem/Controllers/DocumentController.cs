@@ -15,6 +15,7 @@ using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using DMSystem.Minio;
 using DMSystem.ElasticSearch;
+using Microsoft.Extensions.Options;
 
 namespace DMSystem.Controllers
 {
@@ -25,28 +26,33 @@ namespace DMSystem.Controllers
         private readonly IDocumentRepository _documentRepository;
         private readonly ILogger<DocumentController> _logger;
         private readonly IMapper _mapper;
-        private readonly IRabbitMQPublisher<OCRRequest> _rabbitMqPublisher;
+        private readonly IRabbitMQService _rabbitMqService;
         private readonly IValidator<DocumentDTO> _validator;
-        private readonly IFileStorageService _fileStorageService; 
+        private readonly IFileStorageService _fileStorageService;
         private readonly IElasticSearchService _elasticSearchService;
+        private readonly string _ocrQueueName;
 
         public DocumentController(
             IDocumentRepository documentRepository,
             ILogger<DocumentController> logger,
             IMapper mapper,
-            IRabbitMQPublisher<OCRRequest> rabbitMqPublisher,
+            IRabbitMQService rabbitMqService,
             IValidator<DocumentDTO> validator,
-            IFileStorageService fileStorageService, 
-            IElasticSearchService elasticSearchService
+            IFileStorageService fileStorageService,
+            IElasticSearchService elasticSearchService,
+            IOptions<RabbitMQSettings> rabbitMqSettings
         )
         {
             _documentRepository = documentRepository;
             _logger = logger;
             _mapper = mapper;
-            _rabbitMqPublisher = rabbitMqPublisher;
+            _rabbitMqService = rabbitMqService;
             _validator = validator;
-            _fileStorageService = fileStorageService; 
+            _fileStorageService = fileStorageService;
             _elasticSearchService = elasticSearchService;
+
+            // Get OCR queue name from configuration
+            _ocrQueueName = rabbitMqSettings.Value.Queues["OcrQueue"];
         }
 
         /// <summary>
@@ -116,7 +122,7 @@ namespace DMSystem.Controllers
 
             try
             {
-                await _rabbitMqPublisher.PublishMessageAsync(ocrRequest, RabbitMQQueues.OcrQueue);
+                await _rabbitMqService.PublishMessageAsync(ocrRequest, _ocrQueueName);
             }
             catch (Exception ex)
             {
@@ -181,7 +187,7 @@ namespace DMSystem.Controllers
 
             try
             {
-                await _rabbitMqPublisher.PublishMessageAsync(ocrRequest, RabbitMQQueues.OcrQueue);
+                await _rabbitMqService.PublishMessageAsync(ocrRequest, _ocrQueueName);
             }
             catch (Exception ex)
             {
@@ -249,7 +255,7 @@ namespace DMSystem.Controllers
         /// <param name="id">The unique ID of the document whose file needs to be checked.</param>
         /// <returns>
         /// HTTP 200 OK if the file exists in MinIO, with a message indicating success.
-        /// HTTP 404 Not Found if the file does not exist, with a message indicating the file is not found.
+        /// HTTP 404 Not Found if the file does not exist.
         /// </returns>
         [HttpGet("check-file/{id}")]
         public async Task<IActionResult> CheckFileExists(int id)

@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
-using FluentValidation;
 using FluentValidation.AspNetCore;
 using log4net;
 using log4net.Config;
@@ -25,30 +24,38 @@ var logger = LogManager.GetLogger(typeof(Program));
 logger.Info("Initializing application...");
 
 // Configure services
+
+// Database context
 builder.Services.AddDbContext<DALContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))); // Database context
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddScoped<IDocumentRepository, DocumentRepository>(); // Document Repository
-builder.Services.AddAutoMapper(typeof(DocumentProfile).Assembly); // AutoMapper profiles
+// Document Repository
+builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
+
+// AutoMapper profiles
+builder.Services.AddAutoMapper(typeof(DocumentProfile).Assembly);
+
+// Controllers and FluentValidation
 builder.Services.AddControllers()
-    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<DocumentDTOValidator>()); // FluentValidation
+    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<DocumentDTOValidator>());
 
-builder.Services.Configure<RabbitMQSetting>(builder.Configuration.GetSection("RabbitMQ")); // RabbitMQ settings
-builder.Services.AddSingleton<IRabbitMQPublisher<OCRRequest>, RabbitMQPublisher<OCRRequest>>(); // RabbitMQ Publisher
+// Configure RabbitMQ
+builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection("RabbitMQ"));
+builder.Services.AddSingleton<IRabbitMQService, RabbitMQService>();
 
 // Configure MinIO settings
-builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("Minio")); // MinIO settings
+builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("Minio"));
 
 // Register MinIO FileStorage Service using the IFileStorageService interface
 builder.Services.AddSingleton<IFileStorageService, MinioFileStorageService>();
 
-// Configure ElasticSearch settings and service
+// Configure ElasticSearch
 var elasticSearchUrl = builder.Configuration.GetValue<string>("ElasticSearch:Url");
 if (string.IsNullOrWhiteSpace(elasticSearchUrl))
 {
     throw new InvalidOperationException("ElasticSearch URL is not configured. Ensure it is set in appsettings.json or as an environment variable.");
 }
-builder.Services.AddSingleton<IElasticSearchService>(new ElasticSearchService(elasticSearchUrl)); // ElasticSearch service
+builder.Services.AddSingleton<IElasticSearchService>(new ElasticSearchService(elasticSearchUrl));
 
 // CORS Policy
 builder.Services.AddCors(options =>
