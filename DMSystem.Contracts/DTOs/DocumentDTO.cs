@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using FluentValidation;
 
-namespace DMSystem.DTOs
+namespace DMSystem.Contracts.DTOs
 {
     public class DocumentDTO
     {
@@ -12,12 +13,12 @@ namespace DMSystem.DTOs
         public string Name { get; set; }
 
         [Required]
+        [MaxLength(100)]
         public string Author { get; set; }
 
-        public string Description { get; set; } = string.Empty;
-
-        [Required]
         public DateTime LastModified { get; set; }
+
+        public string? FilePath { get; set; }
     }
 
     public class DocumentDTOValidator : AbstractValidator<DocumentDTO>
@@ -27,10 +28,10 @@ namespace DMSystem.DTOs
             RuleFor(d => d.Name)
                 .NotEmpty().WithMessage("Name is required.")
                 .MaximumLength(100).WithMessage("Name cannot exceed 100 characters.");
+
             RuleFor(d => d.Author)
-                .NotEmpty().WithMessage("Author is required.");
-            RuleFor(d => d.Description)
-                .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
+                .NotEmpty().WithMessage("Author is required.")
+                .MaximumLength(100).WithMessage("Author cannot exceed 100 characters.");
         }
     }
 }

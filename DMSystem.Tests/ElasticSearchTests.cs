@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DMSystem.ElasticSearch;
-using DMSystem.Messaging;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -17,7 +16,7 @@ namespace DMSystem.Tests
     public class ElasticSearchTests
     {
         private readonly Mock<IElasticSearchService> _mockElasticSearchService;
-        private readonly Mock<IOptions<RabbitMQSetting>> _mockOptions;
+        private readonly Mock<IOptions<RabbitMQSettings>> _mockOptions;
         private readonly Mock<IConnection> _mockConnection;
         private readonly Mock<IModel> _mockChannel;
         private readonly Mock<ILogger<Worker>> _mockLogger;
@@ -25,12 +24,12 @@ namespace DMSystem.Tests
         public ElasticSearchTests()
         {
             _mockElasticSearchService = new Mock<IElasticSearchService>();
-            _mockOptions = new Mock<IOptions<RabbitMQSetting>>();
+            _mockOptions = new Mock<IOptions<RabbitMQSettings>>();
             _mockConnection = new Mock<IConnection>();
             _mockChannel = new Mock<IModel>();
             _mockLogger = new Mock<ILogger<Worker>>();
 
-            _mockOptions.Setup(o => o.Value).Returns(new RabbitMQSetting
+            _mockOptions.Setup(o => o.Value).Returns(new RabbitMQSettings
             {
                 HostName = "localhost",
                 UserName = "guest",

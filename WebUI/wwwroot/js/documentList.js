@@ -1,29 +1,48 @@
-﻿/**
- * Loads documents from the API and populates the table.
- * @param {string} filterName Optional filter for document name.
- */
-async function loadDocuments(filterName = '') {
-    const url = filterName ? `${apiBaseUrl}?name=${filterName}` : apiBaseUrl;
+﻿async function loadDocuments(searchTerm = '') {
+    const tableBody = document.querySelector('#documentsTable tbody');
+    tableBody.innerHTML = ''; // Clear the table
 
     try {
-        const response = await fetch(url);
+        let documents = [];
+        let response;
+
+        if (searchTerm.trim() === '') {
+            // Fetch all documents if no search term
+            response = await fetch(apiBaseUrl); // GET all documents
+        } else {
+            // Search using the POST search endpoint
+            response = await fetch(`${apiBaseUrl}/search`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(searchTerm.trim()), // Send trimmed search term in body
+            });
+        }
 
         if (!response.ok) {
+            if (response.status === 404) {
+                // Handle no search results
+                tableBody.innerHTML = `<tr><td colspan="5">No matching documents found.</td></tr>`;
+                return;
+            }
             throw new Error('Failed to fetch documents');
         }
 
-        const documents = await response.json();
-        const tableBody = document.querySelector('#documentsTable tbody');
-        tableBody.innerHTML = ''; // Clear the table
+        documents = await response.json();
 
+        if (!Array.isArray(documents) || documents.length === 0) {
+            // Show "No documents found" if the response is empty
+            tableBody.innerHTML = `<tr><td colspan="5">No documents found.</td></tr>`;
+            return;
+        }
+
+        // Populate the table with documents
         documents.forEach((doc) => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${doc.id}</td>
-                <td>${doc.name}</td>
-                <td>${doc.author}</td>
+                <td>${doc.id || 'N/A'}</td>
+                <td>${doc.name || 'N/A'}</td>
+                <td>${doc.author || 'N/A'}</td>
                 <td>${formatLastModifiedDate(doc.lastModified)}</td>
-                <td>${doc.description === null ? 'N/A' : doc.description || ''}</td>
                 <td class="actions">
                     <a class="download-btn" href="${apiBaseUrl}/${doc.id}/download" target="_blank">Download</a>
                     <button class="delete-btn" data-id="${doc.id}">X</button>
@@ -41,16 +60,14 @@ async function loadDocuments(filterName = '') {
                 }
             });
         });
+
     } catch (error) {
         console.error('Error loading documents:', error);
         showErrorModal([{ Property: 'Network', Message: 'Error loading documents' }]);
     }
 }
 
-/**
- * Deletes a document by ID using the API endpoint.
- * @param {string} documentId The ID of the document to delete.
- */
+
 async function deleteDocument(documentId) {
     const deleteUrl = `${apiBaseUrl}/${documentId}`;
 
@@ -73,13 +90,8 @@ async function deleteDocument(documentId) {
     }
 }
 
-/**
- * Formats the LastModified date to DD.MM.YYYY.
- * @param {string} lastModified ISO date string from the API.
- * @returns {string} Formatted date in DD.MM.YYYY format.
- */
 function formatLastModifiedDate(lastModified) {
-    if (!lastModified) return 'N/A'; // Handle null or undefined values
+    if (!lastModified) return 'N/A';
     const date = new Date(lastModified);
-    return date.toLocaleDateString('de-DE'); // 'de-DE' for DD.MM.YYYY format
+    return date.toLocaleDateString('de-DE');
 }

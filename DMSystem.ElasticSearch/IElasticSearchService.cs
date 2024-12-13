@@ -1,15 +1,10 @@
-﻿using DMSystem.Messaging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DMSystem.Contracts;
 
 namespace DMSystem.ElasticSearch
 {
     public interface IElasticSearchService
     {
         Task IndexDocumentAsync(OCRResult ocrResult);
-        Task<IEnumerable<SearchResult>> SearchDocumentsAsync(string searchTerm);
+        Task<IEnumerable<OCRResult>> SearchDocumentsAsync(string searchTerm);
     }
 }

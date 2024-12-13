@@ -6,12 +6,10 @@ namespace DMSystem.DAL
 {
     public class DALContext : DbContext
     {
-        // Constructor accepting DbContextOptions
         public DALContext(DbContextOptions<DALContext> options) : base(options)
         {
         }
 
-        // DbSet for Documents
         public DbSet<Document> Documents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -32,13 +30,9 @@ namespace DMSystem.DAL
                 entity.Property(d => d.Author)
                     .IsRequired();
 
-                // Replace Content with FilePath
                 entity.Property(d => d.FilePath)
                     .IsRequired()
-                    .HasMaxLength(500); // Adjust max length as needed
-
-                entity.Property(d => d.Description)
-                    .IsRequired(false); // Optional
+                    .HasMaxLength(500);
             });
         }
     }

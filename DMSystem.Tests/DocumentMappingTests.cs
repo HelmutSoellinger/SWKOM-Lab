@@ -2,7 +2,7 @@
 using DMSystem.DAL.Models;
 using DMSystem.Controllers;
 using DMSystem.Mappings;
-using DMSystem.DTOs;
+using DMSystem.Contracts.DTOs;
 using Xunit;
 using System.ComponentModel.DataAnnotations;
 

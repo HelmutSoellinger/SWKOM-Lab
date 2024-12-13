@@ -32,12 +32,14 @@ namespace DMSystem.Minio
         /// </summary>
         public async Task InitializeBucketAsync()
         {
+            Console.WriteLine($"Checking if bucket '{_bucketName}' exists...");
             try
             {
                 bool exists = await _minioClient.BucketExistsAsync(
                     new BucketExistsArgs().WithBucket(_bucketName));
                 if (!exists)
                 {
+                    Console.WriteLine($"Bucket '{_bucketName}' does not exist. Creating...");
                     await _minioClient.MakeBucketAsync(
                         new MakeBucketArgs().WithBucket(_bucketName));
                     Console.WriteLine($"Bucket '{_bucketName}' created successfully.");
@@ -49,10 +51,11 @@ namespace DMSystem.Minio
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Error initializing bucket: {ex.Message}");
+                Console.Error.WriteLine($"Error initializing bucket '{_bucketName}': {ex.Message}");
                 throw;
             }
         }
+
 
         /// <summary>
         /// Uploads a file to the MinIO bucket.

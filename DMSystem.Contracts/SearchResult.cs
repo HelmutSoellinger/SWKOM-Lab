@@ -1,4 +1,4 @@
-﻿namespace DMSystem.Messaging
+﻿namespace DMSystem.Contracts
 {
     public class SearchResult
     {

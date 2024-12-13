@@ -30,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DMSystem.Contracts\DMSystem.Contracts.csproj" />
     <ProjectReference Include="..\DMSystem.DAL\DMSystem.DAL.csproj" />
     <ProjectReference Include="..\DMSystem.ElasticSearch\DMSystem.ElasticSearch.csproj" />
     <ProjectReference Include="..\DMSystem.Messaging\DMSystem.Messaging.csproj" />

@@ -1,10 +1,5 @@
-using DMSystem.Messaging;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using DMSystem.Contracts;
 using Microsoft.Extensions.Options;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace DMSystem.ElasticSearch
 {
@@ -36,18 +31,19 @@ namespace DMSystem.ElasticSearch
             // Consume OCR results using the centralized RabbitMQ service
             _rabbitMqService.ConsumeQueue<OCRResult>(_ocrResultsQueueName, async ocrResult =>
             {
+                var docId = ocrResult.Document.Id;
                 try
                 {
-                    _logger.LogInformation("Indexing Document ID: {DocumentId}", ocrResult.DocumentId);
+                    _logger.LogInformation("Indexing Document ID: {DocumentId}", docId);
 
                     // Index the OCR result into Elasticsearch
                     await _elasticSearchService.IndexDocumentAsync(ocrResult);
 
-                    _logger.LogInformation("Document ID: {DocumentId} indexed successfully.", ocrResult.DocumentId);
+                    _logger.LogInformation("Document ID: {DocumentId} indexed successfully.", docId);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error processing OCR result for Document ID: {DocumentId}", ocrResult.DocumentId);
+                    _logger.LogError(ex, "Error processing OCR result for Document ID: {DocumentId}", docId);
                     // Consider retry or DLQ handling if needed
                 }
             });

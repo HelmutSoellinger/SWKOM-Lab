@@ -2774,6 +2774,19 @@
           }
         }
       },
+      "DMSystem.Contracts/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "FluentValidation": "11.11.0"
+        },
+        "compile": {
+          "bin/placeholder/DMSystem.Contracts.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DMSystem.Contracts.dll": {}
+        }
+      },
       "DMSystem.DAL/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
@@ -2791,6 +2804,7 @@
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
         "dependencies": {
+          "DMSystem.Contracts": "1.0.0",
           "DMSystem.Messaging": "1.0.0",
           "Elastic.Clients.Elasticsearch": "8.16.3",
           "Microsoft.Extensions.Hosting": "9.0.0",
@@ -2808,6 +2822,7 @@
         "type": "project",
         "framework": ".NETCoreApp,Version=v8.0",
         "dependencies": {
+          "DMSystem.Contracts": "1.0.0",
           "Microsoft.Extensions.Hosting": "9.0.0",
           "Microsoft.Extensions.Logging": "9.0.0",
           "Microsoft.Extensions.Options": "9.0.0",
@@ -8797,6 +8812,11 @@
         "system.threading.tasks.nuspec"
       ]
     },
+    "DMSystem.Contracts/1.0.0": {
+      "type": "project",
+      "path": "../DMSystem.Contracts/DMSystem.Contracts.csproj",
+      "msbuildProject": "../DMSystem.Contracts/DMSystem.Contracts.csproj"
+    },
     "DMSystem.DAL/1.0.0": {
       "type": "project",
       "path": "../DMSystem.DAL/DMSystem.DAL.csproj",
@@ -8816,6 +8836,7 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "AutoMapper >= 13.0.1",
+      "DMSystem.Contracts >= 1.0.0",
       "DMSystem.DAL >= 1.0.0",
       "DMSystem.ElasticSearch >= 1.0.0",
       "DMSystem.Messaging >= 1.0.0",
@@ -8866,6 +8887,9 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
+            "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.Contracts\\DMSystem.Contracts.csproj": {
+              "projectPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.Contracts\\DMSystem.Contracts.csproj"
+            },
             "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj": {
               "projectPath": "C:\\Users\\jay\\Documents\\FH-Technikum\\5. Semester\\SWKOM\\SemesterProject\\DMSystem.DAL\\DMSystem.DAL.csproj"
             },

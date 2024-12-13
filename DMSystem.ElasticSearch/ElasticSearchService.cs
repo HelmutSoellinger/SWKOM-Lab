@@ -1,9 +1,5 @@
-﻿using Elastic.Clients.Elasticsearch;
-using DMSystem.Messaging;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using DMSystem.ElasticSearch;
+﻿using DMSystem.Contracts;
+using Elastic.Clients.Elasticsearch;
 
 namespace DMSystem.ElasticSearch
 {
@@ -21,7 +17,7 @@ namespace DMSystem.ElasticSearch
         {
             var response = await _client.IndexAsync(ocrResult, i => i
                 .Index("ocr-results")
-                .Id(ocrResult.DocumentId)
+                .Id(ocrResult.Document.Id.ToString())
             );
 
             if (!response.IsValidResponse)
@@ -30,14 +26,14 @@ namespace DMSystem.ElasticSearch
             }
         }
 
-        public async Task<IEnumerable<SearchResult>> SearchDocumentsAsync(string searchTerm)
+        public async Task<IEnumerable<OCRResult>> SearchDocumentsAsync(string searchTerm)
         {
             var searchResponse = await _client.SearchAsync<OCRResult>(s => s
                 .Index("ocr-results")
                 .Query(q => q
-                    .Match(m => m
-                        .Field(f => f.OcrText)
+                    .MultiMatch(m => m
                         .Query(searchTerm)
+                        .Fields(new[] { "Document.Name", "Document.Author", "OcrText" })
                     )
                 )
             );
@@ -47,12 +43,11 @@ namespace DMSystem.ElasticSearch
                 throw new Exception($"Search query failed: {searchResponse.DebugInformation}");
             }
 
-            // Map search results to SearchResult model
-            return searchResponse.Hits.Select(hit => new SearchResult
-            {
-                DocumentId = hit.Id,
-                MatchCount = hit.Highlight["ocrText"].Count
-            });
+            // Return the full OCRResult from _source for each hit.
+            // This means each result includes Document (with Id, Name, Author, etc.) and OcrText.
+            return searchResponse.Hits
+                .Where(hit => hit.Source is not null)
+                .Select(hit => hit.Source!);
         }
     }
 }

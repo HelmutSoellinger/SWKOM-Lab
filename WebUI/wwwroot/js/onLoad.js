@@ -16,11 +16,32 @@
         showSection('add');
     });
 
+    // Attach event listener for form submission (search functionality)
+    const searchForm = document.getElementById('searchForm');
+    if (searchForm) {
+        searchForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent the default form submission behavior
+            const searchBox = document.getElementById('searchBox');
+            const searchTerm = searchBox.value.trim();
+
+            if (searchTerm) {
+                // POST request to /search endpoint for term-based search
+                await loadDocuments(searchTerm);
+            } else {
+                // GET request to fetch all documents
+                await loadDocuments();
+            }
+        });
+    } else {
+        console.error("Search form with ID 'searchForm' not found.");
+    }
+
+
     // Close the error modal when clicking the close button
-    const closeErrorBtn = document.getElementById('addCloseErrorBtn'); // Updated to match your latest changes
+    const closeErrorBtn = document.getElementById('addCloseErrorBtn');
     if (closeErrorBtn) {
         closeErrorBtn.addEventListener('click', hideErrorModal);
     } else {
-        console.error("Element with ID 'addCloseErrorBtn' not found."); // Error message adjusted to match new ID
+        console.error("Element with ID 'addCloseErrorBtn' not found.");
     }
 });

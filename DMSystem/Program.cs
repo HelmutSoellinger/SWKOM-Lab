@@ -10,8 +10,7 @@ using System.IO;
 using System.Reflection;
 using DMSystem.DAL;
 using DMSystem.Mappings;
-using DMSystem.Messaging;
-using DMSystem.DTOs;
+using DMSystem.Contracts.DTOs;
 using DMSystem.Minio;
 using DMSystem.ElasticSearch;
 

@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DMSystem.Contracts\DMSystem.Contracts.csproj" />
     <ProjectReference Include="..\DMSystem.Messaging\DMSystem.Messaging.csproj" />
     <ProjectReference Include="..\DMSystem\DMSystem.csproj" />
   </ItemGroup>

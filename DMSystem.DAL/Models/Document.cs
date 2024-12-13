@@ -16,8 +16,6 @@ namespace DMSystem.DAL.Models
         [Required]
         public string Author { get; set; } = string.Empty;
 
-        public string? Description { get; set; }
-
         [Required]
         [MaxLength(500)] // Adjust max length as needed
         public string FilePath { get; set; } = string.Empty;

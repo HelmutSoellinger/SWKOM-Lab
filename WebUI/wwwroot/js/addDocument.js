@@ -5,13 +5,12 @@
     const formData = new FormData();
     const docName = document.getElementById('docName').value.trim(); // Document Name
     const docAuthor = document.getElementById('docAuthor').value.trim(); // Document Author
-    const docDescription = document.getElementById('docDescription').value.trim() || ""; // Document Description
     const pdfFile = document.getElementById('docFile').files[0]; // PDF File
 
     // Array to store client-side validation errors
     const clientSideErrors = [];
 
-    // Client-side validation matching backend
+    // Client-side validation
     if (!docName) {
         clientSideErrors.push({ Property: 'Name', Message: 'Name is required.' });
     } else if (docName.length > 100) {
@@ -28,13 +27,6 @@
         clientSideErrors.push({ Property: 'Upload PDF', Message: 'A PDF file is required.' });
     }
 
-    if (docDescription.length > 500) {
-        clientSideErrors.push({
-            Property: 'Description',
-            Message: 'Description cannot exceed 500 characters.',
-        });
-    }
-
     // If there are validation errors, display them and exit
     if (clientSideErrors.length > 0) {
         showAddSectionValidationErrors(clientSideErrors);
@@ -44,7 +36,6 @@
     // Append validated fields to FormData
     formData.append('Name', docName);
     formData.append('Author', docAuthor);
-    formData.append('Description', docDescription);
     formData.append('pdfFile', pdfFile);
 
     try {
@@ -111,9 +102,6 @@ function showAddSectionValidationErrors(errors) {
     addErrorBox.style.display = 'block'; // Ensure visibility
 }
 
-/**
- * Hides the error box for the "Add Document" section.
- */
 document.getElementById('addCloseErrorBtn').addEventListener('click', () => {
     const addErrorBox = document.getElementById('addErrorMessages');
     addErrorBox.classList.add('hidden');

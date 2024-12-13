@@ -36,6 +36,7 @@ COPY ../DMSystem.Messaging/*.csproj ./DMSystem.Messaging/
 COPY ../DMSystem.DAL/*.csproj ./DMSystem.DAL/
 COPY ../DMSystem/*.csproj ./DMSystem/
 COPY ../DMSystem.ElasticSearch/*.csproj ./DMSystem.ElasticSearch/
+COPY ../DMSystem.Contracts/*.csproj ./DMSystem.Contracts/
 
 # Restore dependencies
 RUN dotnet restore ./DMSystem.OCRWorker/DMSystem.OCRWorker.csproj
@@ -46,6 +47,7 @@ COPY ../DMSystem.Messaging/ ./DMSystem.Messaging/
 COPY ../DMSystem.DAL/ ./DMSystem.DAL/
 COPY ../DMSystem/ ./DMSystem/
 COPY ../DMSystem.ElasticSearch/ ./DMSystem.ElasticSearch/
+COPY ../DMSystem.Contracts/ ./DMSystem.Contracts/
 
 # Build and publish the application
 WORKDIR /src/DMSystem.OCRWorker
@@ -56,7 +58,7 @@ FROM base AS final
 WORKDIR /app
 
 # Copy the compiled application
-COPY --from=build /app .
+COPY --from=build /app ./
 
 # Debug: Check shared library linking
 RUN ldd /usr/lib/x86_64-linux-gnu/libdl.so

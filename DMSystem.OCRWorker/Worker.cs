@@ -1,14 +1,9 @@
-using DMSystem.Messaging;
+using DMSystem.Contracts;
+using DMSystem.Contracts.DTOs;
 using DMSystem.Minio;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Tesseract;
-using System.IO;
 
 namespace DMSystem.OCRWorker
 {
@@ -23,13 +18,6 @@ namespace DMSystem.OCRWorker
         private readonly string _ocrQueueName;
         private readonly string _ocrResultsQueueName;
 
-        /// <summary>
-        /// Initializes the worker with required services and configurations.
-        /// </summary>
-        /// <param name="rabbitMqSettings">RabbitMQ settings injected via IOptions.</param>
-        /// <param name="fileStorageService">MinIO file storage service for managing files.</param>
-        /// <param name="rabbitMqService">Centralized RabbitMQ service.</param>
-        /// <param name="logger">Logger for logging operations.</param>
         public Worker(
             IOptions<RabbitMQSettings> rabbitMqSettings,
             MinioFileStorageService fileStorageService,
@@ -45,9 +33,6 @@ namespace DMSystem.OCRWorker
             _ocrResultsQueueName = rabbitMqSettings.Value.Queues["OcrResultsQueue"];
         }
 
-        /// <summary>
-        /// Executes the background service for processing OCR messages.
-        /// </summary>
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("OCR Worker started. Listening on queue: {Queue}", _ocrQueueName);
@@ -55,26 +40,28 @@ namespace DMSystem.OCRWorker
             // Set up RabbitMQ consumer for incoming OCR requests
             _rabbitMqService.ConsumeQueue<OCRRequest>(_ocrQueueName, async request =>
             {
+                var docId = request.Document.Id;
                 try
                 {
-                    _logger.LogInformation("Processing OCR for Document ID: {DocumentId}", request.DocumentId);
+                    _logger.LogInformation("Processing OCR for Document ID: {DocumentId}", docId);
 
-                    // Perform OCR on the document
-                    var ocrResultText = await PerformOcrAsync(request.PdfUrl);
+                    // Perform OCR on the document using the FilePath from DocumentDTO
+                    var ocrResultText = await PerformOcrAsync(request.Document.FilePath);
 
-                    // Publish OCR result
+                    // Publish OCR result with full DocumentDTO and OcrText
                     var resultMessage = new OCRResult
                     {
-                        DocumentId = request.DocumentId,
+                        Document = request.Document, // Includes Id, Name, Author, LastModified, FilePath
                         OcrText = ocrResultText
                     };
+
                     await SendResultAsync(resultMessage);
 
-                    _logger.LogInformation("OCR completed for Document ID: {DocumentId}", request.DocumentId);
+                    _logger.LogInformation("OCR completed for Document ID: {DocumentId}", docId);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error processing OCR request for Document ID: {DocumentId}", request.DocumentId);
+                    _logger.LogError(ex, "Error processing OCR request for Document ID: {DocumentId}", docId);
                     // Consider handling retries or DLQs if needed
                 }
             });
@@ -82,11 +69,6 @@ namespace DMSystem.OCRWorker
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Performs OCR on a file stored in MinIO.
-        /// </summary>
-        /// <param name="objectName">The name of the file in MinIO.</param>
-        /// <returns>The extracted text from the file.</returns>
         public async Task<string> PerformOcrAsync(string objectName)
         {
             var result = new StringBuilder();
@@ -134,16 +116,12 @@ namespace DMSystem.OCRWorker
             return result.ToString();
         }
 
-        /// <summary>
-        /// Converts a PDF file into individual images for OCR processing.
-        /// Replace this placeholder with actual PDF-to-image conversion logic.
-        /// </summary>
         private void ConvertPdfToImages(string pdfFilePath, string outputDirectory)
         {
             try
             {
                 // Implement your PDF-to-image conversion here
-                // Example: Ghostscript.NET, ImageMagick, or any suitable library
+                // e.g. using Ghostscript.NET or another library
             }
             catch (Exception ex)
             {
@@ -152,16 +130,12 @@ namespace DMSystem.OCRWorker
             }
         }
 
-        /// <summary>
-        /// Publishes the OCR result to the RabbitMQ results queue.
-        /// </summary>
-        /// <param name="result">The OCR result to send.</param>
         public async Task SendResultAsync(OCRResult result)
         {
             try
             {
                 await _rabbitMqService.PublishMessageAsync(result, _ocrResultsQueueName);
-                _logger.LogInformation("OCR Result published for Document ID: {DocumentId}", result.DocumentId);
+                _logger.LogInformation("OCR Result published for Document ID: {DocumentId}", result.Document.Id);
             }
             catch (Exception ex)
             {

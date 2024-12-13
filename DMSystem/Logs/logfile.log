@@ -397,3 +397,86 @@ Npgsql.NpgsqlException (0x80004005): Failed to connect to 172.19.0.2:5432
 2024-12-13 15:52:31,374 [1] INFO  Program - Database migration completed successfully.
 2024-12-13 15:52:31,509 [9] INFO  Program - MinIO bucket initialization completed.
 2024-12-13 15:52:31,515 [9] INFO  Program - Application has started.
+2024-12-13 19:10:25,981 [1] INFO  Program - Initializing application...
+2024-12-13 19:10:29,088 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 19:10:29,216 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 19:10:29,232 [7] INFO  Program - Application has started.
+2024-12-13 19:15:06,311 [1] INFO  Program - Initializing application...
+2024-12-13 19:15:08,884 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 19:15:09,073 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 19:15:09,080 [10] INFO  Program - Application has started.
+2024-12-13 19:27:46,808 [1] INFO  Program - Initializing application...
+2024-12-13 19:27:49,211 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 19:27:49,352 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 19:27:49,359 [7] INFO  Program - Application has started.
+2024-12-13 19:35:30,360 [1] INFO  Program - Initializing application...
+2024-12-13 19:35:33,314 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 19:35:33,451 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 19:35:33,461 [7] INFO  Program - Application has started.
+2024-12-13 19:50:01,983 [1] INFO  Program - Initializing application...
+2024-12-13 19:50:05,297 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 19:50:05,484 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 19:50:05,493 [7] INFO  Program - Application has started.
+2024-12-13 19:58:39,481 [1] INFO  Program - Initializing application...
+2024-12-13 19:58:46,938 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 19:58:46,949 [1] ERROR Program - An error occurred during application initialization.
+9000:9000 is invalid hostname.: Minio.Exceptions.InvalidEndpointException: MinIO API responded with message=endpoint
+   at Minio.MinioClientExtensions.GetBaseUrl(String endpoint)
+   at Minio.MinioClientExtensions.WithEndpoint(IMinioClient minioClient, String endpoint)
+   at DMSystem.Minio.MinioFileStorageService..ctor(IOptions`1 options) in /src/DMSystem/Minio/MinioFileStorageService.cs:line 22
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitRootCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.Resolve(ServiceCallSite callSite, ServiceProviderEngineScope scope)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.CreateServiceAccessor(ServiceIdentifier serviceIdentifier)
+   at System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd(TKey key, Func`2 valueFactory)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at Program.<Main>$(String[] args) in /src/DMSystem/Program.cs:line 108
+2024-12-13 19:58:47,000 [1] INFO  Program - Application has started.
+2024-12-13 20:01:05,155 [1] INFO  Program - Initializing application...
+2024-12-13 20:01:08,978 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 20:01:09,152 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 20:01:09,160 [9] INFO  Program - Application has started.
+2024-12-13 20:12:18,527 [1] INFO  Program - Initializing application...
+2024-12-13 20:12:21,553 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 20:12:21,865 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 20:12:21,877 [13] INFO  Program - Application has started.
+2024-12-13 20:16:29,855 [1] INFO  Program - Initializing application...
+2024-12-13 20:16:33,310 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 20:16:33,451 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 20:16:33,457 [10] INFO  Program - Application has started.
+2024-12-13 20:21:26,043 [1] INFO  Program - Initializing application...
+2024-12-13 20:21:29,754 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 20:21:29,942 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 20:21:29,951 [13] INFO  Program - Application has started.
+2024-12-13 20:28:31,217 [1] INFO  Program - Initializing application...
+2024-12-13 20:28:34,322 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 20:28:34,428 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 20:28:34,433 [10] INFO  Program - Application has started.
+2024-12-13 20:49:46,156 [1] INFO  Program - Initializing application...
+2024-12-13 20:49:48,341 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 20:49:48,442 [14] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 20:49:48,446 [14] INFO  Program - Application has started.
+2024-12-13 20:54:15,519 [1] INFO  Program - Initializing application...
+2024-12-13 20:54:17,423 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 20:54:17,559 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 20:54:17,567 [9] INFO  Program - Application has started.
+2024-12-13 20:58:22,849 [1] INFO  Program - Initializing application...
+2024-12-13 20:58:24,711 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 20:58:24,836 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 20:58:24,844 [9] INFO  Program - Application has started.
+2024-12-13 21:03:30,930 [1] INFO  Program - Initializing application...
+2024-12-13 21:03:33,688 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 21:03:33,791 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 21:03:33,796 [13] INFO  Program - Application has started.
+2024-12-13 21:13:23,910 [1] INFO  Program - Initializing application...
+2024-12-13 21:13:26,189 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 21:13:26,327 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 21:13:26,335 [7] INFO  Program - Application has started.

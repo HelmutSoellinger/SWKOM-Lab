@@ -1,21 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DMSystem.DAL.Models;
 using DMSystem.DAL;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using AutoMapper;
-using DMSystem.DTOs;
-using DMSystem.Messaging;
+using DMSystem.Contracts.DTOs;
 using FluentValidation;
-using FluentValidation.Results;
-using Microsoft.AspNetCore.Http;
 using DMSystem.Minio;
 using DMSystem.ElasticSearch;
 using Microsoft.Extensions.Options;
+using DMSystem.Contracts;
 
 namespace DMSystem.Controllers
 {
@@ -56,12 +48,13 @@ namespace DMSystem.Controllers
         }
 
         /// <summary>
-        /// Get all documents or filter by name if provided.
+        /// Get all documents.
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DocumentDTO>>> Get([FromQuery] string? name)
+        public async Task<ActionResult<IEnumerable<DocumentDTO>>> Get()
         {
-            var docs = await _documentRepository.GetAllDocumentsAsync(name);
+            // No name filtering, simply return all documents
+            var docs = await _documentRepository.GetAllDocumentsAsync();
             var docDTOs = _mapper.Map<IEnumerable<DocumentDTO>>(docs);
             return Ok(docDTOs);
         }
@@ -84,7 +77,7 @@ namespace DMSystem.Controllers
                 return BadRequest(ModelState);
             }
 
-            // Validate the Document DTO using FluentValidation
+            // Validate the Document DTO
             var validationResult = await _validator.ValidateAsync(documentDto);
             if (!validationResult.IsValid)
             {
@@ -113,11 +106,13 @@ namespace DMSystem.Controllers
             newDocument.LastModified = DateTime.UtcNow;
             await _documentRepository.Add(newDocument);
 
-            // Publish OCR request to RabbitMQ
+            // Map back to DTO to send in OCR request
+            var documentDtoResponse = _mapper.Map<DocumentDTO>(newDocument);
+
+            // Publish OCR request using DocumentDTO
             var ocrRequest = new OCRRequest
             {
-                DocumentId = newDocument.Id.ToString(),
-                PdfUrl = objectName
+                Document = documentDtoResponse
             };
 
             try
@@ -131,7 +126,6 @@ namespace DMSystem.Controllers
             }
 
             // Return success response
-            var documentDtoResponse = _mapper.Map<DocumentDTO>(newDocument);
             return CreatedAtAction(nameof(GetDocumentById), new { id = newDocument.Id }, documentDtoResponse);
         }
 
@@ -174,15 +168,16 @@ namespace DMSystem.Controllers
             }
 
             // Update document file path
-            existingDocument.FilePath = objectName; // Store MinIO object name
+            existingDocument.FilePath = objectName;
             existingDocument.LastModified = DateTime.UtcNow;
             await _documentRepository.Update(existingDocument);
 
-            // Publish OCR request to RabbitMQ
+            // Create DocumentDTO to publish as OCRRequest
+            var documentDtoResponse = _mapper.Map<DocumentDTO>(existingDocument);
+
             var ocrRequest = new OCRRequest
             {
-                DocumentId = existingDocument.Id.ToString(),
-                PdfUrl = objectName
+                Document = documentDtoResponse
             };
 
             try
@@ -252,17 +247,11 @@ namespace DMSystem.Controllers
         /// <summary>
         /// Checks if a file associated with a document ID exists in the MinIO bucket.
         /// </summary>
-        /// <param name="id">The unique ID of the document whose file needs to be checked.</param>
-        /// <returns>
-        /// HTTP 200 OK if the file exists in MinIO, with a message indicating success.
-        /// HTTP 404 Not Found if the file does not exist.
-        /// </returns>
         [HttpGet("check-file/{id}")]
         public async Task<IActionResult> CheckFileExists(int id)
         {
             try
             {
-                // Retrieve the document by ID
                 var document = await _documentRepository.GetByIdAsync(id);
                 if (document == null)
                 {
@@ -289,10 +278,7 @@ namespace DMSystem.Controllers
 
         /// <summary>
         /// Searches documents in Elasticsearch by a given term.
-        /// Returns a list of document IDs and the number of matches for the search term in each document.
         /// </summary>
-        /// <param name="searchTerm">The term to search for in the document OCR text.</param>
-        /// <returns>A list of documents with their IDs and match counts.</returns>
         [HttpPost("search")]
         public async Task<IActionResult> SearchDocuments([FromBody] string searchTerm)
         {
@@ -303,6 +289,8 @@ namespace DMSystem.Controllers
 
             try
             {
+                // SearchDocumentsAsync returns IEnumerable<OCRResult>,
+                // each containing DocumentDTO and OcrText, fully sourced.
                 var searchResults = await _elasticSearchService.SearchDocumentsAsync(searchTerm);
 
                 if (!searchResults.Any())
