@@ -5,8 +5,6 @@ VisualStudioVersion = 17.9.34607.119
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DMSystem", "DMSystem\DMSystem.csproj", "{D5EAA5B6-85C8-4F36-9E21-CD22E7E5A51B}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{7C95F05F-2BDE-42EB-9304-034F65698C4B}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0851603D-631B-45B9-826D-8EC2A26647B2}"
 	ProjectSection(SolutionItems) = preProject
 		nginx.conf = nginx.conf

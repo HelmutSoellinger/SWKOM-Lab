@@ -11,26 +11,35 @@
             response = await fetch(apiBaseUrl); // GET all documents
         } else {
             // Search using the POST search endpoint
+            const payload = searchTerm.trim(); // Send as plain string
+
+            // Debugging: Log the payload being sent to the server
+            console.log("Search Request Payload:", payload);
+
             response = await fetch(`${apiBaseUrl}/search`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(searchTerm.trim()), // Send trimmed search term in body
+                body: JSON.stringify(payload), // Send search term as plain string
             });
         }
 
         if (!response.ok) {
+            const errorMessage = await response.text(); // Get detailed error message from the response
+            console.error('Response Error:', errorMessage);
+
             if (response.status === 404) {
                 // Handle no search results
                 tableBody.innerHTML = `<tr><td colspan="5">No matching documents found.</td></tr>`;
                 return;
             }
-            throw new Error('Failed to fetch documents');
+
+            throw new Error(`Failed to fetch documents: ${errorMessage}`);
         }
 
+        // Parse the response JSON
         documents = await response.json();
 
         if (!Array.isArray(documents) || documents.length === 0) {
-            // Show "No documents found" if the response is empty
             tableBody.innerHTML = `<tr><td colspan="5">No documents found.</td></tr>`;
             return;
         }
@@ -63,10 +72,9 @@
 
     } catch (error) {
         console.error('Error loading documents:', error);
-        showErrorModal([{ Property: 'Network', Message: 'Error loading documents' }]);
+        showErrorModal([{ Property: 'Network', Message: 'Error loading documents. Please try again later.' }]);
     }
 }
-
 
 async function deleteDocument(documentId) {
     const deleteUrl = `${apiBaseUrl}/${documentId}`;

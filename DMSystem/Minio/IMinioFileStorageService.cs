@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace DMSystem.Minio
 {
-    public interface IFileStorageService
+    public interface IMinioFileStorageService
     {
         Task InitializeBucketAsync();
         Task UploadFileAsync(string objectName, Stream fileStream, long fileSize, string contentType);

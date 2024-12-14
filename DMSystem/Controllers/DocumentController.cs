@@ -20,7 +20,7 @@ namespace DMSystem.Controllers
         private readonly IMapper _mapper;
         private readonly IRabbitMQService _rabbitMqService;
         private readonly IValidator<DocumentDTO> _validator;
-        private readonly IFileStorageService _fileStorageService;
+        private readonly IMinioFileStorageService _fileStorageService;
         private readonly IElasticSearchService _elasticSearchService;
         private readonly string _ocrQueueName;
 
@@ -30,7 +30,7 @@ namespace DMSystem.Controllers
             IMapper mapper,
             IRabbitMQService rabbitMqService,
             IValidator<DocumentDTO> validator,
-            IFileStorageService fileStorageService,
+            IMinioFileStorageService fileStorageService,
             IElasticSearchService elasticSearchService,
             IOptions<RabbitMQSettings> rabbitMqSettings
         )
@@ -245,38 +245,6 @@ namespace DMSystem.Controllers
         }
 
         /// <summary>
-        /// Checks if a file associated with a document ID exists in the MinIO bucket.
-        /// </summary>
-        [HttpGet("check-file/{id}")]
-        public async Task<IActionResult> CheckFileExists(int id)
-        {
-            try
-            {
-                var document = await _documentRepository.GetByIdAsync(id);
-                if (document == null)
-                {
-                    return NotFound(new { message = $"Document with ID {id} not found." });
-                }
-
-                // Check if the file exists in MinIO
-                var exists = await _fileStorageService.FileExistsAsync(document.FilePath);
-                if (exists)
-                {
-                    return Ok(new { message = "File exists in MinIO." });
-                }
-                else
-                {
-                    return NotFound(new { message = "File not found in MinIO." });
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error occurred while checking file for Document ID {id}.");
-                return StatusCode(500, new { message = "An unexpected error occurred while checking the file." });
-            }
-        }
-
-        /// <summary>
         /// Searches documents in Elasticsearch by a given term.
         /// </summary>
         [HttpPost("search")]
@@ -306,5 +274,37 @@ namespace DMSystem.Controllers
                 return StatusCode(500, new { message = "An error occurred while processing the search." });
             }
         }
+
+        ///// <summary>
+        ///// Checks if a file associated with a document ID exists in the MinIO bucket.
+        ///// </summary>
+        //[HttpGet("check-file/{id}")]
+        //public async Task<IActionResult> CheckFileExists(int id)
+        //{
+        //    try
+        //    {
+        //        var document = await _documentRepository.GetByIdAsync(id);
+        //        if (document == null)
+        //        {
+        //            return NotFound(new { message = $"Document with ID {id} not found." });
+        //        }
+
+        //        // Check if the file exists in MinIO
+        //        var exists = await _fileStorageService.FileExistsAsync(document.FilePath);
+        //        if (exists)
+        //        {
+        //            return Ok(new { message = "File exists in MinIO." });
+        //        }
+        //        else
+        //        {
+        //            return NotFound(new { message = "File not found in MinIO." });
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, $"Error occurred while checking file for Document ID {id}.");
+        //        return StatusCode(500, new { message = "An unexpected error occurred while checking the file." });
+        //    }
+        //}
     }
 }

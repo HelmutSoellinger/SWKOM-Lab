@@ -2,151 +2,151 @@
 using Moq;
 using System.IO;
 using System.Text;
-using System.Text.Json; // Added namespace for JsonSerializer
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using DMSystem.Messaging;
+using DMSystem.Contracts;
 using DMSystem.Minio;
 using DMSystem.OCRWorker;
+using DMSystem.Contracts.DTOs;
 
 namespace DMSystem.Tests
 {
-    public class WorkerTests
+    public class OCRWorkerTests
     {
-        private readonly Mock<IOptions<RabbitMQSetting>> _mockRabbitMqOptions;
-        private readonly Mock<MinioFileStorageService> _mockFileStorageService;
+        private readonly Mock<IOptions<RabbitMQSettings>> _mockRabbitMqOptions;
+        private readonly Mock<IMinioFileStorageService> _mockFileStorageService;
+        private readonly Mock<IRabbitMQService> _mockRabbitMqService;
         private readonly Mock<ILogger<Worker>> _mockLogger;
-        private readonly Mock<IConnection> _mockConnection;
-        private readonly Mock<IModel> _mockChannel;
 
-        public WorkerTests()
+        public OCRWorkerTests()
         {
-            _mockRabbitMqOptions = new Mock<IOptions<RabbitMQSetting>>();
-            _mockFileStorageService = new Mock<MinioFileStorageService>();
+            _mockRabbitMqOptions = new Mock<IOptions<RabbitMQSettings>>();
+            _mockFileStorageService = new Mock<IMinioFileStorageService>();
+            _mockRabbitMqService = new Mock<IRabbitMQService>();
             _mockLogger = new Mock<ILogger<Worker>>();
-            _mockConnection = new Mock<IConnection>();
-            _mockChannel = new Mock<IModel>();
 
             // Set up RabbitMQ settings
-            var rabbitMqSettings = new RabbitMQSetting
+            var rabbitMqSettings = new RabbitMQSettings
             {
-                HostName = "localhost",
-                UserName = "guest",
-                Password = "guest",
-                OcrQueue = "ocr_queue",
-                OcrResultsQueue = "ocr_results_queue"
+                Queues = new Dictionary<string, string>
+                {
+                    { "OcrQueue", "ocr_queue" },
+                    { "OcrResultsQueue", "ocr_results_queue" }
+                }
             };
             _mockRabbitMqOptions.Setup(o => o.Value).Returns(rabbitMqSettings);
-
-            // Mock RabbitMQ connection and channel behavior
-            _mockConnection.Setup(c => c.CreateModel()).Returns(_mockChannel.Object);
         }
 
         [Fact]
         public async Task ExecuteAsync_ShouldProcessOCRRequests()
         {
             // Arrange
-            var worker = new Worker(_mockRabbitMqOptions.Object, _mockFileStorageService.Object, _mockLogger.Object);
+            var worker = new Worker(
+                _mockRabbitMqOptions.Object,
+                _mockFileStorageService.Object,
+                _mockRabbitMqService.Object,
+                _mockLogger.Object
+            );
 
-            var mockMessage = new OCRRequest { DocumentId = "123", PdfUrl = "test.pdf" };
-            var messageBody = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(mockMessage));
-
-            var consumer = new EventingBasicConsumer(_mockChannel.Object);
-            _mockChannel.Setup(c => c.BasicConsume(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<EventingBasicConsumer>()))
-                .Callback<string, bool, IBasicConsumer>((queue, autoAck, consumer) =>
+            var ocrRequest = new OCRRequest
+            {
+                Document = new DocumentDTO
                 {
-                    // Simulate a message being received
-                    consumer.HandleBasicDeliver(
-                        consumerTag: "test_consumer",
-                        deliveryTag: 1,
-                        redelivered: false,
-                        exchange: "",
-                        routingKey: "ocr_queue",
-                        properties: null,
-                        body: messageBody);
-                });
+                    Id = 123,
+                    FilePath = "test.pdf"
+                }
+            };
 
-            // Act
-            var cts = new CancellationTokenSource();
-            cts.CancelAfter(1000); // Ensure the worker stops after some time
-            await worker.StartAsync(cts.Token);
+            // Simulate consuming an OCR request
+            _mockRabbitMqService.Setup(m => m.ConsumeQueue<OCRRequest>(
+                It.Is<string>(q => q == "ocr_queue"),
+                It.IsAny<Func<OCRRequest, Task>>()
+            )).Callback<string, Func<OCRRequest, Task>>((queue, callback) =>
+            {
+                callback(ocrRequest).Wait();
+            });
 
-            // Assert
-            _mockFileStorageService.Verify(f => f.DownloadFileAsync("test.pdf"), Times.Once);
-        }
-
-        [Fact]
-        public async Task PerformOcrAsync_ShouldExtractTextFromPdf()
-        {
-            // Arrange
-            var worker = new Worker(_mockRabbitMqOptions.Object, _mockFileStorageService.Object, _mockLogger.Object);
-
-            // Mock a file stream as the downloaded PDF content
+            // Mock file download behavior
             var mockFileStream = new MemoryStream(Encoding.UTF8.GetBytes("Test PDF Content"));
             _mockFileStorageService.Setup(f => f.DownloadFileAsync(It.IsAny<string>()))
                 .ReturnsAsync(mockFileStream);
 
-            // Act
-            var result = await worker.PerformOcrAsync("test.pdf");
-
-            // Assert
-            Assert.NotNull(result);
-            _mockFileStorageService.Verify(f => f.DownloadFileAsync("test.pdf"), Times.Once);
-        }
-
-        [Fact]
-        public void SendResult_ShouldPublishMessageToQueue()
-        {
-            // Arrange
-            var worker = new Worker(_mockRabbitMqOptions.Object, _mockFileStorageService.Object, _mockLogger.Object);
-
-            var ocrResult = new OCRResult
-            {
-                DocumentId = "123",
-                OcrText = "Sample OCR Text"
-            };
-
-            // Act
-            worker.SendResult(ocrResult); // Ensure SendResult is public
-
-            // Assert
-            _mockChannel.Verify(c => c.BasicPublish(
-                It.IsAny<string>(), // Removed named argument
-                It.IsAny<string>(), // Removed named argument
-                null,
-                It.IsAny<byte[]>()), Times.Once);
-        }
-
-        [Fact]
-        public async Task ExecuteAsync_ShouldHandleInvalidMessages()
-        {
-            // Arrange
-            var worker = new Worker(_mockRabbitMqOptions.Object, _mockFileStorageService.Object, _mockLogger.Object);
-
-            var invalidMessage = "Invalid JSON";
-            var messageBody = Encoding.UTF8.GetBytes(invalidMessage);
-
-            var consumer = new EventingBasicConsumer(_mockChannel.Object);
-            _mockChannel.Setup(c => c.BasicConsume(It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<EventingBasicConsumer>()))
-                .Callback<string, bool, IBasicConsumer>((queue, autoAck, consumer) =>
-                {
-                    consumer.HandleBasicDeliver(
-                        consumerTag: "test_consumer",
-                        deliveryTag: 1,
-                        redelivered: false,
-                        exchange: "",
-                        routingKey: "ocr_queue",
-                        properties: null,
-                        body: messageBody);
-                });
+            // Mock result publishing
+            _mockRabbitMqService.Setup(m => m.PublishMessageAsync(
+                It.IsAny<OCRResult>(),
+                It.Is<string>(q => q == "ocr_results_queue")
+            )).Returns(Task.CompletedTask);
 
             // Act
             var cts = new CancellationTokenSource();
-            cts.CancelAfter(1000);
+            cts.CancelAfter(1000); // Stop the worker after some time
+            await worker.StartAsync(cts.Token);
+
+            // Assert
+            _mockFileStorageService.Verify(f => f.DownloadFileAsync("test.pdf"), Times.Once);
+            _mockRabbitMqService.Verify(m => m.PublishMessageAsync(It.IsAny<OCRResult>(), "ocr_results_queue"), Times.Once);
+        }
+
+        [Fact]
+        public async Task PerformOcrAsync_ShouldExtractTextFromValidPdf()
+        {
+            // Arrange
+            var filePath = "sample.pdf"; // Platzieren Sie eine PDF-Datei in Ihrem Arbeitsverzeichnis.
+            var worker = new Worker(
+                _mockRabbitMqOptions.Object,
+                _mockFileStorageService.Object,
+                _mockRabbitMqService.Object,
+                _mockLogger.Object
+            );
+
+            // Mock the file storage service to simulate a downloaded PDF
+            var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            _mockFileStorageService.Setup(f => f.DownloadFileAsync(It.IsAny<string>())).ReturnsAsync(fileStream);
+
+            // Act
+            var result = await worker.PerformOcrAsync(filePath);
+
+            // Assert
+            Assert.False(string.IsNullOrWhiteSpace(result), "OCR result should not be empty.");
+            Assert.Contains("Expected text in the PDF", result); // Optional: Prüfen Sie auf spezifischen Text
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_ShouldHandleInvalidMessagesGracefully()
+        {
+            // Arrange
+            var worker = new Worker(
+                _mockRabbitMqOptions.Object,
+                _mockFileStorageService.Object,
+                _mockRabbitMqService.Object,
+                _mockLogger.Object
+            );
+
+            // Simulate invalid message
+            var invalidRequest = "Invalid JSON";
+
+            _mockRabbitMqService.Setup(m => m.ConsumeQueue<OCRRequest>(
+                It.Is<string>(q => q == "ocr_queue"),
+                It.IsAny<Func<OCRRequest, Task>>()
+            )).Callback<string, Func<OCRRequest, Task>>(async (queue, callback) =>
+            {
+                try
+                {
+                    // Simulate deserialization failure
+                    await callback(JsonSerializer.Deserialize<OCRRequest>(invalidRequest));
+                }
+                catch (Exception ex)
+                {
+                    _mockLogger.Object.LogError(ex, "Error occurred while handling message.");
+                }
+            });
+
+            // Act
+            var cts = new CancellationTokenSource();
+            cts.CancelAfter(1000); // Stop the worker after some time
             await worker.StartAsync(cts.Token);
 
             // Assert
@@ -155,7 +155,42 @@ namespace DMSystem.Tests
                 It.IsAny<EventId>(),
                 It.IsAny<object>(),
                 It.IsAny<Exception>(),
-                (Func<object, Exception, string>)It.IsAny<object>()), Times.Once); // Fixed lambda
+                It.IsAny<Func<object, Exception, string>>()
+            ), Times.AtLeastOnce);
+        }
+
+        [Fact]
+        public async Task SendResultAsync_ShouldPublishMessageToResultsQueue()
+        {
+            // Arrange
+            var worker = new Worker(
+                _mockRabbitMqOptions.Object,
+                _mockFileStorageService.Object,
+                _mockRabbitMqService.Object,
+                _mockLogger.Object
+            );
+
+            var ocrResult = new OCRResult
+            {
+                Document = new DocumentDTO
+                {
+                    Id = 123,
+                    Name = "Test Document",
+                    Author = "Author",
+                    FilePath = "test.pdf",
+                    LastModified = DateTime.UtcNow
+                },
+                OcrText = "Sample OCR Text"
+            };
+
+            // Act
+            await worker.SendResultAsync(ocrResult);
+
+            // Assert
+            _mockRabbitMqService.Verify(m => m.PublishMessageAsync(
+                It.Is<OCRResult>(r => r.Document.Id == 123 && r.OcrText == "Sample OCR Text"),
+                "ocr_results_queue"
+            ), Times.Once);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using DMSystem.DTOs;
+﻿using DMSystem.Contracts.DTOs;
 using FluentValidation.TestHelper;
 using Xunit;
 
@@ -77,28 +77,6 @@ namespace DMSystem.Tests
             // Act & Assert
             var result = _validator.TestValidate(document);
             result.ShouldNotHaveValidationErrorFor(doc => doc.Author);
-        }
-
-        [Fact]
-        public void Validate_Document_Should_Allow_Empty_Description()
-        {
-            // Arrange
-            var document = new DocumentDTO();
-
-            // Act & Assert
-            var result = _validator.TestValidate(document);
-            result.ShouldNotHaveValidationErrorFor(doc => doc.Description);
-        }
-
-        [Fact]
-        public void Validate_Document_Should_Have_Error_For_Description_Larger_Than_Max_Length()
-        {
-            // Arrange
-            var document = new DocumentDTO { Description = new string('a', 501) };
-
-            // Act & Assert
-            var result = _validator.TestValidate(document);
-            result.ShouldHaveValidationErrorFor(doc => doc.Description);
         }
     }
 }

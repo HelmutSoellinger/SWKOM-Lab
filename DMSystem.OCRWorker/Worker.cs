@@ -1,6 +1,7 @@
 using DMSystem.Contracts;
 using DMSystem.Contracts.DTOs;
 using DMSystem.Minio;
+using ImageMagick;
 using Microsoft.Extensions.Options;
 using System.Text;
 using Tesseract;
@@ -14,13 +15,13 @@ namespace DMSystem.OCRWorker
     {
         private readonly ILogger<Worker> _logger;
         private readonly IRabbitMQService _rabbitMqService;
-        private readonly MinioFileStorageService _fileStorageService;
+        private readonly IMinioFileStorageService _fileStorageService;
         private readonly string _ocrQueueName;
         private readonly string _ocrResultsQueueName;
 
         public Worker(
             IOptions<RabbitMQSettings> rabbitMqSettings,
-            MinioFileStorageService fileStorageService,
+            IMinioFileStorageService fileStorageService,
             IRabbitMQService rabbitMqService,
             ILogger<Worker> logger)
         {
@@ -62,7 +63,6 @@ namespace DMSystem.OCRWorker
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error processing OCR request for Document ID: {DocumentId}", docId);
-                    // Consider handling retries or DLQs if needed
                 }
             });
 
@@ -72,11 +72,14 @@ namespace DMSystem.OCRWorker
         public async Task<string> PerformOcrAsync(string objectName)
         {
             var result = new StringBuilder();
-            var tempPdfPath = $"/tmp/{objectName}";
-            var outputImageDir = "/tmp/pdf_images";
+            var tempPdfPath = Path.Combine(Path.GetTempPath(), objectName);
+            var outputImageDir = Path.Combine(Path.GetTempPath(), $"pdf_images_{Guid.NewGuid()}");
 
             try
             {
+                // Ensure directories exist
+                Directory.CreateDirectory(outputImageDir);
+
                 // Download the file from MinIO
                 var fileStream = await _fileStorageService.DownloadFileAsync(objectName);
 
@@ -87,16 +90,26 @@ namespace DMSystem.OCRWorker
                 }
 
                 // Convert the PDF to images
-                Directory.CreateDirectory(outputImageDir);
                 ConvertPdfToImages(tempPdfPath, outputImageDir);
 
                 // Perform OCR on each image
-                using var engine = new TesseractEngine(@"./tessdata", "eng", EngineMode.Default);
+                using var engine = new TesseractEngine(@"/app/tessdata", "eng+deu", EngineMode.Default);
                 foreach (var imagePath in Directory.GetFiles(outputImageDir, "*.png"))
                 {
+                    _logger.LogInformation("Processing image: {ImagePath}", imagePath);
                     using var img = Pix.LoadFromFile(imagePath);
                     using var page = engine.Process(img);
-                    result.Append(page.GetText());
+                    var text = page.GetText();
+
+                    if (string.IsNullOrWhiteSpace(text))
+                    {
+                        _logger.LogWarning("No text extracted from image: {ImagePath}");
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Text extracted from image: {ImagePath}");
+                        result.Append(text);
+                    }
                 }
             }
             catch (Exception ex)
@@ -120,12 +133,21 @@ namespace DMSystem.OCRWorker
         {
             try
             {
-                // Implement your PDF-to-image conversion here
-                // e.g. using Ghostscript.NET or another library
+                using (var images = new MagickImageCollection(pdfFilePath))
+                {
+                    foreach (var image in images)
+                    {
+                        image.Density = new Density(300, 300); // Increase resolution
+                        image.Format = MagickFormat.Png;      // Convert to PNG
+                        var outputPath = Path.Combine(outputDirectory, Guid.NewGuid() + ".png");
+                        image.Write(outputPath);
+                        _logger.LogInformation("Image generated: {OutputPath}", outputPath);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error converting PDF to images: {PdfFilePath}", pdfFilePath);
+                _logger.LogError(ex, "Error during PDF-to-Image conversion: {PdfFilePath}", pdfFilePath);
                 throw;
             }
         }

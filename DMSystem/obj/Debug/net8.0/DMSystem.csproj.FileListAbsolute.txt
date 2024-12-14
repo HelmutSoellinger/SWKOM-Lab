@@ -440,3 +440,6 @@ C:\Users\Helmut\Desktop\FH\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.xm
 C:\Users\Helmut\Desktop\FH\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.pdb
 C:\Users\Helmut\Desktop\FH\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.genruntimeconfig.cache
 C:\Users\Helmut\Desktop\FH\SemesterProject\DMSystem\obj\Debug\net8.0\ref\DMSystem.dll
+C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\DMSystem.Contracts.dll
+C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\bin\Debug\net8.0\DMSystem.Contracts.pdb
+C:\Users\jay\Documents\FH-Technikum\5. Semester\SWKOM\SemesterProject\DMSystem\obj\Debug\net8.0\DMSystem.MvcApplicationPartsAssemblyInfo.cs

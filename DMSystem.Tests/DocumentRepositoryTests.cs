@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Xunit;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System;
+using System.Linq;
 
 namespace DMSystem.Tests
 {
@@ -30,7 +32,6 @@ namespace DMSystem.Tests
                 Name = "Test Document",
                 LastModified = DateTime.Now,
                 Author = "Test Author",
-                Description = "Test Description",
                 FilePath = "testpath"
             };
 
@@ -41,6 +42,7 @@ namespace DMSystem.Tests
             Assert.NotNull(result);
             Assert.Equal("Test Document", result.Name);
             Assert.Equal("Test Author", result.Author);
+            Assert.Single(context.Documents); // Verify document count in database
         }
 
         [Fact]
@@ -62,7 +64,7 @@ namespace DMSystem.Tests
             }
 
             // Act
-            var result = await repository.GetAllDocumentsAsync(null);
+            var result = await repository.GetAllDocumentsAsync();
 
             // Assert
             Assert.Equal(2, result.Count);
@@ -117,6 +119,7 @@ namespace DMSystem.Tests
 
             // Assert
             Assert.Equal("Updated Author", updatedDocument.Author);
+            Assert.Single(context.Documents.Where(d => d.Author == "Updated Author"));
         }
 
         [Fact]
@@ -142,6 +145,32 @@ namespace DMSystem.Tests
             // Assert
             var result = await repository.GetByIdAsync(addedDocument.Id);
             Assert.Null(result); // Document should be null after removal
+            Assert.Empty(context.Documents); // Verify database state
+        }
+
+        [Fact]
+        public async Task AddDocument_ShouldThrowException_WhenDatabaseFails()
+        {
+            // Arrange
+            var options = new DbContextOptionsBuilder<DALContext>()
+                .UseInMemoryDatabase("FailingDatabase")
+                .Options;
+
+            var context = new DALContext(options);
+            var repository = new DocumentRepository(context);
+
+            var document = new Document
+            {
+                Name = "Faulty Document",
+                LastModified = DateTime.Now,
+                Author = "Faulty Author",
+                FilePath = "faultypath"
+            };
+
+            context.Dispose(); // Simulate a database failure
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ObjectDisposedException>(async () => await repository.Add(document));
         }
     }
 }

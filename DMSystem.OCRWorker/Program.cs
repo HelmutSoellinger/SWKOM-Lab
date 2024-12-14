@@ -1,5 +1,8 @@
 using DMSystem.Minio;
 using DMSystem.OCRWorker;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -9,13 +12,13 @@ builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
 
 // Register RabbitMQ settings and service
 builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection("RabbitMQ"));
-builder.Services.AddSingleton<IRabbitMQService, RabbitMQService>(); // Ensure RabbitMQService is implemented as shown in previous examples.
+builder.Services.AddSingleton<IRabbitMQService, RabbitMQService>();
 
 // Register MinIO settings
 builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("Minio"));
 
-// Register MinIO FileStorage Service
-builder.Services.AddSingleton<MinioFileStorageService>();
+// Register MinIO FileStorage Service with interface mapping
+builder.Services.AddSingleton<IMinioFileStorageService, MinioFileStorageService>();
 
 // Register Worker Service
 builder.Services.AddHostedService<Worker>();
