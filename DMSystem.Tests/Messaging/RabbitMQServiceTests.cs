@@ -13,7 +13,7 @@ namespace DMSystem.Tests.Messaging
     public class RabbitMQServiceTests
     {
         private readonly Mock<IConnection> _mockConnection;
-        private readonly Mock<IModel> _mockPublishChannel;
+        private readonly Mock<IModelWrapper> _mockPublishChannel;
         private readonly Mock<ILogger<RabbitMQService>> _mockLogger;
         private readonly RabbitMQSettings _settings;
         private readonly RabbitMQService _service;
@@ -22,7 +22,7 @@ namespace DMSystem.Tests.Messaging
         {
             // Mock dependencies
             _mockConnection = new Mock<IConnection>();
-            _mockPublishChannel = new Mock<IModel>();
+            _mockPublishChannel = new Mock<IModelWrapper>();
             _mockLogger = new Mock<ILogger<RabbitMQService>>();
 
             // Test RabbitMQ settings
@@ -38,7 +38,7 @@ namespace DMSystem.Tests.Messaging
             };
 
             // Mock the RabbitMQ connection to return the mocked publish channel
-            _mockConnection.Setup(c => c.CreateModel()).Returns(_mockPublishChannel.Object);
+            //_mockConnection.Setup(c => c.CreateModel()).Returns(_mockPublishChannel.Object);
 
             // Initialize the service with mocked dependencies
             _service = new RabbitMQService(_mockConnection.Object, _settings, _mockLogger.Object);
