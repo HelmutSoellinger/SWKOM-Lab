@@ -15,12 +15,12 @@ if (string.IsNullOrWhiteSpace(elasticsearchUrl))
     throw new ArgumentNullException(nameof(elasticsearchUrl), "Elasticsearch URL is not configured. Ensure it is set in appsettings.json or as an environment variable.");
 }
 
+// Register ElasticsearchClientWrapper
+builder.Services.AddSingleton<IElasticsearchClientWrapper>(provider =>
+    new ElasticsearchClientWrapper(elasticsearchUrl));
+
 // Use a factory method for ElasticSearchService to inject ILogger<ElasticSearchService>
-builder.Services.AddSingleton<IElasticSearchService>(provider =>
-{
-    var logger = provider.GetRequiredService<ILogger<ElasticSearchService>>();
-    return new ElasticSearchService(elasticsearchUrl, logger);
-});
+builder.Services.AddScoped<IElasticSearchService, ElasticSearchService>();
 
 // Configure RabbitMQ using the new RabbitMQSettings
 builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection("RabbitMQ"));

@@ -6,19 +6,18 @@ namespace DMSystem.ElasticSearch
 {
     public class ElasticSearchService : IElasticSearchService
     {
-        private readonly ElasticsearchClient _client;
+        private readonly IElasticsearchClientWrapper _clientWrapper; // Use the wrapper
         private readonly ILogger<ElasticSearchService> _logger; // Injected logger
 
-        public ElasticSearchService(string elasticsearchUrl, ILogger<ElasticSearchService> logger)
+        public ElasticSearchService(IElasticsearchClientWrapper clientWrapper, ILogger<ElasticSearchService> logger)
         {
-            var settings = new ElasticsearchClientSettings(new Uri(elasticsearchUrl));
-            _client = new ElasticsearchClient(settings);
+            _clientWrapper = clientWrapper; // Assign wrapper
             _logger = logger; // Assign injected logger
         }
 
         public async Task IndexDocumentAsync(OCRResult ocrResult)
         {
-            var response = await _client.IndexAsync(ocrResult, i => i
+            var response = await _clientWrapper.IndexDocumentAsync(ocrResult, i => i
                 .Index("ocr-results")
                 .Id(ocrResult.Document.Id.ToString())
             );
@@ -61,7 +60,7 @@ namespace DMSystem.ElasticSearch
             {
                 _logger.LogInformation("Executing standard Elasticsearch query for term: {SearchTerm}", searchTerm);
 
-                var searchResponse = await _client.SearchAsync<OCRResult>(s => s
+                var searchResponse = await _clientWrapper.SearchDocumentsAsync<OCRResult>(s => s
                     .Index("ocr-results")
                     .Query(q => q
                         .Bool(b => b
@@ -95,7 +94,7 @@ namespace DMSystem.ElasticSearch
                     )
                 );
 
-                if (!searchResponse.IsValidResponse)
+                if (!searchResponse.IsValid)
                 {
                     _logger.LogError("Standard search failed: {DebugInformation}", searchResponse.DebugInformation);
                     throw new Exception($"Search query failed: {searchResponse.DebugInformation}");
@@ -104,7 +103,7 @@ namespace DMSystem.ElasticSearch
                 _logger.LogInformation("Standard search succeeded with {HitsCount} hits.", searchResponse.Hits.Count);
 
                 return searchResponse.Hits
-                    .Where(hit => hit.Source is not null)
+                    .Where(hit => hit.Source != null)
                     .Select(hit => hit.Source!);
             }
             catch (Exception ex)
@@ -120,7 +119,7 @@ namespace DMSystem.ElasticSearch
             {
                 _logger.LogInformation("Executing fuzzy Elasticsearch query for term: {SearchTerm}", searchTerm);
 
-                var fuzzyResponse = await _client.SearchAsync<OCRResult>(s => s
+                var fuzzyResponse = await _clientWrapper.SearchDocumentsAsync<OCRResult>(s => s
                     .Index("ocr-results")
                     .Query(q => q
                         .Bool(b => b
@@ -128,24 +127,24 @@ namespace DMSystem.ElasticSearch
                                 bs => bs.Fuzzy(f => f
                                     .Field(f => f.Document.Name)
                                     .Value(searchTerm)
-                                    .Fuzziness(new Fuzziness(2)) // Correct way to specify fuzziness
+                                    .Fuzziness(new Fuzziness(2))
                                 ),
                                 bs => bs.Fuzzy(f => f
                                     .Field(f => f.Document.Author)
                                     .Value(searchTerm)
-                                    .Fuzziness(new Fuzziness(2)) // Correct way to specify fuzziness
+                                    .Fuzziness(new Fuzziness(2))
                                 ),
                                 bs => bs.Fuzzy(f => f
                                     .Field(f => f.OcrText)
                                     .Value(searchTerm)
-                                    .Fuzziness(new Fuzziness(2)) // Correct way to specify fuzziness
+                                    .Fuzziness(new Fuzziness(2))
                                 )
                             )
                         )
                     )
                 );
 
-                if (!fuzzyResponse.IsValidResponse)
+                if (!fuzzyResponse.IsValid)
                 {
                     _logger.LogError("Fuzzy search failed: {DebugInformation}", fuzzyResponse.DebugInformation);
                     throw new Exception($"Fuzzy search query failed: {fuzzyResponse.DebugInformation}");
@@ -154,7 +153,7 @@ namespace DMSystem.ElasticSearch
                 _logger.LogInformation("Fuzzy search succeeded with {HitsCount} hits.", fuzzyResponse.Hits.Count);
 
                 return fuzzyResponse.Hits
-                    .Where(hit => hit.Source is not null)
+                    .Where(hit => hit.Source != null)
                     .Select(hit => hit.Source!);
             }
             catch (Exception ex)

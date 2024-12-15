@@ -12,7 +12,7 @@ using DMSystem.Minio;
 using DMSystem.OCRWorker;
 using DMSystem.Contracts.DTOs;
 
-namespace DMSystem.Tests
+namespace DMSystem.Tests.OCRWorker
 {
     public class OCRWorkerTests
     {
@@ -61,7 +61,7 @@ namespace DMSystem.Tests
             };
 
             // Simulate consuming an OCR request
-            _mockRabbitMqService.Setup(m => m.ConsumeQueue<OCRRequest>(
+            _mockRabbitMqService.Setup(m => m.ConsumeQueue(
                 It.Is<string>(q => q == "ocr_queue"),
                 It.IsAny<Func<OCRRequest, Task>>()
             )).Callback<string, Func<OCRRequest, Task>>((queue, callback) =>
@@ -128,7 +128,7 @@ namespace DMSystem.Tests
             // Simulate invalid message
             var invalidRequest = "Invalid JSON";
 
-            _mockRabbitMqService.Setup(m => m.ConsumeQueue<OCRRequest>(
+            _mockRabbitMqService.Setup(m => m.ConsumeQueue(
                 It.Is<string>(q => q == "ocr_queue"),
                 It.IsAny<Func<OCRRequest, Task>>()
             )).Callback<string, Func<OCRRequest, Task>>(async (queue, callback) =>
