@@ -16,7 +16,7 @@ using Microsoft.Extensions.Options;
 using DMSystem.Contracts;
 using Microsoft.AspNetCore.Http;
 
-namespace DMSystem.Tests
+namespace DMSystem.Tests.DMSystem
 {
     public class DocumentControllerTests
     {
@@ -140,8 +140,8 @@ namespace DMSystem.Tests
 
             _mockValidator.Setup(v => v.ValidateAsync(documentDto, default))
                 .ReturnsAsync(new FluentValidation.Results.ValidationResult());
-            _mockFileStorageService.Setup(f => f.UploadFileAsync(It.IsAny<string>(), It.IsAny<System.IO.Stream>(), It.IsAny<long>(), It.IsAny<string>()))
-                .ThrowsAsync(new System.Exception("File upload failed"));
+            _mockFileStorageService.Setup(f => f.UploadFileAsync(It.IsAny<string>(), It.IsAny<Stream>(), It.IsAny<long>(), It.IsAny<string>()))
+                .ThrowsAsync(new Exception("File upload failed"));
 
             var result = await _controller.CreateDocument(documentDto, mockFile.Object);
 
@@ -164,7 +164,7 @@ namespace DMSystem.Tests
                 .Returns(Task.FromResult(mockDocument));
             _mockMapper.Setup(m => m.Map<DocumentDTO>(mockDocument)).Returns(documentDto);
             _mockRabbitMqService.Setup(r => r.PublishMessageAsync(It.IsAny<OCRRequest>(), It.IsAny<string>()))
-                .ThrowsAsync(new System.Exception("RabbitMQ error"));
+                .ThrowsAsync(new Exception("RabbitMQ error"));
 
             var result = await _controller.CreateDocument(documentDto, mockFile.Object);
 
@@ -191,7 +191,7 @@ namespace DMSystem.Tests
             var mockDocument = new Document { Id = 1, Name = "TestDoc", FilePath = "file.pdf" };
             _mockRepository.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(mockDocument);
             _mockFileStorageService.Setup(f => f.DeleteFileAsync(mockDocument.FilePath))
-                .ThrowsAsync(new System.Exception("File deletion failed"));
+                .ThrowsAsync(new Exception("File deletion failed"));
 
             var result = await _controller.DeleteDocument(1);
 

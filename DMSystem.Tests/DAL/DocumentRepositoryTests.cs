@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System;
 using System.Linq;
 
-namespace DMSystem.Tests
+namespace DMSystem.Tests.DAL
 {
     public class DocumentRepositoryTests
     {

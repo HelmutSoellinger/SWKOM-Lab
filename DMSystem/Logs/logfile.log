@@ -579,3 +579,39 @@ Npgsql.NpgsqlException (0x80004005): Failed to connect to 172.19.0.2:5432
 2024-12-15 00:48:20,407 [1] INFO  Program - Database migration completed successfully.
 2024-12-15 00:48:20,714 [7] INFO  Program - MinIO bucket initialization completed.
 2024-12-15 00:48:20,746 [7] INFO  Program - Application has started.
+2024-12-15 15:21:41,922 [1] INFO  Program - Initializing application...
+2024-12-15 15:21:47,045 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 15:21:47,324 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 15:21:47,362 [9] INFO  Program - Application has started.
+2024-12-15 20:37:19,229 [1] INFO  Program - Initializing application...
+2024-12-15 20:37:22,175 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 20:37:22,369 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 20:37:22,387 [9] INFO  Program - Application has started.
+2024-12-15 20:58:06,626 [1] INFO  Program - Initializing application...
+2024-12-15 20:58:09,312 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 20:58:09,578 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 20:58:09,587 [10] INFO  Program - Application has started.
+2024-12-15 21:02:58,358 [1] INFO  Program - Initializing application...
+2024-12-15 21:03:01,186 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 21:03:01,365 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 21:03:01,375 [9] INFO  Program - Application has started.
+2024-12-15 21:05:14,099 [1] INFO  Program - Initializing application...
+2024-12-15 21:05:18,744 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 21:05:18,901 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 21:05:18,906 [9] INFO  Program - Application has started.
+2024-12-15 21:11:10,631 [1] INFO  Program - Initializing application...
+2024-12-15 21:11:13,230 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 21:11:13,390 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 21:11:13,402 [13] INFO  Program - Application has started.
+2024-12-15 21:17:11,952 [1] INFO  Program - Initializing application...
+2024-12-15 21:17:13,815 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 21:17:13,929 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 21:17:13,935 [9] INFO  Program - Application has started.
+2024-12-15 21:18:36,676 [1] INFO  Program - Initializing application...
+2024-12-15 21:18:38,801 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 21:18:39,003 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 21:18:39,007 [7] INFO  Program - Application has started.
+2024-12-15 21:25:16,887 [1] INFO  Program - Initializing application...
+2024-12-15 21:25:20,237 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 21:25:20,492 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 21:25:20,500 [7] INFO  Program - Application has started.

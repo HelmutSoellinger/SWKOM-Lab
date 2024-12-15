@@ -5,13 +5,8 @@ using DMSystem.Tests.Utilities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
 
-namespace DMSystem.Tests.ElasticSearchTests
+namespace DMSystem.Tests.ElasticSearch
 {
     public class WorkerTests
     {
@@ -176,6 +171,5 @@ namespace DMSystem.Tests.ElasticSearchTests
                 _mockElasticSearchService.Verify(es => es.IndexDocumentAsync(msg), Times.Once());
             }
         }
-
     }
 }

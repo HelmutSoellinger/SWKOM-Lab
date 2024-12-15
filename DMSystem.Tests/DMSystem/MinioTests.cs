@@ -9,7 +9,7 @@ using Microsoft.Extensions.Options;
 using Minio.DataModel;
 using DMSystem.Minio;
 
-namespace DMSystem.Tests
+namespace DMSystem.Tests.DMSystem
 {
     public interface IMinioClientWrapper
     {

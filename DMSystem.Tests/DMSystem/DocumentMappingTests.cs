@@ -4,7 +4,7 @@ using DMSystem.Mappings;
 using DMSystem.Contracts.DTOs;
 using Xunit;
 
-namespace DMSystem.Tests
+namespace DMSystem.Tests.DMSystem
 {
     public class DocumentMappingTests
     {

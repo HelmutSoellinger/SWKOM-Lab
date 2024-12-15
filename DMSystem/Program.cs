@@ -56,12 +56,14 @@ if (string.IsNullOrWhiteSpace(elasticSearchUrl))
     throw new InvalidOperationException("ElasticSearch URL is not configured. Ensure it is set in appsettings.json or as an environment variable.");
 }
 
-// Use a factory method to inject the logger into ElasticSearchService
-builder.Services.AddSingleton<IElasticSearchService>(provider =>
+// Register ElasticsearchClientWrapper as a singleton
+builder.Services.AddSingleton<IElasticsearchClientWrapper>(provider =>
 {
-    var logger = provider.GetRequiredService<ILogger<ElasticSearchService>>();
-    return new ElasticSearchService(elasticSearchUrl, logger);
+    return new ElasticsearchClientWrapper(elasticSearchUrl);
 });
+
+// Register ElasticSearchService
+builder.Services.AddScoped<IElasticSearchService, ElasticSearchService>();
 
 // CORS Policy
 builder.Services.AddCors(options =>

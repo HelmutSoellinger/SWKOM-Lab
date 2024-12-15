@@ -1,93 +1,101 @@
 ﻿using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.Core.Search;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace DMSystem.ElasticSearch
 {
     public interface IElasticsearchClientWrapper
     {
-        Task<IndexResponse> IndexAsync<T>(
-            T document,
-            IndexName index,
-            CancellationToken cancellationToken = default) where T : class;
+        Task<MockableIndexResponse> IndexDocumentAsync<T>(T document, Action<IndexRequestDescriptor<T>> configureRequest)
+            where T : class;
 
-        Task<SearchResponse<T>> SearchAsync<T>(
-            SearchRequest request,
-            CancellationToken cancellationToken = default) where T : class;
+        Task<SearchResult<T>> SearchDocumentsAsync<T>(Action<SearchRequestDescriptor<T>> configureRequest)
+            where T : class;
+    }
+
+    public class SearchResult<T>
+    {
+        public bool IsValid { get; set; } // Equivalent to IsValidResponse
+        public string DebugInformation { get; set; } = string.Empty; // Store debug information
+        public IReadOnlyCollection<Hit<T>> Hits { get; set; } = new List<Hit<T>>();
+    }
+
+    public class MockableIndexResponse
+    {
+        public bool IsValidResponse { get; set; }
+        public string DebugInformation { get; set; } = string.Empty;
     }
 
     public class ElasticsearchClientWrapper : IElasticsearchClientWrapper
     {
         private readonly ElasticsearchClient _client;
 
+        // Wrapper for testing
+        private readonly IElasticsearchClientWrapper _clientWrapper;
+
+        // Constructor for testing with IElasticsearchClientWrapper
+        public ElasticsearchClientWrapper(IElasticsearchClientWrapper clientWrapper)
+        {
+            _clientWrapper = clientWrapper ?? throw new ArgumentNullException(nameof(clientWrapper));
+        }
+
+        // Constructor for production
+        public ElasticsearchClientWrapper(string elasticsearchUrl)
+        {
+            if (string.IsNullOrWhiteSpace(elasticsearchUrl))
+                throw new ArgumentException("Elasticsearch URL cannot be null or empty.", nameof(elasticsearchUrl));
+
+            var settings = new ElasticsearchClientSettings(new Uri(elasticsearchUrl));
+            _client = new ElasticsearchClient(settings);
+        }
+
+        // Constructor for testing with ElasticsearchClient
         public ElasticsearchClientWrapper(ElasticsearchClient client)
         {
-            _client = client ?? throw new ArgumentNullException(nameof(client));
+            _client = client ?? throw new ArgumentNullException(nameof(client), "Elasticsearch client cannot be null.");
         }
 
-        public async Task<IndexResponse> IndexAsync<T>(
-            T document,
-            IndexName index,
-            CancellationToken cancellationToken = default) where T : class
+        public async Task<MockableIndexResponse> IndexDocumentAsync<T>(T document, Action<IndexRequestDescriptor<T>> configureRequest)
+            where T : class
         {
             if (document == null)
-                throw new ArgumentNullException(nameof(document), "The document cannot be null.");
-            if (index == null)
-                throw new ArgumentNullException(nameof(index), "The index cannot be null.");
+                throw new ArgumentNullException(nameof(document), "Document cannot be null.");
 
-            var request = new IndexRequest<T>(document, index);
-            return await _client.IndexAsync(request, cancellationToken);
-        }
+            if (configureRequest == null)
+                throw new ArgumentNullException(nameof(configureRequest), "ConfigureRequest action cannot be null.");
 
-        public async Task<SearchResponse<T>> SearchAsync<T>(
-            SearchRequest request,
-            CancellationToken cancellationToken = default) where T : class
-        {
-            if (request == null)
-                throw new ArgumentNullException(nameof(request), "The search request cannot be null.");
+            // Use the test wrapper if it's initialized
+            if (_clientWrapper != null)
+                return await _clientWrapper.IndexDocumentAsync(document, configureRequest);
 
-            return await _client.SearchAsync<T>(request, cancellationToken);
-        }
-    }
+            // Otherwise, use the production client
+            var response = await _client.IndexAsync(document, configureRequest);
 
-    // Mocked implementations for testing (example usage in test context)
-    public class MockElasticsearchClientWrapper : IElasticsearchClientWrapper
-    {
-        private readonly Dictionary<string, object> _mockData = new();
-
-        public void AddMockIndexResponse<T>(T document, IndexName index, IndexResponse response)
-        {
-            var key = $"{typeof(T).FullName}-{index}";
-            _mockData[key] = response;
-        }
-
-        public void AddMockSearchResponse<T>(SearchRequest request, SearchResponse<T> response) where T : class
-        {
-            var key = $"Search-{typeof(T).FullName}-{request.Query}";
-            _mockData[key] = response;
-        }
-
-        public Task<IndexResponse> IndexAsync<T>(T document, IndexName index, CancellationToken cancellationToken = default) where T : class
-        {
-            var key = $"{typeof(T).FullName}-{index}";
-            if (_mockData.TryGetValue(key, out var response) && response is IndexResponse indexResponse)
+            return new MockableIndexResponse
             {
-                return Task.FromResult(indexResponse);
-            }
-            throw new InvalidOperationException("No mock response configured for IndexAsync.");
+                IsValidResponse = response.IsValidResponse,
+                DebugInformation = response.DebugInformation
+            };
         }
 
-        public Task<SearchResponse<T>> SearchAsync<T>(SearchRequest request, CancellationToken cancellationToken = default) where T : class
+        public async Task<SearchResult<T>> SearchDocumentsAsync<T>(Action<SearchRequestDescriptor<T>> configureRequest)
+            where T : class
         {
-            var key = $"Search-{typeof(T).FullName}-{request.Query}";
-            if (_mockData.TryGetValue(key, out var response) && response is SearchResponse<T> searchResponse)
+            if (configureRequest == null)
+                throw new ArgumentNullException(nameof(configureRequest), "ConfigureRequest action cannot be null.");
+
+            // Use the test wrapper if it's initialized
+            if (_clientWrapper != null)
+                return await _clientWrapper.SearchDocumentsAsync(configureRequest);
+
+            // Otherwise, use the production client
+            var response = await _client.SearchAsync(configureRequest);
+
+            return new SearchResult<T>
             {
-                return Task.FromResult(searchResponse);
-            }
-            throw new InvalidOperationException("No mock response configured for SearchAsync.");
+                IsValid = response.IsValidResponse,
+                DebugInformation = response.DebugInformation,
+                Hits = response.Hits ?? new List<Hit<T>>() // Default to an empty list if Hits is null
+            };
         }
     }
 }
