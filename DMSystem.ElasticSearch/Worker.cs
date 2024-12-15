@@ -20,8 +20,12 @@ namespace DMSystem.ElasticSearch
             _elasticSearchService = elasticSearchService;
             _rabbitMqService = rabbitMqService;
 
-            // Retrieve the OcrResultsQueue name from the RabbitMQ settings
-            _ocrResultsQueueName = rabbitMqOptions.Value.Queues["OcrResultsQueue"];
+            if (!rabbitMqOptions.Value.Queues.TryGetValue("OcrResultsQueue", out var queueName) || string.IsNullOrWhiteSpace(queueName))
+            {
+                throw new Exception("The OcrResultsQueue name is missing or invalid in RabbitMQ settings.");
+            }
+
+            _ocrResultsQueueName = queueName;
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -31,6 +35,12 @@ namespace DMSystem.ElasticSearch
             // Consume OCR results using the centralized RabbitMQ service
             _rabbitMqService.ConsumeQueue<OCRResult>(_ocrResultsQueueName, async ocrResult =>
             {
+                if (ocrResult == null)
+                {
+                    _logger.LogError("Received null OCRResult. Skipping processing.");
+                    return; // Exit early for null messages
+                }
+
                 var docId = ocrResult.Document.Id;
                 try
                 {
@@ -44,7 +54,6 @@ namespace DMSystem.ElasticSearch
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error processing OCR result for Document ID: {DocumentId}", docId);
-                    // Consider retry or DLQ handling if needed
                 }
             });
 

@@ -575,3 +575,7 @@ Npgsql.NpgsqlException (0x80004005): Failed to connect to 172.19.0.2:5432
 2024-12-15 00:40:06,711 [1] INFO  Program - Database migration completed successfully.
 2024-12-15 00:40:06,982 [13] INFO  Program - MinIO bucket initialization completed.
 2024-12-15 00:40:06,995 [13] INFO  Program - Application has started.
+2024-12-15 00:48:16,741 [1] INFO  Program - Initializing application...
+2024-12-15 00:48:20,407 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 00:48:20,714 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 00:48:20,746 [7] INFO  Program - Application has started.

@@ -115,12 +115,26 @@ namespace DMSystem.Tests.ElasticSearchTests
                 .Setup(m => m.ConsumeQueue<OCRResult>(
                     "test-queue",
                     It.IsAny<Func<OCRResult?, Task>>()))
-                .Callback<string, Func<OCRResult?, Task>>((queue, callback) => callback(null));
+                .Callback<string, Func<OCRResult?, Task>>((queue, callback) =>
+                {
+                    // Explicitly invoke the callback with null
+                    callback(null).Wait();
+                });
 
-            // Act & Assert
+            // Act
             await _worker.StartAsync(CancellationToken.None);
-            _mockLogger.VerifyLog(LogLevel.Error, "Received null OCRResult", Times.Once());
+
+            // Debug logs
+            Console.WriteLine("DEBUG: Captured Logs:");
+            foreach (var invocation in _mockLogger.Invocations)
+            {
+                Console.WriteLine(invocation);
+            }
+
+            // Assert
+            _mockLogger.VerifyLog(LogLevel.Error, "Received null OCRResult. Skipping processing.", Times.Once());
         }
+
 
         [Fact]
         public void Worker_Should_Throw_When_QueueNameMissing()
@@ -128,8 +142,11 @@ namespace DMSystem.Tests.ElasticSearchTests
             // Arrange
             var rabbitMqSettings = Options.Create(new RabbitMQSettings { Queues = new Dictionary<string, string>() });
 
-            Assert.Throws<Exception>(() =>
+            // Act & Assert
+            var exception = Assert.Throws<Exception>(() =>
                 new Worker(rabbitMqSettings, _mockElasticSearchService.Object, _mockRabbitMqService.Object, _mockLogger.Object));
+
+            Assert.Equal("The OcrResultsQueue name is missing or invalid in RabbitMQ settings.", exception.Message);
         }
 
         [Fact]
