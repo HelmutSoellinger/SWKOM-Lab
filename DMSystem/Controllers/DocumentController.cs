@@ -257,54 +257,24 @@ namespace DMSystem.Controllers
 
             try
             {
-                // SearchDocumentsAsync returns IEnumerable<OCRResult>,
-                // each containing DocumentDTO and OcrText, fully sourced.
+                _logger.LogInformation("Searching for term: {SearchTerm}", searchTerm);
+
                 var searchResults = await _elasticSearchService.SearchDocumentsAsync(searchTerm);
 
                 if (!searchResults.Any())
                 {
+                    _logger.LogInformation("No results found for term: {SearchTerm}", searchTerm);
                     return NotFound(new { message = "No documents found matching the search term." });
                 }
 
+                _logger.LogInformation("Search results count: {Count}", searchResults.Count());
                 return Ok(searchResults);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred during document search.");
+                _logger.LogError(ex, "Error occurred during document search for term: {SearchTerm}", searchTerm);
                 return StatusCode(500, new { message = "An error occurred while processing the search." });
             }
         }
-
-        ///// <summary>
-        ///// Checks if a file associated with a document ID exists in the MinIO bucket.
-        ///// </summary>
-        //[HttpGet("check-file/{id}")]
-        //public async Task<IActionResult> CheckFileExists(int id)
-        //{
-        //    try
-        //    {
-        //        var document = await _documentRepository.GetByIdAsync(id);
-        //        if (document == null)
-        //        {
-        //            return NotFound(new { message = $"Document with ID {id} not found." });
-        //        }
-
-        //        // Check if the file exists in MinIO
-        //        var exists = await _fileStorageService.FileExistsAsync(document.FilePath);
-        //        if (exists)
-        //        {
-        //            return Ok(new { message = "File exists in MinIO." });
-        //        }
-        //        else
-        //        {
-        //            return NotFound(new { message = "File not found in MinIO." });
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, $"Error occurred while checking file for Document ID {id}.");
-        //        return StatusCode(500, new { message = "An unexpected error occurred while checking the file." });
-        //    }
-        //}
     }
 }

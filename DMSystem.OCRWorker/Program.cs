@@ -1,5 +1,6 @@
 using DMSystem.Minio;
 using DMSystem.OCRWorker;
+using DMSystem.Messaging;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;

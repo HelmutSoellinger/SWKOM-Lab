@@ -1,4 +1,5 @@
-﻿using DMSystem.Contracts;
+﻿using Microsoft.Extensions.Logging;
+using DMSystem.Contracts;
 using Elastic.Clients.Elasticsearch;
 
 namespace DMSystem.ElasticSearch
@@ -6,11 +7,13 @@ namespace DMSystem.ElasticSearch
     public class ElasticSearchService : IElasticSearchService
     {
         private readonly ElasticsearchClient _client;
+        private readonly ILogger<ElasticSearchService> _logger; // Injected logger
 
-        public ElasticSearchService(string elasticsearchUrl)
+        public ElasticSearchService(string elasticsearchUrl, ILogger<ElasticSearchService> logger)
         {
             var settings = new ElasticsearchClientSettings(new Uri(elasticsearchUrl));
             _client = new ElasticsearchClient(settings);
+            _logger = logger; // Assign injected logger
         }
 
         public async Task IndexDocumentAsync(OCRResult ocrResult)
@@ -22,32 +25,143 @@ namespace DMSystem.ElasticSearch
 
             if (!response.IsValidResponse)
             {
+                _logger.LogError("Failed to index document: {DebugInformation}", response.DebugInformation);
                 throw new Exception($"Failed to index document: {response.DebugInformation}");
             }
+
+            _logger.LogInformation("Document indexed successfully: {DocumentId}", ocrResult.Document.Id);
         }
 
         public async Task<IEnumerable<OCRResult>> SearchDocumentsAsync(string searchTerm)
         {
-            var searchResponse = await _client.SearchAsync<OCRResult>(s => s
-                .Index("ocr-results")
-                .Query(q => q
-                    .MultiMatch(m => m
-                        .Query(searchTerm)
-                        .Fields(new[] { "Document.Name", "Document.Author", "OcrText" })
-                    )
-                )
-            );
-
-            if (!searchResponse.IsValidResponse)
+            try
             {
-                throw new Exception($"Search query failed: {searchResponse.DebugInformation}");
-            }
+                // Perform standard search
+                var results = await SearchDocuments(searchTerm);
 
-            // Return the full OCRResult from _source for each hit.
-            // This means each result includes Document (with Id, Name, Author, etc.) and OcrText.
-            return searchResponse.Hits
-                .Where(hit => hit.Source is not null)
-                .Select(hit => hit.Source!);
+                if (results.Any())
+                {
+                    return results;
+                }
+
+                // If no results, fallback to fuzzy search
+                _logger.LogInformation("No results found for term: {SearchTerm}. Falling back to fuzzy search.", searchTerm);
+                return await FuzzySearchDocuments(searchTerm);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during search process for term: {SearchTerm}", searchTerm);
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<OCRResult>> SearchDocuments(string searchTerm)
+        {
+            try
+            {
+                _logger.LogInformation("Executing standard Elasticsearch query for term: {SearchTerm}", searchTerm);
+
+                var searchResponse = await _client.SearchAsync<OCRResult>(s => s
+                    .Index("ocr-results")
+                    .Query(q => q
+                        .Bool(b => b
+                            .Should(
+                                bs => bs.Match(m => m
+                                    .Field(f => f.Document.Name)
+                                    .Query(searchTerm)
+                                ),
+                                bs => bs.Match(m => m
+                                    .Field(f => f.Document.Author)
+                                    .Query(searchTerm)
+                                ),
+                                bs => bs.Match(m => m
+                                    .Field(f => f.OcrText)
+                                    .Query(searchTerm)
+                                ),
+                                bs => bs.Wildcard(w => w
+                                    .Field(f => f.Document.Name)
+                                    .Value($"*{searchTerm}*")
+                                ),
+                                bs => bs.Wildcard(w => w
+                                    .Field(f => f.Document.Author)
+                                    .Value($"*{searchTerm}*")
+                                ),
+                                bs => bs.Wildcard(w => w
+                                    .Field(f => f.OcrText)
+                                    .Value($"*{searchTerm}*")
+                                )
+                            )
+                        )
+                    )
+                );
+
+                if (!searchResponse.IsValidResponse)
+                {
+                    _logger.LogError("Standard search failed: {DebugInformation}", searchResponse.DebugInformation);
+                    throw new Exception($"Search query failed: {searchResponse.DebugInformation}");
+                }
+
+                _logger.LogInformation("Standard search succeeded with {HitsCount} hits.", searchResponse.Hits.Count);
+
+                return searchResponse.Hits
+                    .Where(hit => hit.Source is not null)
+                    .Select(hit => hit.Source!);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error executing standard search for term: {SearchTerm}", searchTerm);
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<OCRResult>> FuzzySearchDocuments(string searchTerm)
+        {
+            try
+            {
+                _logger.LogInformation("Executing fuzzy Elasticsearch query for term: {SearchTerm}", searchTerm);
+
+                var fuzzyResponse = await _client.SearchAsync<OCRResult>(s => s
+                    .Index("ocr-results")
+                    .Query(q => q
+                        .Bool(b => b
+                            .Should(
+                                bs => bs.Fuzzy(f => f
+                                    .Field(f => f.Document.Name)
+                                    .Value(searchTerm)
+                                    .Fuzziness(new Fuzziness(2)) // Correct way to specify fuzziness
+                                ),
+                                bs => bs.Fuzzy(f => f
+                                    .Field(f => f.Document.Author)
+                                    .Value(searchTerm)
+                                    .Fuzziness(new Fuzziness(2)) // Correct way to specify fuzziness
+                                ),
+                                bs => bs.Fuzzy(f => f
+                                    .Field(f => f.OcrText)
+                                    .Value(searchTerm)
+                                    .Fuzziness(new Fuzziness(2)) // Correct way to specify fuzziness
+                                )
+                            )
+                        )
+                    )
+                );
+
+                if (!fuzzyResponse.IsValidResponse)
+                {
+                    _logger.LogError("Fuzzy search failed: {DebugInformation}", fuzzyResponse.DebugInformation);
+                    throw new Exception($"Fuzzy search query failed: {fuzzyResponse.DebugInformation}");
+                }
+
+                _logger.LogInformation("Fuzzy search succeeded with {HitsCount} hits.", fuzzyResponse.Hits.Count);
+
+                return fuzzyResponse.Hits
+                    .Where(hit => hit.Source is not null)
+                    .Select(hit => hit.Source!);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error executing fuzzy search for term: {SearchTerm}", searchTerm);
+                throw;
+            }
         }
     }
 }

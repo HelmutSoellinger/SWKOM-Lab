@@ -1,4 +1,6 @@
 using DMSystem.ElasticSearch;
+using DMSystem.Messaging;
+using Microsoft.Extensions.Logging;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -12,7 +14,13 @@ if (string.IsNullOrWhiteSpace(elasticsearchUrl))
 {
     throw new ArgumentNullException(nameof(elasticsearchUrl), "Elasticsearch URL is not configured. Ensure it is set in appsettings.json or as an environment variable.");
 }
-builder.Services.AddSingleton<IElasticSearchService>(new ElasticSearchService(elasticsearchUrl));
+
+// Use a factory method for ElasticSearchService to inject ILogger<ElasticSearchService>
+builder.Services.AddSingleton<IElasticSearchService>(provider =>
+{
+    var logger = provider.GetRequiredService<ILogger<ElasticSearchService>>();
+    return new ElasticSearchService(elasticsearchUrl, logger);
+});
 
 // Configure RabbitMQ using the new RabbitMQSettings
 builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection("RabbitMQ"));

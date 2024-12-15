@@ -12,6 +12,7 @@ using DMSystem.DAL;
 using DMSystem.Mappings;
 using DMSystem.Contracts.DTOs;
 using DMSystem.Minio;
+using DMSystem.Messaging;
 using DMSystem.ElasticSearch;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,7 +55,13 @@ if (string.IsNullOrWhiteSpace(elasticSearchUrl))
 {
     throw new InvalidOperationException("ElasticSearch URL is not configured. Ensure it is set in appsettings.json or as an environment variable.");
 }
-builder.Services.AddSingleton<IElasticSearchService>(new ElasticSearchService(elasticSearchUrl));
+
+// Use a factory method to inject the logger into ElasticSearchService
+builder.Services.AddSingleton<IElasticSearchService>(provider =>
+{
+    var logger = provider.GetRequiredService<ILogger<ElasticSearchService>>();
+    return new ElasticSearchService(elasticSearchUrl, logger);
+});
 
 // CORS Policy
 builder.Services.AddCors(options =>
