@@ -3,67 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document Management</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Document Management System</title>
+    <!-- Existing CSS files -->
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/document-list.css">
+    <link rel="stylesheet" href="css/add-document.css">
+    <!-- New CSS for Edit Modal -->
+    <link rel="stylesheet" href="css/edit-document.css">
+    <style>
+        /* Fallback styles for Edit Modal */
+        #editDocumentModal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            z-index: 1000;
+        }
+
+            #editDocumentModal .modal-content h2 {
+                margin: 0 0 10px;
+            }
+
+            #editDocumentModal.hidden {
+                display: none;
+            }
+
+            #editDocumentModal form {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+                #editDocumentModal form label {
+                    font-weight: bold;
+                }
+
+                #editDocumentModal form input {
+                    padding: 5px;
+                    font-size: 14px;
+                }
+
+                #editDocumentModal form button {
+                    padding: 8px;
+                    cursor: pointer;
+                }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 999;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <h1 id="homeBtn">Document Management System</h1>
+        <h1>Document Management System</h1>
     </header>
-
     <nav>
         <ul>
             <li><a href="#" id="navList">Document List</a></li>
             <li><a href="#" id="navAdd">Add Document</a></li>
         </ul>
     </nav>
+    <main>
+        <section id="listSection" class="hidden">
+            <div class="list-header">
+                <h2>Documents</h2>
+                <form class="filter-search" id="searchForm">
+                    <input type="text" id="searchBox" placeholder="Search documents..." />
+                    <button type="submit" id="searchButton">Search</button>
+                </form>
+            </div>
+            <table id="documentsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Author</th>
+                        <th>Last Modified</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </section>
 
-    <div class="section" id="listSection">
-        <h2>Document List</h2>
-        <div class="filter-search">
-            <input type="text" id="filterName" placeholder="Enter document name" />
-            <button id="filterBtn">Search</button>
+        <!-- Add Section Wrapper -->
+        <section id="addSection" class="hidden">
+            <h2>Add New Document</h2>
+
+            <!-- Error box to display validation errors -->
+            <div id="addErrorMessages" class="error-box hidden">
+                <h3>Validation Errors</h3>
+                <ul id="addErrorList"></ul>
+                <button id="addCloseErrorBtn">Close</button>
+            </div>
+
+            <form id="addDocumentForm">
+                <label for="docName">Name:</label>
+                <input type="text" id="docName" name="name">
+
+                <label for="docAuthor">Author:</label>
+                <input type="text" id="docAuthor" name="author">
+
+                <label for="docFile">Upload PDF:</label>
+                <input type="file" id="docFile" name="file" accept="application/pdf">
+
+                <button type="submit">Add Document</button>
+            </form>
+        </section>
+
+        <!-- Modal Overlay -->
+        <div class="modal-overlay" id="modalOverlay"></div>
+
+        <!-- Edit Modal -->
+        <div id="editDocumentModal" class="hidden">
+            <div class="modal-content">
+                <h2>Edit Document</h2>
+                <form id="editDocumentForm" enctype="multipart/form-data">
+                    <label for="editDocName">Name:</label>
+                    <input type="text" id="editDocName" name="name" maxlength="100" required>
+
+                    <label for="editDocAuthor">Author:</label>
+                    <input type="text" id="editDocAuthor" name="author" maxlength="100" required>
+
+                    <label for="editDocFile">Upload New PDF (optional):</label>
+                    <input type="file" id="editDocFile" name="file" accept="application/pdf">
+
+                    <button type="button" id="cancelEditBtn">Cancel</button>
+                    <button type="submit">Save Changes</button>
+                </form>
+            </div>
         </div>
-        <table id="documentsTable">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Name</th>
-                    <th>Author</th>
-                    <th>Last Modified</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Documents will be loaded here -->
-            </tbody>
-        </table>
-    </div>
 
-    <div class="section" id="addSection" style="display:none;">
-        <h2>Add New Document</h2>
-        <form id="addDocumentForm">
-            <label for="docName">Document Name</label>
-            <input type="text" id="docName" placeholder="Document Name" required />
-
-            <label for="docAuthor">Author</label>
-            <input type="text" id="docAuthor" placeholder="Author" required />
-
-            <label for="docDescription">Description</label>
-            <textarea id="docDescription" placeholder="Description"></textarea>
-
-            <label for="docContent">Upload PDF</label>
-            <input type="file" id="docContent" accept=".pdf" required />
-
-            <button type="submit" id="addDocBtn">Add Document</button>
-        </form>
-    </div>
-
+    </main>
     <footer>
         <p>Created by Lang and Soellinger, 2024</p>
     </footer>
 
-    <script src="js/script.js"></script>
+    <!-- JavaScript includes -->
+    <script src="js/utilities.js"></script>
+    <script src="js/onLoad.js"></script>
+    <script src="js/addDocument.js"></script>
+    <script src="js/documentList.js"></script>
+    <script>
+        // Inline editDocument logic for cancel functionality
+        document.addEventListener('DOMContentLoaded', () => {
+            const editModal = document.getElementById('editDocumentModal');
+            const modalOverlay = document.getElementById('modalOverlay');
+            const cancelEditBtn = document.getElementById('cancelEditBtn');
+
+            // Function to close the edit modal
+            function closeEditModal() {
+                editModal.classList.add('hidden');
+                modalOverlay.style.display = 'none';
+            }
+
+            // Event listener for cancel button
+            cancelEditBtn.addEventListener('click', closeEditModal);
+
+            // Close the modal if overlay is clicked
+            modalOverlay.addEventListener('click', closeEditModal);
+        });
+    </script>
 </body>
 </html>

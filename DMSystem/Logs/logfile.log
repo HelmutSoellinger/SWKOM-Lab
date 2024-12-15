@@ -1,0 +1,645 @@
+2024-11-23 13:47:33,931 [1] INFO  Program - Initializing application...
+2024-11-23 13:47:35,666 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 13:47:35,762 [1] INFO  Program - Application has started.
+2024-11-23 18:38:47,362 [1] INFO  Program - Initializing application...
+2024-11-23 18:38:48,671 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 18:38:48,723 [1] INFO  Program - Application has started.
+2024-11-23 18:38:52,078 [1] INFO  Program - Initializing application...
+2024-11-23 18:38:52,966 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 18:38:53,053 [1] INFO  Program - Application has started.
+2024-11-23 18:41:09,204 [1] INFO  Program - Initializing application...
+2024-11-23 18:41:10,029 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 18:41:10,090 [1] INFO  Program - Application has started.
+2024-11-23 18:41:13,011 [1] INFO  Program - Initializing application...
+2024-11-23 18:41:13,733 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 18:41:13,779 [1] INFO  Program - Application has started.
+2024-11-23 18:54:29,350 [1] INFO  Program - Initializing application...
+2024-11-23 18:54:30,462 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 18:54:30,551 [1] INFO  Program - Application has started.
+2024-11-23 18:54:33,762 [1] INFO  Program - Initializing application...
+2024-11-23 18:54:34,841 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 18:54:34,924 [1] INFO  Program - Application has started.
+2024-11-23 18:58:23,475 [1] INFO  Program - Initializing application...
+2024-11-23 18:58:24,756 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 18:58:24,835 [1] INFO  Program - Application has started.
+2024-11-23 18:58:26,920 [1] INFO  Program - Initializing application...
+2024-11-23 18:58:28,305 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 18:58:28,386 [1] INFO  Program - Application has started.
+2024-11-23 19:17:45,300 [1] INFO  Program - Initializing application...
+2024-11-23 19:17:47,051 [1] ERROR Program - An error occurred during database migration.
+System.InvalidOperationException: An error was generated for warning 'Microsoft.EntityFrameworkCore.Migrations.PendingModelChangesWarning': The model for context 'DALContext' has pending changes. Add a new migration before updating the database. This exception can be suppressed or logged by passing event ID 'RelationalEventId.PendingModelChangesWarning' to the 'ConfigureWarnings' method in 'DbContext.OnConfiguring' or 'AddDbContext'.
+   at Microsoft.EntityFrameworkCore.Diagnostics.EventDefinition`1.Log[TLoggerCategory](IDiagnosticsLogger`1 logger, TParam arg)
+   at Microsoft.EntityFrameworkCore.Diagnostics.RelationalLoggerExtensions.PendingModelChangesWarning(IDiagnosticsLogger`1 diagnostics, Type contextType)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.Migrate(String targetMigration)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlMigrator.Migrate(String targetMigration)
+   at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.Migrate(DatabaseFacade databaseFacade)
+   at Program.<Main>$(String[] args) in /src/DMSystem/Program.cs:line 84
+2024-11-23 19:17:47,211 [1] INFO  Program - Application has started.
+2024-11-23 19:17:50,323 [1] INFO  Program - Initializing application...
+2024-11-23 19:17:52,851 [1] ERROR Program - An error occurred during database migration.
+System.InvalidOperationException: An error was generated for warning 'Microsoft.EntityFrameworkCore.Migrations.PendingModelChangesWarning': The model for context 'DALContext' has pending changes. Add a new migration before updating the database. This exception can be suppressed or logged by passing event ID 'RelationalEventId.PendingModelChangesWarning' to the 'ConfigureWarnings' method in 'DbContext.OnConfiguring' or 'AddDbContext'.
+   at Microsoft.EntityFrameworkCore.Diagnostics.EventDefinition`1.Log[TLoggerCategory](IDiagnosticsLogger`1 logger, TParam arg)
+   at Microsoft.EntityFrameworkCore.Diagnostics.RelationalLoggerExtensions.PendingModelChangesWarning(IDiagnosticsLogger`1 diagnostics, Type contextType)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.Migrate(String targetMigration)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlMigrator.Migrate(String targetMigration)
+   at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.Migrate(DatabaseFacade databaseFacade)
+   at Program.<Main>$(String[] args) in /src/DMSystem/Program.cs:line 84
+2024-11-23 19:17:53,003 [1] INFO  Program - Application has started.
+2024-11-23 19:17:56,100 [1] INFO  Program - Initializing application...
+2024-11-23 19:17:57,313 [1] ERROR Program - An error occurred during database migration.
+System.InvalidOperationException: An error was generated for warning 'Microsoft.EntityFrameworkCore.Migrations.PendingModelChangesWarning': The model for context 'DALContext' has pending changes. Add a new migration before updating the database. This exception can be suppressed or logged by passing event ID 'RelationalEventId.PendingModelChangesWarning' to the 'ConfigureWarnings' method in 'DbContext.OnConfiguring' or 'AddDbContext'.
+   at Microsoft.EntityFrameworkCore.Diagnostics.EventDefinition`1.Log[TLoggerCategory](IDiagnosticsLogger`1 logger, TParam arg)
+   at Microsoft.EntityFrameworkCore.Diagnostics.RelationalLoggerExtensions.PendingModelChangesWarning(IDiagnosticsLogger`1 diagnostics, Type contextType)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.Migrate(String targetMigration)
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlMigrator.Migrate(String targetMigration)
+   at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.Migrate(DatabaseFacade databaseFacade)
+   at Program.<Main>$(String[] args) in /src/DMSystem/Program.cs:line 84
+2024-11-23 19:17:57,411 [1] INFO  Program - Application has started.
+2024-11-23 20:02:54,164 [1] INFO  Program - Initializing application...
+2024-11-23 20:02:57,723 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 20:02:57,922 [1] INFO  Program - Application has started.
+2024-11-23 20:03:00,720 [1] INFO  Program - Initializing application...
+2024-11-23 20:03:02,763 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 20:03:02,853 [1] INFO  Program - Application has started.
+2024-11-23 20:03:05,241 [1] INFO  Program - Initializing application...
+2024-11-23 20:03:06,559 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 20:03:06,759 [1] INFO  Program - Application has started.
+2024-11-23 20:05:06,057 [1] INFO  Program - Initializing application...
+2024-11-23 20:05:07,662 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 20:05:07,856 [1] INFO  Program - Application has started.
+2024-11-23 20:05:10,705 [1] INFO  Program - Initializing application...
+2024-11-23 20:05:12,219 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 20:05:12,312 [1] INFO  Program - Application has started.
+2024-11-23 20:17:09,799 [1] INFO  Program - Initializing application...
+2024-11-23 20:17:11,587 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 20:17:11,706 [1] INFO  Program - Application has started.
+2024-11-23 20:17:14,254 [1] INFO  Program - Initializing application...
+2024-11-23 20:17:15,770 [1] INFO  Program - Database migration completed successfully.
+2024-11-23 20:17:15,858 [1] INFO  Program - Application has started.
+2024-11-24 13:54:34,740 [1] INFO  Program - Initializing application...
+2024-11-24 13:54:36,521 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 13:54:36,629 [1] INFO  Program - Application has started.
+2024-11-24 13:54:40,062 [1] INFO  Program - Initializing application...
+2024-11-24 13:54:41,513 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 13:54:41,623 [1] INFO  Program - Application has started.
+2024-11-24 14:11:18,275 [1] INFO  Program - Initializing application...
+2024-11-24 14:11:19,905 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 14:11:20,019 [1] INFO  Program - Application has started.
+2024-11-24 14:11:23,773 [1] INFO  Program - Initializing application...
+2024-11-24 14:11:25,358 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 14:11:25,441 [1] INFO  Program - Application has started.
+2024-11-24 14:25:01,172 [1] INFO  Program - Initializing application...
+2024-11-24 14:25:02,673 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 14:25:02,758 [1] INFO  Program - Application has started.
+2024-11-24 14:25:06,438 [1] INFO  Program - Initializing application...
+2024-11-24 14:25:08,043 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 14:25:08,150 [1] INFO  Program - Application has started.
+2024-11-24 14:30:11,824 [1] INFO  Program - Initializing application...
+2024-11-24 14:30:13,212 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 14:30:13,293 [1] INFO  Program - Application has started.
+2024-11-24 14:30:15,592 [1] INFO  Program - Initializing application...
+2024-11-24 14:30:17,182 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 14:30:17,246 [1] INFO  Program - Application has started.
+2024-11-24 15:03:35,197 [1] INFO  Program - Initializing application...
+2024-11-24 15:03:37,782 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 15:03:37,916 [1] INFO  Program - Application has started.
+2024-11-24 15:03:41,544 [1] INFO  Program - Initializing application...
+2024-11-24 15:03:43,545 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 15:03:43,641 [1] INFO  Program - Application has started.
+2024-11-24 15:32:50,837 [1] INFO  Program - Initializing application...
+2024-11-24 15:32:53,826 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 15:32:54,022 [1] INFO  Program - Application has started.
+2024-11-24 15:32:57,970 [1] INFO  Program - Initializing application...
+2024-11-24 15:33:00,578 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 15:33:00,708 [1] INFO  Program - Application has started.
+2024-11-24 15:33:03,882 [1] INFO  Program - Initializing application...
+2024-11-24 15:33:05,462 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 15:33:05,538 [1] INFO  Program - Application has started.
+2024-11-24 15:46:40,793 [1] INFO  Program - Initializing application...
+2024-11-24 15:46:42,392 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 15:46:42,398 [1] INFO  Program - Application has started.
+2024-11-24 15:46:45,218 [1] INFO  Program - Initializing application...
+2024-11-24 15:46:46,991 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 15:46:46,997 [1] INFO  Program - Application has started.
+2024-11-24 15:55:55,194 [1] INFO  Program - Initializing application...
+2024-11-24 15:55:57,182 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 15:55:57,192 [1] INFO  Program - Application has started.
+2024-11-24 15:56:00,311 [1] INFO  Program - Initializing application...
+2024-11-24 15:56:01,984 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 15:56:01,991 [1] INFO  Program - Application has started.
+2024-11-24 15:56:04,227 [1] INFO  Program - Initializing application...
+2024-11-24 15:56:05,692 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 15:56:05,699 [1] INFO  Program - Application has started.
+2024-11-24 16:05:11,601 [1] INFO  Program - Initializing application...
+2024-11-24 16:05:13,421 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 16:05:13,431 [1] INFO  Program - Application has started.
+2024-11-24 16:05:16,860 [1] INFO  Program - Initializing application...
+2024-11-24 16:05:18,390 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 16:05:18,396 [1] INFO  Program - Application has started.
+2024-11-24 16:05:20,707 [1] INFO  Program - Initializing application...
+2024-11-24 16:05:22,037 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 16:05:22,041 [1] INFO  Program - Application has started.
+2024-11-24 16:09:31,368 [1] INFO  Program - Initializing application...
+2024-11-24 16:09:33,565 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 16:09:33,582 [1] INFO  Program - Application has started.
+2024-11-24 16:09:36,562 [1] INFO  Program - Initializing application...
+2024-11-24 16:09:38,170 [1] INFO  Program - Database migration completed successfully.
+2024-11-24 16:09:38,175 [1] INFO  Program - Application has started.
+2024-11-25 11:27:47,462 [1] INFO  Program - Initializing application...
+2024-11-25 11:27:49,599 [1] INFO  Program - Database migration completed successfully.
+2024-11-25 11:27:49,605 [1] INFO  Program - Application has started.
+2024-11-25 11:27:53,398 [1] INFO  Program - Initializing application...
+2024-11-25 11:27:55,354 [1] INFO  Program - Database migration completed successfully.
+2024-11-25 11:27:55,361 [1] INFO  Program - Application has started.
+2024-11-25 11:27:57,787 [1] INFO  Program - Initializing application...
+2024-11-25 11:27:59,391 [1] INFO  Program - Database migration completed successfully.
+2024-11-25 11:27:59,398 [1] INFO  Program - Application has started.
+2024-11-25 18:15:59,850 [1] INFO  Program - Initializing application...
+2024-11-25 18:16:01,670 [1] INFO  Program - Database migration completed successfully.
+2024-11-25 18:16:01,675 [1] INFO  Program - Application has started.
+2024-11-25 18:35:15,938 [1] INFO  Program - Initializing application...
+2024-11-25 18:35:16,912 [1] INFO  Program - Database migration completed successfully.
+2024-11-25 18:35:16,915 [1] INFO  Program - Application has started.
+2024-11-25 18:40:47,400 [1] INFO  Program - Initializing application...
+2024-11-25 18:40:48,363 [1] INFO  Program - Database migration completed successfully.
+2024-11-25 18:40:48,366 [1] INFO  Program - Application has started.
+2024-11-25 18:48:00,521 [1] INFO  Program - Initializing application...
+2024-11-25 18:48:01,629 [1] INFO  Program - Database migration completed successfully.
+2024-11-25 18:48:01,633 [1] INFO  Program - Application has started.
+2024-11-25 18:54:36,869 [1] INFO  Program - Initializing application...
+2024-11-25 18:54:37,929 [1] INFO  Program - Database migration completed successfully.
+2024-11-25 18:54:37,933 [1] INFO  Program - Application has started.
+2024-11-25 19:41:43,200 [1] INFO  Program - Initializing application...
+2024-11-25 19:41:44,246 [1] INFO  Program - Database migration completed successfully.
+2024-11-25 19:41:44,250 [1] INFO  Program - Application has started.
+2024-11-25 19:47:48,905 [1] INFO  Program - Initializing application...
+2024-11-25 19:47:50,606 [1] INFO  Program - Database migration completed successfully.
+2024-11-25 19:47:50,611 [1] INFO  Program - Application has started.
+2024-11-25 19:54:02,700 [1] INFO  Program - Initializing application...
+2024-11-25 19:54:03,867 [1] INFO  Program - Database migration completed successfully.
+2024-11-25 19:54:03,871 [1] INFO  Program - Application has started.
+2024-11-25 20:35:48,221 [1] INFO  Program - Initializing application...
+2024-11-25 20:35:49,794 [1] INFO  Program - Database migration completed successfully.
+2024-11-25 20:35:49,801 [1] INFO  Program - Application has started.
+2024-12-02 15:12:46,972 [1] INFO  Program - Initializing application...
+2024-12-02 15:12:48,210 [1] INFO  Program - Database migration completed successfully.
+2024-12-02 15:12:48,214 [1] INFO  Program - Application has started.
+2024-12-02 15:14:29,218 [1] INFO  Program - Initializing application...
+2024-12-02 15:14:30,204 [1] INFO  Program - Database migration completed successfully.
+2024-12-02 15:14:30,207 [1] INFO  Program - Application has started.
+2024-12-02 15:28:11,646 [1] INFO  Program - Initializing application...
+2024-12-02 15:28:12,657 [1] INFO  Program - Database migration completed successfully.
+2024-12-02 15:28:12,661 [1] INFO  Program - Application has started.
+2024-12-02 15:31:19,191 [1] INFO  Program - Initializing application...
+2024-12-02 15:31:20,245 [1] INFO  Program - Database migration completed successfully.
+2024-12-02 15:31:20,249 [1] INFO  Program - Application has started.
+2024-12-02 15:40:26,820 [1] INFO  Program - Initializing application...
+2024-12-02 15:40:28,588 [1] INFO  Program - Database migration completed successfully.
+2024-12-02 15:40:28,591 [1] INFO  Program - Application has started.
+2024-12-02 15:48:43,207 [1] INFO  Program - Initializing application...
+2024-12-02 15:48:44,666 [1] INFO  Program - Database migration completed successfully.
+2024-12-02 15:48:44,669 [1] INFO  Program - Application has started.
+2024-12-02 15:53:05,498 [1] INFO  Program - Initializing application...
+2024-12-02 15:53:06,617 [1] INFO  Program - Database migration completed successfully.
+2024-12-02 15:53:06,621 [1] INFO  Program - Application has started.
+2024-12-02 15:57:14,404 [1] INFO  Program - Initializing application...
+2024-12-02 15:57:16,130 [1] INFO  Program - Database migration completed successfully.
+2024-12-02 15:57:16,134 [1] INFO  Program - Application has started.
+2024-12-02 16:02:09,247 [1] INFO  Program - Initializing application...
+2024-12-02 16:02:10,175 [1] INFO  Program - Database migration completed successfully.
+2024-12-02 16:02:10,179 [1] INFO  Program - Application has started.
+2024-12-02 16:05:13,093 [1] INFO  Program - Initializing application...
+2024-12-02 16:05:14,826 [1] INFO  Program - Database migration completed successfully.
+2024-12-02 16:05:14,832 [1] INFO  Program - Application has started.
+2024-12-02 16:10:29,519 [1] INFO  Program - Initializing application...
+2024-12-02 16:10:30,470 [1] INFO  Program - Database migration completed successfully.
+2024-12-02 16:10:30,474 [1] INFO  Program - Application has started.
+2024-12-02 16:15:06,474 [1] INFO  Program - Initializing application...
+2024-12-02 16:15:07,511 [1] INFO  Program - Database migration completed successfully.
+2024-12-02 16:15:07,515 [1] INFO  Program - Application has started.
+2024-12-05 14:49:49,770 [1] INFO  Program - Initializing application...
+2024-12-05 14:49:53,119 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 14:49:53,127 [1] INFO  Program - Application has started.
+2024-12-05 15:10:35,566 [1] INFO  Program - Initializing application...
+2024-12-05 15:10:37,934 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 15:10:37,942 [1] INFO  Program - Application has started.
+2024-12-05 15:13:03,250 [1] INFO  Program - Initializing application...
+2024-12-05 15:13:05,412 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 15:13:05,425 [1] INFO  Program - Application has started.
+2024-12-05 15:16:25,980 [1] INFO  Program - Initializing application...
+2024-12-05 15:16:28,112 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 15:16:28,117 [1] INFO  Program - Application has started.
+2024-12-05 15:22:39,229 [1] INFO  Program - Initializing application...
+2024-12-05 15:22:41,167 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 15:22:41,177 [1] INFO  Program - Application has started.
+2024-12-05 15:25:20,036 [1] INFO  Program - Initializing application...
+2024-12-05 15:25:22,707 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 15:25:22,712 [1] INFO  Program - Application has started.
+2024-12-05 15:43:25,669 [1] INFO  Program - Initializing application...
+2024-12-05 15:43:27,536 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 15:43:27,548 [1] INFO  Program - Application has started.
+2024-12-05 15:49:30,476 [1] INFO  Program - Initializing application...
+2024-12-05 15:49:32,164 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 15:49:32,169 [1] INFO  Program - Application has started.
+2024-12-05 15:53:44,302 [1] INFO  Program - Initializing application...
+2024-12-05 15:53:46,568 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 15:53:46,575 [1] INFO  Program - Application has started.
+2024-12-05 17:11:10,687 [1] INFO  Program - Initializing application...
+2024-12-05 17:11:12,434 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 17:11:12,447 [1] INFO  Program - Application has started.
+2024-12-05 17:23:22,962 [1] INFO  Program - Initializing application...
+2024-12-05 17:23:24,677 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 17:23:24,685 [1] INFO  Program - Application has started.
+2024-12-05 17:32:33,644 [1] INFO  Program - Initializing application...
+2024-12-05 17:32:35,242 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 17:32:35,250 [1] INFO  Program - Application has started.
+2024-12-05 17:40:44,254 [1] INFO  Program - Initializing application...
+2024-12-05 17:40:46,185 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 17:40:46,315 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-05 17:40:46,323 [9] INFO  Program - Application has started.
+2024-12-05 21:03:07,332 [1] INFO  Program - Initializing application...
+2024-12-05 21:03:09,540 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 21:03:09,663 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-05 21:03:09,669 [9] INFO  Program - Application has started.
+2024-12-05 21:05:42,055 [1] INFO  Program - Initializing application...
+2024-12-05 21:05:43,393 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 21:05:43,469 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-05 21:05:43,474 [7] INFO  Program - Application has started.
+2024-12-05 21:13:51,590 [1] INFO  Program - Initializing application...
+2024-12-05 21:13:53,324 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 21:13:53,442 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-05 21:13:53,449 [10] INFO  Program - Application has started.
+2024-12-05 21:20:01,534 [1] INFO  Program - Initializing application...
+2024-12-05 21:20:04,252 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 21:20:04,413 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-05 21:20:04,422 [9] INFO  Program - Application has started.
+2024-12-05 21:32:36,391 [1] INFO  Program - Initializing application...
+2024-12-05 21:32:39,220 [1] INFO  Program - Database migration completed successfully.
+2024-12-05 21:32:39,406 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-05 21:32:39,415 [7] INFO  Program - Application has started.
+2024-12-06 09:50:54,562 [1] INFO  Program - Initializing application...
+2024-12-06 09:50:56,687 [1] INFO  Program - Database migration completed successfully.
+2024-12-06 09:50:56,832 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-06 09:50:56,838 [7] INFO  Program - Application has started.
+2024-12-06 16:44:47,149 [1] INFO  Program - Initializing application...
+2024-12-06 16:44:50,509 [1] INFO  Program - Database migration completed successfully.
+2024-12-06 16:44:50,759 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-06 16:44:50,771 [9] INFO  Program - Application has started.
+2024-12-06 16:57:12,106 [1] INFO  Program - Initializing application...
+2024-12-06 16:57:14,492 [1] INFO  Program - Database migration completed successfully.
+2024-12-06 16:57:14,664 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-06 16:57:14,671 [10] INFO  Program - Application has started.
+2024-12-08 19:38:30,073 [1] INFO  Program - Initializing application...
+2024-12-08 19:38:35,607 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 19:38:35,920 [11] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 19:38:35,942 [11] INFO  Program - Application has started.
+2024-12-08 21:21:00,071 [1] INFO  Program - Initializing application...
+2024-12-08 21:21:01,410 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 21:27:28,976 [1] INFO  Program - Initializing application...
+2024-12-08 21:27:30,491 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 21:27:30,634 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 21:27:30,637 [7] INFO  Program - Application has started.
+2024-12-08 21:30:27,549 [1] INFO  Program - Initializing application...
+2024-12-08 21:30:29,803 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 21:30:29,976 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 21:30:29,985 [10] INFO  Program - Application has started.
+2024-12-08 21:36:06,862 [1] INFO  Program - Initializing application...
+2024-12-08 21:36:10,321 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 21:36:10,541 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 21:36:10,553 [10] INFO  Program - Application has started.
+2024-12-08 21:42:18,682 [1] INFO  Program - Initializing application...
+2024-12-08 21:42:20,564 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 21:42:20,704 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 21:42:20,713 [9] INFO  Program - Application has started.
+2024-12-08 21:44:25,012 [1] INFO  Program - Initializing application...
+2024-12-08 21:44:27,692 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 21:44:27,851 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 21:44:27,863 [9] INFO  Program - Application has started.
+2024-12-08 22:01:45,145 [1] INFO  Program - Initializing application...
+2024-12-08 22:01:48,233 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 22:01:48,372 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 22:01:48,380 [9] INFO  Program - Application has started.
+2024-12-08 22:10:56,023 [1] INFO  Program - Initializing application...
+2024-12-08 22:10:59,411 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 22:10:59,609 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 22:10:59,620 [9] INFO  Program - Application has started.
+2024-12-08 22:14:22,462 [1] INFO  Program - Initializing application...
+2024-12-08 22:14:27,693 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 22:14:28,020 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 22:14:28,042 [13] INFO  Program - Application has started.
+2024-12-08 22:17:33,891 [1] INFO  Program - Initializing application...
+2024-12-08 22:17:36,029 [1] ERROR Program - An error occurred during application initialization.
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 172.19.0.3:5432
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(SslMode sslMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|214_1(NpgsqlConnector conn, SslMode sslMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.Open()
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenDbConnection(Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternal(Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.Open(Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Migrations.HistoryRepository.GetAppliedMigrations()
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlHistoryRepository.GetAppliedMigrations()
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlMigrator.Migrate(String targetMigration)
+   at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.Migrate(DatabaseFacade databaseFacade)
+   at Program.<Main>$(String[] args) in /src/DMSystem/Program.cs:line 98
+2024-12-08 22:17:36,094 [1] INFO  Program - Application has started.
+2024-12-08 22:24:01,617 [1] INFO  Program - Initializing application...
+2024-12-08 22:24:03,867 [1] INFO  Program - Database migration completed successfully.
+2024-12-08 22:24:04,015 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-08 22:24:04,024 [7] INFO  Program - Application has started.
+2024-12-09 11:35:30,167 [1] INFO  Program - Initializing application...
+2024-12-09 11:35:33,030 [1] INFO  Program - Database migration completed successfully.
+2024-12-09 11:35:33,226 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-09 11:35:33,238 [13] INFO  Program - Application has started.
+2024-12-09 11:37:03,203 [1] INFO  Program - Initializing application...
+2024-12-09 11:37:06,549 [1] INFO  Program - Database migration completed successfully.
+2024-12-09 11:37:06,700 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-09 11:37:06,709 [13] INFO  Program - Application has started.
+2024-12-09 15:46:26,613 [1] INFO  Program - Initializing application...
+2024-12-09 15:46:31,188 [1] INFO  Program - Database migration completed successfully.
+2024-12-09 15:46:31,399 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-09 15:46:31,416 [7] INFO  Program - Application has started.
+2024-12-13 15:37:31,305 [1] INFO  Program - Initializing application...
+2024-12-13 15:37:36,238 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 15:37:36,438 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 15:37:36,462 [10] INFO  Program - Application has started.
+2024-12-13 15:46:10,073 [1] INFO  Program - Initializing application...
+2024-12-13 15:46:13,369 [1] ERROR Program - An error occurred during application initialization.
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 172.19.0.2:5432
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(SslMode sslMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|214_1(NpgsqlConnector conn, SslMode sslMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.Open()
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenDbConnection(Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternal(Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.Open(Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Migrations.HistoryRepository.GetAppliedMigrations()
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlHistoryRepository.GetAppliedMigrations()
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlMigrator.Migrate(String targetMigration)
+   at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.Migrate(DatabaseFacade databaseFacade)
+   at Program.<Main>$(String[] args) in /src/DMSystem/Program.cs:line 105
+2024-12-13 15:46:13,452 [1] INFO  Program - Application has started.
+2024-12-13 15:52:27,962 [1] INFO  Program - Initializing application...
+2024-12-13 15:52:31,374 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 15:52:31,509 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 15:52:31,515 [9] INFO  Program - Application has started.
+2024-12-13 19:10:25,981 [1] INFO  Program - Initializing application...
+2024-12-13 19:10:29,088 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 19:10:29,216 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 19:10:29,232 [7] INFO  Program - Application has started.
+2024-12-13 19:15:06,311 [1] INFO  Program - Initializing application...
+2024-12-13 19:15:08,884 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 19:15:09,073 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 19:15:09,080 [10] INFO  Program - Application has started.
+2024-12-13 19:27:46,808 [1] INFO  Program - Initializing application...
+2024-12-13 19:27:49,211 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 19:27:49,352 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 19:27:49,359 [7] INFO  Program - Application has started.
+2024-12-13 19:35:30,360 [1] INFO  Program - Initializing application...
+2024-12-13 19:35:33,314 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 19:35:33,451 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 19:35:33,461 [7] INFO  Program - Application has started.
+2024-12-13 19:50:01,983 [1] INFO  Program - Initializing application...
+2024-12-13 19:50:05,297 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 19:50:05,484 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 19:50:05,493 [7] INFO  Program - Application has started.
+2024-12-13 19:58:39,481 [1] INFO  Program - Initializing application...
+2024-12-13 19:58:46,938 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 19:58:46,949 [1] ERROR Program - An error occurred during application initialization.
+9000:9000 is invalid hostname.: Minio.Exceptions.InvalidEndpointException: MinIO API responded with message=endpoint
+   at Minio.MinioClientExtensions.GetBaseUrl(String endpoint)
+   at Minio.MinioClientExtensions.WithEndpoint(IMinioClient minioClient, String endpoint)
+   at DMSystem.Minio.MinioFileStorageService..ctor(IOptions`1 options) in /src/DMSystem/Minio/MinioFileStorageService.cs:line 22
+   at System.RuntimeMethodHandle.InvokeMethod(Object target, Void** arguments, Signature sig, Boolean isConstructor)
+   at System.Reflection.MethodBaseInvoker.InvokeDirectByRefWithFewArgs(Object obj, Span`1 copyOfArgs, BindingFlags invokeAttr)
+   at System.Reflection.MethodBaseInvoker.InvokeWithOneArg(Object obj, BindingFlags invokeAttr, Binder binder, Object[] parameters, CultureInfo culture)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitConstructor(ConstructorCallSite constructorCallSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSiteMain(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.VisitRootCache(ServiceCallSite callSite, RuntimeResolverContext context)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteVisitor`2.VisitCallSite(ServiceCallSite callSite, TArgument argument)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.CallSiteRuntimeResolver.Resolve(ServiceCallSite callSite, ServiceProviderEngineScope scope)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.CreateServiceAccessor(ServiceIdentifier serviceIdentifier)
+   at System.Collections.Concurrent.ConcurrentDictionary`2.GetOrAdd(TKey key, Func`2 valueFactory)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ServiceProviderEngineScope.GetService(Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at Program.<Main>$(String[] args) in /src/DMSystem/Program.cs:line 108
+2024-12-13 19:58:47,000 [1] INFO  Program - Application has started.
+2024-12-13 20:01:05,155 [1] INFO  Program - Initializing application...
+2024-12-13 20:01:08,978 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 20:01:09,152 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 20:01:09,160 [9] INFO  Program - Application has started.
+2024-12-13 20:12:18,527 [1] INFO  Program - Initializing application...
+2024-12-13 20:12:21,553 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 20:12:21,865 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 20:12:21,877 [13] INFO  Program - Application has started.
+2024-12-13 20:16:29,855 [1] INFO  Program - Initializing application...
+2024-12-13 20:16:33,310 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 20:16:33,451 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 20:16:33,457 [10] INFO  Program - Application has started.
+2024-12-13 20:21:26,043 [1] INFO  Program - Initializing application...
+2024-12-13 20:21:29,754 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 20:21:29,942 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 20:21:29,951 [13] INFO  Program - Application has started.
+2024-12-13 20:28:31,217 [1] INFO  Program - Initializing application...
+2024-12-13 20:28:34,322 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 20:28:34,428 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 20:28:34,433 [10] INFO  Program - Application has started.
+2024-12-13 20:49:46,156 [1] INFO  Program - Initializing application...
+2024-12-13 20:49:48,341 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 20:49:48,442 [14] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 20:49:48,446 [14] INFO  Program - Application has started.
+2024-12-13 20:54:15,519 [1] INFO  Program - Initializing application...
+2024-12-13 20:54:17,423 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 20:54:17,559 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 20:54:17,567 [9] INFO  Program - Application has started.
+2024-12-13 20:58:22,849 [1] INFO  Program - Initializing application...
+2024-12-13 20:58:24,711 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 20:58:24,836 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 20:58:24,844 [9] INFO  Program - Application has started.
+2024-12-13 21:03:30,930 [1] INFO  Program - Initializing application...
+2024-12-13 21:03:33,688 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 21:03:33,791 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 21:03:33,796 [13] INFO  Program - Application has started.
+2024-12-13 21:13:23,910 [1] INFO  Program - Initializing application...
+2024-12-13 21:13:26,189 [1] INFO  Program - Database migration completed successfully.
+2024-12-13 21:13:26,327 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-13 21:13:26,335 [7] INFO  Program - Application has started.
+2024-12-14 18:06:10,426 [1] INFO  Program - Initializing application...
+2024-12-14 18:06:13,127 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 18:06:13,287 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 18:06:13,294 [13] INFO  Program - Application has started.
+2024-12-14 18:17:54,696 [1] INFO  Program - Initializing application...
+2024-12-14 18:17:56,739 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 18:17:56,843 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 18:17:56,852 [7] INFO  Program - Application has started.
+2024-12-14 19:54:06,691 [1] INFO  Program - Initializing application...
+2024-12-14 19:54:09,523 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 19:54:09,616 [14] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 19:54:09,628 [14] INFO  Program - Application has started.
+2024-12-14 19:57:17,731 [1] INFO  Program - Initializing application...
+2024-12-14 19:57:19,997 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 19:57:20,129 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 19:57:20,136 [13] INFO  Program - Application has started.
+2024-12-14 20:11:40,692 [1] INFO  Program - Initializing application...
+2024-12-14 20:11:45,009 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 20:11:45,161 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 20:11:45,170 [10] INFO  Program - Application has started.
+2024-12-14 20:57:49,206 [1] INFO  Program - Initializing application...
+2024-12-14 20:57:51,322 [1] ERROR Program - An error occurred during application initialization.
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 172.19.0.2:5432
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(SslMode sslMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|214_1(NpgsqlConnector conn, SslMode sslMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.Open()
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenDbConnection(Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternal(Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.Open(Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Migrations.HistoryRepository.GetAppliedMigrations()
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlHistoryRepository.GetAppliedMigrations()
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlMigrator.Migrate(String targetMigration)
+   at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.Migrate(DatabaseFacade databaseFacade)
+   at Program.<Main>$(String[] args) in /src/DMSystem/Program.cs:line 104
+2024-12-14 20:57:51,369 [1] INFO  Program - Application has started.
+2024-12-14 21:01:32,925 [1] INFO  Program - Initializing application...
+2024-12-14 21:01:35,090 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 21:01:35,247 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 21:01:35,258 [9] INFO  Program - Application has started.
+2024-12-14 21:07:39,661 [1] INFO  Program - Initializing application...
+2024-12-14 21:07:42,592 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 21:07:42,765 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 21:07:42,772 [10] INFO  Program - Application has started.
+2024-12-14 21:10:13,261 [1] INFO  Program - Initializing application...
+2024-12-14 21:10:15,828 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 21:10:15,951 [14] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 21:10:15,959 [14] INFO  Program - Application has started.
+2024-12-14 21:12:33,187 [1] INFO  Program - Initializing application...
+2024-12-14 21:12:36,582 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 21:12:39,118 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 21:12:39,121 [9] INFO  Program - Application has started.
+2024-12-14 21:23:33,188 [1] INFO  Program - Initializing application...
+2024-12-14 21:23:36,165 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 21:23:36,317 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 21:23:36,327 [7] INFO  Program - Application has started.
+2024-12-14 21:40:02,277 [1] INFO  Program - Initializing application...
+2024-12-14 21:40:05,458 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 21:40:05,668 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 21:40:05,675 [9] INFO  Program - Application has started.
+2024-12-14 21:45:21,897 [1] INFO  Program - Initializing application...
+2024-12-14 21:45:24,877 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 21:45:25,019 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 21:45:25,025 [10] INFO  Program - Application has started.
+2024-12-14 21:51:50,861 [1] INFO  Program - Initializing application...
+2024-12-14 21:51:54,173 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 21:51:54,376 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 21:51:54,385 [10] INFO  Program - Application has started.
+2024-12-14 22:09:08,033 [1] INFO  Program - Initializing application...
+2024-12-14 22:09:12,371 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 22:09:12,739 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 22:09:12,746 [9] INFO  Program - Application has started.
+2024-12-14 22:11:43,678 [1] INFO  Program - Initializing application...
+2024-12-14 22:11:46,415 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 22:11:46,599 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 22:11:46,608 [9] INFO  Program - Application has started.
+2024-12-14 22:19:08,593 [1] INFO  Program - Initializing application...
+2024-12-14 22:19:12,476 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 22:19:12,667 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 22:19:12,673 [9] INFO  Program - Application has started.
+2024-12-14 22:37:38,167 [1] INFO  Program - Initializing application...
+2024-12-14 22:37:40,759 [1] INFO  Program - Database migration completed successfully.
+2024-12-14 22:37:40,923 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-14 22:37:40,931 [13] INFO  Program - Application has started.
+2024-12-15 00:40:03,440 [1] INFO  Program - Initializing application...
+2024-12-15 00:40:06,711 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 00:40:06,982 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 00:40:06,995 [13] INFO  Program - Application has started.
+2024-12-15 00:48:16,741 [1] INFO  Program - Initializing application...
+2024-12-15 00:48:20,407 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 00:48:20,714 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 00:48:20,746 [7] INFO  Program - Application has started.
+2024-12-15 15:21:41,922 [1] INFO  Program - Initializing application...
+2024-12-15 15:21:47,045 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 15:21:47,324 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 15:21:47,362 [9] INFO  Program - Application has started.
+2024-12-15 20:37:19,229 [1] INFO  Program - Initializing application...
+2024-12-15 20:37:22,175 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 20:37:22,369 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 20:37:22,387 [9] INFO  Program - Application has started.
+2024-12-15 20:58:06,626 [1] INFO  Program - Initializing application...
+2024-12-15 20:58:09,312 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 20:58:09,578 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 20:58:09,587 [10] INFO  Program - Application has started.
+2024-12-15 21:02:58,358 [1] INFO  Program - Initializing application...
+2024-12-15 21:03:01,186 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 21:03:01,365 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 21:03:01,375 [9] INFO  Program - Application has started.
+2024-12-15 21:05:14,099 [1] INFO  Program - Initializing application...
+2024-12-15 21:05:18,744 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 21:05:18,901 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 21:05:18,906 [9] INFO  Program - Application has started.
+2024-12-15 21:11:10,631 [1] INFO  Program - Initializing application...
+2024-12-15 21:11:13,230 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 21:11:13,390 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 21:11:13,402 [13] INFO  Program - Application has started.
+2024-12-15 21:17:11,952 [1] INFO  Program - Initializing application...
+2024-12-15 21:17:13,815 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 21:17:13,929 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 21:17:13,935 [9] INFO  Program - Application has started.
+2024-12-15 21:18:36,676 [1] INFO  Program - Initializing application...
+2024-12-15 21:18:38,801 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 21:18:39,003 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 21:18:39,007 [7] INFO  Program - Application has started.
+2024-12-15 21:25:16,887 [1] INFO  Program - Initializing application...
+2024-12-15 21:25:20,237 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 21:25:20,492 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 21:25:20,500 [7] INFO  Program - Application has started.
+2024-12-15 21:44:47,104 [1] INFO  Program - Initializing application...
+2024-12-15 21:44:49,461 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 21:44:49,649 [13] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 21:44:49,658 [13] INFO  Program - Application has started.
+2024-12-15 21:54:42,342 [1] INFO  Program - Initializing application...
+2024-12-15 21:54:44,938 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 21:54:45,081 [9] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 21:54:45,087 [9] INFO  Program - Application has started.
+2024-12-15 22:05:00,942 [1] INFO  Program - Initializing application...
+2024-12-15 22:05:02,854 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 22:05:03,041 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 22:05:03,049 [7] INFO  Program - Application has started.
+2024-12-15 22:12:44,211 [1] INFO  Program - Initializing application...
+2024-12-15 22:12:46,090 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 22:12:46,185 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 22:12:46,189 [10] INFO  Program - Application has started.
+2024-12-15 22:19:19,335 [1] INFO  Program - Initializing application...
+2024-12-15 22:19:21,411 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 22:19:21,572 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 22:19:21,580 [7] INFO  Program - Application has started.
+2024-12-15 22:31:33,675 [1] INFO  Program - Initializing application...
+2024-12-15 22:31:35,833 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 22:31:35,962 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 22:31:35,968 [10] INFO  Program - Application has started.
+2024-12-15 22:42:38,506 [1] INFO  Program - Initializing application...
+2024-12-15 22:42:41,792 [1] INFO  Program - Database migration completed successfully.
+2024-12-15 22:42:42,047 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-15 22:42:42,054 [7] INFO  Program - Application has started.

@@ -1,0 +1,97 @@
+﻿/* General form container styling */
+#addSection {
+    width: 100%;
+    max-width: 540px; /* Increased width to match the updated form and error box width */
+    padding: 20px;
+    box-sizing: border-box;
+    margin: 0 auto; /* Center the form within the main container */
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+
+/* Input field and label styling */
+#addDocumentForm label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: bold;
+}
+
+#addDocumentForm input[type="text"],
+#addDocumentForm textarea,
+#addDocumentForm input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+/* Styling for the "Add Document" button */
+#addDocumentForm button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #ff9800;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+    #addDocumentForm button[type="submit"]:hover {
+        background-color: #e68900;
+    }
+
+/* Error box styling */
+.error-box {
+    width: 100%; /* Match the form container's width */
+    margin-bottom: 20px;
+    box-sizing: border-box; /* Ensure padding doesn't affect width */
+    display: none; /* Hidden by default */
+    background-color: #4a1e1e; /* Soft dark red tone */
+    color: #e0e0e0; /* Light text color for readability */
+    border: 1px solid #ff4d4d; /* Light red border */
+    border-radius: 8px; /* Rounded corners */
+    padding: 15px; /* Inner spacing */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Soft shadow for depth */
+    font-size: 1rem; /* Standard font size */
+}
+
+    /* Error box heading */
+    .error-box h3 {
+        margin-top: 0;
+        color: #ff8080; /* Softer red for heading */
+        font-size: 1.2rem;
+    }
+
+    /* Error list inside the error box */
+    .error-box ul {
+        list-style: none; /* No bullet points */
+        padding-left: 0; /* Align with the box content */
+        margin: 10px 0;
+    }
+
+    /* Individual error messages */
+    .error-box li {
+        margin-bottom: 5px; /* Spacing between errors */
+    }
+
+    /* Close button styling */
+    .error-box button {
+        background-color: #ff4d4d; /* Red button to match the error box */
+        color: #ffffff; /* White text */
+        border: none;
+        border-radius: 4px;
+        padding: 8px 12px;
+        cursor: pointer;
+        float: right; /* Align to the right */
+    }
+
+        /* Hover effect for the close button */
+        .error-box button:hover {
+            background-color: #e63939; /* Slightly darker red on hover */
+        }

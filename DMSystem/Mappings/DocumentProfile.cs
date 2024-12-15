@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using DMSystem.DAL.Models;
-using DMSystem.DTOs;
+using DMSystem.Contracts.DTOs;
 
 namespace DMSystem.Mappings
 {
@@ -8,10 +8,19 @@ namespace DMSystem.Mappings
     {
         public DocumentProfile()
         {
-            // Map from Document entity to DocumentDTO and vice versa
-            CreateMap<Document, DocumentDTO>();
+            // Ignore LastModified during mapping
             CreateMap<DocumentDTO, Document>()
-                .ForMember(dest => dest.Content, opt => opt.Ignore()); // Ignore Content in the reverse mapping
+                .ForMember(dest => dest.LastModified, opt => opt.Ignore());
+
+            CreateMap<Document, DocumentDTO>()
+                .ForMember(dest => dest.LastModified, opt => opt.MapFrom(src => src.LastModified));
+
+            // Ignore FilePath during mapping
+            CreateMap<Document, DocumentDTO>()
+            .ForMember(dest => dest.FilePath, opt => opt.Ignore());
+
+            CreateMap<Document, DocumentDTO>()
+                .ForMember(dest => dest.FilePath, opt => opt.MapFrom(src => src.FilePath));
         }
     }
 }

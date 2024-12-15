@@ -61,14 +61,9 @@ namespace DMSystem.DAL
         }
 
         // Get All Documents
-        public async Task<ICollection<Document>> GetAllDocumentsAsync(string? name)
+        public async Task<ICollection<Document>> GetAllDocumentsAsync()
         {
             var query = _context.Documents.AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(name))
-            {
-                query = query.Where(d => d.Name.Contains(name)); // Apply filtering if a name is provided
-            }
 
             return await query.ToListAsync(); // Return all documents as a list
         }
@@ -87,7 +82,6 @@ namespace DMSystem.DAL
         Task<Document> Update(Document document);
         Task Remove(Document document);
         Task<Document?> GetByIdAsync(int id); // New method to get a document by Id
-        Task<ICollection<Document>> GetDocumentsByName(string searchPattern);
-        Task<ICollection<Document>> GetAllDocumentsAsync(string? name); // New method for fetching documents
+        Task<ICollection<Document>> GetAllDocumentsAsync(); // New method for fetching documents
     }
 }

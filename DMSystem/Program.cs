@@ -1,48 +1,71 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using System.IO;
-using DMSystem.DAL;
-using DMSystem.DAL.Models;
+using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
-using DMSystem.Mappings; // Namespace for AutoMapper profiles
-using DMSystem.Messaging;
-using DMSystem.DTOs;
-using FluentValidation;
 using FluentValidation.AspNetCore;
-using Microsoft.Extensions.Hosting;
+using log4net;
+using log4net.Config;
+using System.IO;
+using System.Reflection;
+using DMSystem.DAL;
+using DMSystem.Mappings;
+using DMSystem.Contracts.DTOs;
+using DMSystem.Minio;
+using DMSystem.Messaging;
+using DMSystem.ElasticSearch;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure database context
+// Configure Log4Net for logging
+var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
+var logger = LogManager.GetLogger(typeof(Program));
+logger.Info("Initializing application...");
+
+// Configure services
+
+// Database context
 builder.Services.AddDbContext<DALContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Register the Document Repository
+// Document Repository
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 
-// Register AutoMapper and scan for profiles (e.g., DocumentProfile)
-builder.Services.AddAutoMapper(typeof(DocumentProfile).Assembly); // Registers all profiles in the assembly
+// AutoMapper profiles
+builder.Services.AddAutoMapper(typeof(DocumentProfile).Assembly);
 
-// Register FluentValidation and add validators
+// Controllers and FluentValidation
 builder.Services.AddControllers()
     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<DocumentDTOValidator>());
 
-// Register RabbitMQ settings and services
-builder.Services.Configure<RabbitMQSetting>(builder.Configuration.GetSection("RabbitMQ"));
-builder.Services.AddSingleton<IRabbitMQPublisher<Document>, RabbitMQPublisher<Document>>();
-builder.Services.AddHostedService<OrderValidationMessageConsumerService>();
+// Configure RabbitMQ
+builder.Services.Configure<RabbitMQSettings>(builder.Configuration.GetSection("RabbitMQ"));
+builder.Services.AddSingleton<IRabbitMQService, RabbitMQService>();
 
-// Configure Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
+// Configure MinIO settings
+builder.Services.Configure<MinioSettings>(builder.Configuration.GetSection("Minio"));
+
+// Register MinIO FileStorage Service using the IFileStorageService interface
+builder.Services.AddSingleton<IMinioFileStorageService, MinioFileStorageService>();
+
+// Configure ElasticSearch
+var elasticSearchUrl = builder.Configuration.GetValue<string>("ElasticSearch:Url");
+if (string.IsNullOrWhiteSpace(elasticSearchUrl))
 {
-    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    c.IncludeXmlComments(xmlPath);
+    throw new InvalidOperationException("ElasticSearch URL is not configured. Ensure it is set in appsettings.json or as an environment variable.");
+}
+
+// Register ElasticsearchClientWrapper as a singleton
+builder.Services.AddSingleton<IElasticsearchClientWrapper>(provider =>
+{
+    return new ElasticsearchClientWrapper(elasticSearchUrl);
 });
 
-// Configure CORS policy
+// Register ElasticSearchService
+builder.Services.AddScoped<IElasticSearchService, ElasticSearchService>();
+
+// CORS Policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -53,9 +76,19 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Add API Explorer and Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+});
+
+// Build the application
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// Configure Middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -63,19 +96,38 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAll");
+app.UseAuthorization();
+app.MapControllers();
 
-// Ensure the database is created and migrated
+// Health Check Endpoint
+app.MapGet("/health", () => Results.Ok("Healthy")).WithTags("Health Check");
+
+// Apply Database Migrations and Initialize Services
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<DALContext>();
-    dbContext.Database.Migrate();
+    try
+    {
+        // Apply database migrations
+        var dbContext = scope.ServiceProvider.GetRequiredService<DALContext>();
+        dbContext.Database.Migrate();
+        logger.Info("Database migration completed successfully.");
+
+        // Initialize MinIO bucket
+        var fileStorageService = scope.ServiceProvider.GetRequiredService<IMinioFileStorageService>();
+        await fileStorageService.InitializeBucketAsync();
+        logger.Info("MinIO bucket initialization completed.");
+    }
+    catch (Exception ex)
+    {
+        logger.Error("An error occurred during application initialization.", ex);
+    }
 }
 
-// Use CORS before Authorization
-app.UseCors("AllowAll");
+// Log application start
+logger.Info("Application has started.");
 
-app.UseAuthorization();
-
-app.MapControllers();
+// Bind application to 0.0.0.0:5000
+app.Urls.Add("http://0.0.0.0:5000");
 
 app.Run();

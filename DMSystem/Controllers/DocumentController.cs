@@ -1,18 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using DMSystem.DAL.Models;
 using DMSystem.DAL;
-using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using AutoMapper;
-using DMSystem.DTOs;
-using DMSystem.Messaging;
+using DMSystem.Contracts.DTOs;
 using FluentValidation;
-using FluentValidation.Results;
-using Microsoft.AspNetCore.Http;
+using DMSystem.Minio;
+using DMSystem.ElasticSearch;
+using Microsoft.Extensions.Options;
+using DMSystem.Contracts;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace DMSystem.Controllers
 {
@@ -23,135 +19,182 @@ namespace DMSystem.Controllers
         private readonly IDocumentRepository _documentRepository;
         private readonly ILogger<DocumentController> _logger;
         private readonly IMapper _mapper;
-        private readonly IRabbitMQPublisher<Document> _rabbitMqPublisher;
+        private readonly IRabbitMQService _rabbitMqService;
         private readonly IValidator<DocumentDTO> _validator;
+        private readonly IMinioFileStorageService _fileStorageService;
+        private readonly IElasticSearchService _elasticSearchService;
+        private readonly string _ocrQueueName;
 
         public DocumentController(
             IDocumentRepository documentRepository,
             ILogger<DocumentController> logger,
             IMapper mapper,
-            IRabbitMQPublisher<Document> rabbitMqPublisher,
-            IValidator<DocumentDTO> validator)
+            IRabbitMQService rabbitMqService,
+            IValidator<DocumentDTO> validator,
+            IMinioFileStorageService fileStorageService,
+            IElasticSearchService elasticSearchService,
+            IOptions<RabbitMQSettings> rabbitMqSettings
+        )
         {
             _documentRepository = documentRepository;
             _logger = logger;
             _mapper = mapper;
-            _rabbitMqPublisher = rabbitMqPublisher;
+            _rabbitMqService = rabbitMqService;
             _validator = validator;
+            _fileStorageService = fileStorageService;
+            _elasticSearchService = elasticSearchService;
+
+            // Get OCR queue name from configuration
+            _ocrQueueName = rabbitMqSettings.Value.Queues["OcrQueue"];
         }
 
         /// <summary>
-        /// Returns all Documents. Optional filter by name.
+        /// Get all documents.
         /// </summary>
-        /// <param name="name"></param>
-        /// <returns>List of Documents</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DocumentDTO>>> Get([FromQuery] string? name)
+        public async Task<ActionResult<IEnumerable<DocumentDTO>>> Get()
         {
-            var docs = await _documentRepository.GetAllDocumentsAsync(name);
+            // No name filtering, simply return all documents
+            var docs = await _documentRepository.GetAllDocumentsAsync();
             var docDTOs = _mapper.Map<IEnumerable<DocumentDTO>>(docs);
             return Ok(docDTOs);
         }
 
         /// <summary>
-        /// Creates a new Document with an associated PDF file.
+        /// Create a new document with an uploaded PDF file.
         /// </summary>
-        /// <param name="createDocumentDto">Document information</param>
-        /// <param name="pdfFile">PDF file</param>
-        /// <returns>Created Document</returns>
         [HttpPost]
-        public async Task<ActionResult<DocumentDTO>> PostDocument(
-            [FromForm] DocumentDTO createDocument,
-            [FromForm] IFormFile pdfFile)
+        public async Task<IActionResult> CreateDocument([FromForm] DocumentDTO documentDto, [FromForm] IFormFile? pdfFile)
         {
-            // Validate the DTO
-            var validationResult = await _validator.ValidateAsync(createDocument);
-
-            if (!validationResult.IsValid)
-            {
-                // Prepare structured error response with property names and messages
-                var errorMessages = validationResult.Errors
-                    .Select(error => new
-                    {
-                        Property = error.PropertyName,
-                        Message = error.ErrorMessage
-                    })
-                    .ToList();
-
-                return BadRequest(new { errors = errorMessages });
-            }
-
-            // Check for the PDF file
+            // Validate uploaded file
             if (pdfFile == null || pdfFile.Length == 0)
             {
-                return BadRequest(new { errors = new[] { new { Property = "pdfFile", Message = "A PDF file is required." } } });
+                ModelState.AddModelError("pdfFile", "No file uploaded.");
+                return BadRequest(ModelState);
             }
-
-            // Process the file and add the document to the repository
-            byte[] pdfContent;
-            using (var memoryStream = new MemoryStream())
+            if (!pdfFile.FileName.EndsWith(".pdf"))
             {
-                await pdfFile.CopyToAsync(memoryStream);
-                pdfContent = memoryStream.ToArray();
+                ModelState.AddModelError("pdfFile", "Only PDF files are allowed.");
+                return BadRequest(ModelState);
             }
 
-            var newDocument = _mapper.Map<Document>(createDocument);
-            newDocument.Content = pdfContent;
-            newDocument.LastModified = DateOnly.FromDateTime(DateTime.Today);
-            if(newDocument.Description == null)
+            // Validate the Document DTO
+            var validationResult = await _validator.ValidateAsync(documentDto);
+            if (!validationResult.IsValid)
             {
-                newDocument.Description = string.Empty;
+                var errors = validationResult.Errors
+                    .Select(e => new { Property = e.PropertyName, Message = e.ErrorMessage })
+                    .ToList();
+                return BadRequest(new { errors });
             }
 
+            // Save the PDF file to MinIO
+            string objectName = Guid.NewGuid() + "_" + pdfFile.FileName;
+            using var fileStream = pdfFile.OpenReadStream();
+            try
+            {
+                await _fileStorageService.UploadFileAsync(objectName, fileStream, pdfFile.Length, pdfFile.ContentType);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading file to MinIO.");
+                return StatusCode(500, new { message = "Error uploading file to MinIO storage." });
+            }
+
+            // Create a new document in the DAL
+            var newDocument = _mapper.Map<Document>(documentDto);
+            newDocument.FilePath = objectName; // Store MinIO object name
+            newDocument.LastModified = DateTime.UtcNow;
             await _documentRepository.Add(newDocument);
 
-            // Publish message to RabbitMQ
-            await _rabbitMqPublisher.PublishMessageAsync(newDocument, RabbitMQQueues.OrderValidationQueue);
+            // Map back to DTO to send in OCR request
+            var documentDtoResponse = _mapper.Map<DocumentDTO>(newDocument);
 
-            // Map and return the created document
-            var newDocumentDTO = _mapper.Map<DocumentDTO>(newDocument);
-            return CreatedAtAction(nameof(Get), new { id = newDocument.Id }, newDocumentDTO);
-        }
-
-        /// <summary>
-        /// Updates a Document by Id
-        /// </summary>
-        /// <param name="id">Document Id</param>
-        /// <param name="docDTO">Updated Document data</param>
-        /// <returns>Status code indicating success or failure</returns>
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutDocument(int id, DocumentDTO docDTO)
-        {
-            if (id != docDTO.Id)
+            // Publish OCR request using DocumentDTO
+            var ocrRequest = new OCRRequest
             {
-                return BadRequest("Document ID mismatch.");
-            }
-
-            var existingDoc = await _documentRepository.GetByIdAsync(id);
-            if (existingDoc == null)
-            {
-                return NotFound();
-            }
-
-            _mapper.Map(docDTO, existingDoc);
+                Document = documentDtoResponse
+            };
 
             try
             {
-                await _documentRepository.Update(existingDoc);
-                return NoContent();
+                await _rabbitMqService.PublishMessageAsync(ocrRequest, _ocrQueueName);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception ex)
             {
-                _logger.LogError($"Concurrency error while updating document with ID {id}");
-                return StatusCode(500, "Error updating document due to concurrency issues.");
+                _logger.LogError(ex, "Error while sending message to RabbitMQ.");
+                return StatusCode(500, new { message = "Error sending OCR request to queue." });
             }
+
+            // Return success response
+            return CreatedAtAction(nameof(GetDocumentById), new { id = newDocument.Id }, documentDtoResponse);
         }
 
         /// <summary>
-        /// Deletes a Document by Id
+        /// Upload a new PDF for an existing document by ID.
         /// </summary>
-        /// <param name="id">Document Id</param>
-        /// <returns>Status code indicating success or failure</returns>
+        [HttpPut("{id}/upload")]
+        public async Task<IActionResult> UploadDocumentFile(int id, [FromForm] DocumentDTO documentDto, [FromForm] IFormFile? pdfFile)
+        {
+            var existingDocument = await _documentRepository.GetByIdAsync(id);
+            if (existingDocument == null)
+            {
+                return NotFound(new { message = $"Document with ID {id} not found." });
+            }
+
+            // Update Name and Author (Validation)
+            if (string.IsNullOrWhiteSpace(documentDto.Name) || string.IsNullOrWhiteSpace(documentDto.Author))
+            {
+                return BadRequest(new { message = "Name and Author cannot be empty." });
+            }
+
+            existingDocument.Name = documentDto.Name;
+            existingDocument.Author = documentDto.Author;
+
+            // Handle file upload and old file deletion
+            if (pdfFile != null && pdfFile.Length > 0)
+            {
+                if (!pdfFile.FileName.EndsWith(".pdf"))
+                {
+                    return BadRequest(new { message = "Only PDF files are allowed." });
+                }
+
+                try
+                {
+                    // Delete old file from storage
+                    await _fileStorageService.DeleteFileAsync(existingDocument.FilePath);
+
+                    // Save new file to MinIO
+                    string objectName = Guid.NewGuid() + "_" + pdfFile.FileName;
+                    using var fileStream = pdfFile.OpenReadStream();
+                    await _fileStorageService.UploadFileAsync(objectName, fileStream, pdfFile.Length, pdfFile.ContentType);
+
+                    // Update document path
+                    existingDocument.FilePath = objectName;
+
+                    // Trigger OCR since a new file was uploaded
+                    var ocrRequest = new OCRRequest
+                    {
+                        Document = _mapper.Map<DocumentDTO>(existingDocument)
+                    };
+                    await _rabbitMqService.PublishMessageAsync(ocrRequest, _ocrQueueName);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing file upload.");
+                    return StatusCode(500, new { message = "Error uploading file to storage." });
+                }
+            }
+
+            existingDocument.LastModified = DateTime.UtcNow;
+
+            await _documentRepository.Update(existingDocument);
+            return Ok(new { message = $"Document ID {id} updated successfully and OCR triggered." });
+        }
+
+        /// <summary>
+        /// Delete a document by ID.
+        /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDocument(int id)
         {
@@ -161,8 +204,115 @@ namespace DMSystem.Controllers
                 return NotFound();
             }
 
+            // Delete the file from MinIO
+            try
+            {
+                await _fileStorageService.DeleteFileAsync(doc.FilePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting file '{doc.FilePath}' from MinIO.");
+                return StatusCode(500, new { message = "Error deleting file from MinIO storage." });
+            }
+
             await _documentRepository.Remove(doc);
             return NoContent();
+        }
+
+        /// <summary>
+        /// Get a document by its ID.
+        /// </summary>
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetDocumentById(int id)
+        {
+            try
+            {
+                var document = await _documentRepository.GetByIdAsync(id);
+                if (document == null)
+                {
+                    return NotFound(new { message = $"Document with ID {id} not found." });
+                }
+
+                var documentDto = _mapper.Map<DocumentDTO>(document);
+                return Ok(documentDto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An error occurred while retrieving the document with ID {id}.");
+                return StatusCode(500, new { message = "An unexpected error occurred while retrieving the document." });
+            }
+        }
+
+        /// <summary>
+        /// Searches documents in Elasticsearch by a given term.
+        /// </summary>
+        [HttpPost("search")]
+        public async Task<IActionResult> SearchDocuments([FromBody] string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return BadRequest(new { message = "Search term cannot be empty" });
+            }
+
+            try
+            {
+                _logger.LogInformation("Searching for term: {SearchTerm}", searchTerm);
+
+                var searchResults = await _elasticSearchService.SearchDocumentsAsync(searchTerm);
+
+                if (!searchResults.Any())
+                {
+                    _logger.LogInformation("No results found for term: {SearchTerm}", searchTerm);
+                    return NotFound(new { message = "No documents found matching the search term." });
+                }
+
+                _logger.LogInformation("Search results count: {Count}", searchResults.Count());
+                return Ok(searchResults);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred during document search for term: {SearchTerm}", searchTerm);
+                return StatusCode(500, new { message = "An error occurred while processing the search." });
+            }
+        }
+
+        /// <summary>
+        /// Download a document file by ID.
+        /// </summary>
+        [HttpGet("{id}/download")]
+        public async Task<IActionResult> DownloadDocument(int id)
+        {
+            try
+            {
+                // Retrieve the document details from the repository
+                var document = await _documentRepository.GetByIdAsync(id);
+                if (document == null)
+                {
+                    return NotFound(new { message = $"Document with ID {id} not found." });
+                }
+
+                // Retrieve the file from MinIO using the file path
+                var fileStream = await _fileStorageService.DownloadFileAsync(document.FilePath);
+                if (fileStream == null)
+                {
+                    return NotFound(new { message = $"File '{document.FilePath}' not found in MinIO storage." });
+                }
+
+                // Get content type for the file
+                var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
+                if (!provider.TryGetContentType(document.FilePath, out var contentType))
+                {
+                    contentType = "application/octet-stream"; // Fallback content type
+                }
+
+                // Return the file as a download
+                return File(fileStream, contentType, Path.GetFileName(document.FilePath));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while downloading document with ID {id}.");
+                return StatusCode(500, new { message = "An unexpected error occurred while downloading the document." });
+            }
         }
     }
 }

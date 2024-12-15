@@ -6,12 +6,10 @@ namespace DMSystem.DAL
 {
     public class DALContext : DbContext
     {
-        // Constructor accepting DbContextOptions
         public DALContext(DbContextOptions<DALContext> options) : base(options)
         {
         }
 
-        // DbSet for Documents
         public DbSet<Document> Documents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -24,7 +22,7 @@ namespace DMSystem.DAL
 
                 entity.Property(d => d.Name)
                     .IsRequired()
-                    .HasMaxLength(100); // Define required field and max length
+                    .HasMaxLength(100);
 
                 entity.Property(d => d.LastModified)
                     .IsRequired();
@@ -32,12 +30,9 @@ namespace DMSystem.DAL
                 entity.Property(d => d.Author)
                     .IsRequired();
 
-                entity.Property(d => d.Content)
+                entity.Property(d => d.FilePath)
                     .IsRequired()
-                    .HasColumnType("bytea"); // Specify the column type for storing binary data
-
-                entity.Property(d => d.Description)
-                    .IsRequired(false); // Make Description optional
+                    .HasMaxLength(500);
             });
         }
     }
