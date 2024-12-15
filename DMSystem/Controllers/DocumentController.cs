@@ -8,6 +8,7 @@ using DMSystem.Minio;
 using DMSystem.ElasticSearch;
 using Microsoft.Extensions.Options;
 using DMSystem.Contracts;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace DMSystem.Controllers
 {
@@ -133,64 +134,62 @@ namespace DMSystem.Controllers
         /// Upload a new PDF for an existing document by ID.
         /// </summary>
         [HttpPut("{id}/upload")]
-        public async Task<IActionResult> UploadDocumentFile(int id, [FromForm] IFormFile? pdfFile)
+        public async Task<IActionResult> UploadDocumentFile(int id, [FromForm] DocumentDTO documentDto, [FromForm] IFormFile? pdfFile)
         {
-            // Validate uploaded file
-            if (pdfFile == null || pdfFile.Length == 0)
-            {
-                ModelState.AddModelError("pdfFile", "No file uploaded.");
-                return BadRequest(ModelState);
-            }
-            if (!pdfFile.FileName.EndsWith(".pdf"))
-            {
-                ModelState.AddModelError("pdfFile", "Only PDF files are allowed.");
-                return BadRequest(ModelState);
-            }
-
-            // Fetch the existing document
             var existingDocument = await _documentRepository.GetByIdAsync(id);
             if (existingDocument == null)
             {
                 return NotFound(new { message = $"Document with ID {id} not found." });
             }
 
-            // Save the PDF file to MinIO
-            string objectName = Guid.NewGuid() + "_" + pdfFile.FileName;
-            using var fileStream = pdfFile.OpenReadStream();
-            try
+            // Update Name and Author (Validation)
+            if (string.IsNullOrWhiteSpace(documentDto.Name) || string.IsNullOrWhiteSpace(documentDto.Author))
             {
-                await _fileStorageService.UploadFileAsync(objectName, fileStream, pdfFile.Length, pdfFile.ContentType);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error uploading file to MinIO.");
-                return StatusCode(500, new { message = "Error uploading file to MinIO storage." });
+                return BadRequest(new { message = "Name and Author cannot be empty." });
             }
 
-            // Update document file path
-            existingDocument.FilePath = objectName;
+            existingDocument.Name = documentDto.Name;
+            existingDocument.Author = documentDto.Author;
+
+            // Handle file upload and old file deletion
+            if (pdfFile != null && pdfFile.Length > 0)
+            {
+                if (!pdfFile.FileName.EndsWith(".pdf"))
+                {
+                    return BadRequest(new { message = "Only PDF files are allowed." });
+                }
+
+                try
+                {
+                    // Delete old file from storage
+                    await _fileStorageService.DeleteFileAsync(existingDocument.FilePath);
+
+                    // Save new file to MinIO
+                    string objectName = Guid.NewGuid() + "_" + pdfFile.FileName;
+                    using var fileStream = pdfFile.OpenReadStream();
+                    await _fileStorageService.UploadFileAsync(objectName, fileStream, pdfFile.Length, pdfFile.ContentType);
+
+                    // Update document path
+                    existingDocument.FilePath = objectName;
+
+                    // Trigger OCR since a new file was uploaded
+                    var ocrRequest = new OCRRequest
+                    {
+                        Document = _mapper.Map<DocumentDTO>(existingDocument)
+                    };
+                    await _rabbitMqService.PublishMessageAsync(ocrRequest, _ocrQueueName);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing file upload.");
+                    return StatusCode(500, new { message = "Error uploading file to storage." });
+                }
+            }
+
             existingDocument.LastModified = DateTime.UtcNow;
+
             await _documentRepository.Update(existingDocument);
-
-            // Create DocumentDTO to publish as OCRRequest
-            var documentDtoResponse = _mapper.Map<DocumentDTO>(existingDocument);
-
-            var ocrRequest = new OCRRequest
-            {
-                Document = documentDtoResponse
-            };
-
-            try
-            {
-                await _rabbitMqService.PublishMessageAsync(ocrRequest, _ocrQueueName);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error while sending message to RabbitMQ.");
-                return StatusCode(500, new { message = "Error sending OCR request to queue." });
-            }
-
-            return Ok(new { message = $"File uploaded and associated with Document ID {id}." });
+            return Ok(new { message = $"Document ID {id} updated successfully and OCR triggered." });
         }
 
         /// <summary>
@@ -274,6 +273,45 @@ namespace DMSystem.Controllers
             {
                 _logger.LogError(ex, "Error occurred during document search for term: {SearchTerm}", searchTerm);
                 return StatusCode(500, new { message = "An error occurred while processing the search." });
+            }
+        }
+
+        /// <summary>
+        /// Download a document file by ID.
+        /// </summary>
+        [HttpGet("{id}/download")]
+        public async Task<IActionResult> DownloadDocument(int id)
+        {
+            try
+            {
+                // Retrieve the document details from the repository
+                var document = await _documentRepository.GetByIdAsync(id);
+                if (document == null)
+                {
+                    return NotFound(new { message = $"Document with ID {id} not found." });
+                }
+
+                // Retrieve the file from MinIO using the file path
+                var fileStream = await _fileStorageService.DownloadFileAsync(document.FilePath);
+                if (fileStream == null)
+                {
+                    return NotFound(new { message = $"File '{document.FilePath}' not found in MinIO storage." });
+                }
+
+                // Get content type for the file
+                var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
+                if (!provider.TryGetContentType(document.FilePath, out var contentType))
+                {
+                    contentType = "application/octet-stream"; // Fallback content type
+                }
+
+                // Return the file as a download
+                return File(fileStream, contentType, Path.GetFileName(document.FilePath));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while downloading document with ID {id}.");
+                return StatusCode(500, new { message = "An unexpected error occurred while downloading the document." });
             }
         }
     }
