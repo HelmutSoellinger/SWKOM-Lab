@@ -1,20 +1,21 @@
 ﻿using Minio;
 using Minio.DataModel.Args;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 using System.IO;
 
 namespace DMSystem.Minio
 {
     public class MinioFileStorageService : IMinioFileStorageService
     {
-        private readonly IMinioClient _minioClient; // MinIO client instance
-        private readonly string _bucketName; // Name of the bucket
+        private readonly IMinioClient _minioClient;
+        private readonly string _bucketName;
+        private readonly ILogger<MinioFileStorageService> _logger;
 
         /// <summary>
-        /// Initializes the MinioFileStorageService with configuration settings.
+        /// Initializes the MinioFileStorageService with configuration settings and logging.
         /// </summary>
-        /// <param name="options">MinIO settings provided via dependency injection.</param>
-        public MinioFileStorageService(IOptions<MinioSettings> options)
+        public MinioFileStorageService(IOptions<MinioSettings> options, ILogger<MinioFileStorageService> logger)
         {
             var settings = options.Value;
 
@@ -25,6 +26,7 @@ namespace DMSystem.Minio
                 .Build();
 
             _bucketName = settings.BucketName;
+            _logger = logger;
         }
 
         /// <summary>
@@ -32,38 +34,33 @@ namespace DMSystem.Minio
         /// </summary>
         public async Task InitializeBucketAsync()
         {
-            Console.WriteLine($"Checking if bucket '{_bucketName}' exists...");
+            _logger.LogInformation("Checking if bucket '{BucketName}' exists...", _bucketName);
             try
             {
                 bool exists = await _minioClient.BucketExistsAsync(
                     new BucketExistsArgs().WithBucket(_bucketName));
                 if (!exists)
                 {
-                    Console.WriteLine($"Bucket '{_bucketName}' does not exist. Creating...");
+                    _logger.LogInformation("Bucket '{BucketName}' does not exist. Creating...", _bucketName);
                     await _minioClient.MakeBucketAsync(
                         new MakeBucketArgs().WithBucket(_bucketName));
-                    Console.WriteLine($"Bucket '{_bucketName}' created successfully.");
+                    _logger.LogInformation("Bucket '{BucketName}' created successfully.", _bucketName);
                 }
                 else
                 {
-                    Console.WriteLine($"Bucket '{_bucketName}' already exists.");
+                    _logger.LogInformation("Bucket '{BucketName}' already exists.", _bucketName);
                 }
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Error initializing bucket '{_bucketName}': {ex.Message}");
+                _logger.LogError(ex, "Error initializing bucket '{BucketName}'.", _bucketName);
                 throw;
             }
         }
 
-
         /// <summary>
         /// Uploads a file to the MinIO bucket.
         /// </summary>
-        /// <param name="objectName">Unique identifier for the file in the bucket.</param>
-        /// <param name="fileStream">Stream containing the file content.</param>
-        /// <param name="fileSize">Size of the file in bytes.</param>
-        /// <param name="contentType">MIME type of the file.</param>
         public async Task UploadFileAsync(string objectName, Stream fileStream, long fileSize, string contentType)
         {
             try
@@ -74,11 +71,11 @@ namespace DMSystem.Minio
                     .WithStreamData(fileStream)
                     .WithObjectSize(fileSize)
                     .WithContentType(contentType));
-                Console.WriteLine($"File '{objectName}' uploaded successfully.");
+                _logger.LogInformation("File '{ObjectName}' uploaded successfully.", objectName);
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Error uploading file '{objectName}': {ex.Message}");
+                _logger.LogError(ex, "Error uploading file '{ObjectName}'.", objectName);
                 throw;
             }
         }
@@ -86,13 +83,11 @@ namespace DMSystem.Minio
         /// <summary>
         /// Downloads a file from the MinIO bucket.
         /// </summary>
-        /// <param name="objectName">Unique identifier for the file in the bucket.</param>
-        /// <returns>Stream containing the file content.</returns>
         public async Task<Stream> DownloadFileAsync(string objectName)
         {
             try
             {
-                MemoryStream memoryStream = new MemoryStream();
+                var memoryStream = new MemoryStream();
                 await _minioClient.GetObjectAsync(new GetObjectArgs()
                     .WithBucket(_bucketName)
                     .WithObject(objectName)
@@ -100,13 +95,13 @@ namespace DMSystem.Minio
                     {
                         stream.CopyTo(memoryStream);
                     }));
-                memoryStream.Seek(0, SeekOrigin.Begin); // Reset stream position
-                Console.WriteLine($"File '{objectName}' downloaded successfully.");
+                memoryStream.Seek(0, SeekOrigin.Begin);
+                _logger.LogInformation("File '{ObjectName}' downloaded successfully.", objectName);
                 return memoryStream;
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Error downloading file '{objectName}': {ex.Message}");
+                _logger.LogError(ex, "Error downloading file '{ObjectName}'.", objectName);
                 throw;
             }
         }
@@ -114,7 +109,6 @@ namespace DMSystem.Minio
         /// <summary>
         /// Deletes a file from the MinIO bucket.
         /// </summary>
-        /// <param name="objectName">Unique identifier for the file in the bucket.</param>
         public async Task DeleteFileAsync(string objectName)
         {
             try
@@ -122,11 +116,11 @@ namespace DMSystem.Minio
                 await _minioClient.RemoveObjectAsync(new RemoveObjectArgs()
                     .WithBucket(_bucketName)
                     .WithObject(objectName));
-                Console.WriteLine($"File '{objectName}' deleted successfully.");
+                _logger.LogInformation("File '{ObjectName}' deleted successfully.", objectName);
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Error deleting file '{objectName}': {ex.Message}");
+                _logger.LogError(ex, "Error deleting file '{ObjectName}'.", objectName);
                 throw;
             }
         }
@@ -134,8 +128,6 @@ namespace DMSystem.Minio
         /// <summary>
         /// Checks if a file exists in the MinIO bucket.
         /// </summary>
-        /// <param name="objectName">Unique identifier for the file in the bucket.</param>
-        /// <returns>True if the file exists; otherwise, false.</returns>
         public async Task<bool> FileExistsAsync(string objectName)
         {
             try
@@ -145,12 +137,13 @@ namespace DMSystem.Minio
                     .WithObject(objectName);
 
                 await _minioClient.StatObjectAsync(args);
-                return true; // File exists
+                _logger.LogInformation("File '{ObjectName}' exists.", objectName);
+                return true;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"File '{objectName}' not found: {ex.Message}");
-                return false; // File does not exist
+                _logger.LogWarning("File '{ObjectName}' does not exist: {Message}", objectName, ex.Message);
+                return false;
             }
         }
     }
