@@ -6,5 +6,6 @@ namespace DMSystem.ElasticSearch
     {
         Task IndexDocumentAsync(OCRResult ocrResult);
         Task<IEnumerable<OCRResult>> SearchDocumentsAsync(string searchTerm);
+        Task DeleteDocumentByIdAsync(int documentId); // Add this method
     }
 }

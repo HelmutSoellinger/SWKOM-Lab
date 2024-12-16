@@ -11,8 +11,8 @@ namespace DMSystem.ElasticSearch
 
         public ElasticSearchService(IElasticsearchClientWrapper clientWrapper, ILogger<ElasticSearchService> logger)
         {
-            _clientWrapper = clientWrapper; // Assign wrapper
-            _logger = logger; // Assign injected logger
+            _clientWrapper = clientWrapper ?? throw new ArgumentNullException(nameof(clientWrapper));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task IndexDocumentAsync(OCRResult ocrResult)
@@ -159,6 +159,30 @@ namespace DMSystem.ElasticSearch
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error executing fuzzy search for term: {SearchTerm}", searchTerm);
+                throw;
+            }
+        }
+
+        // New Method: Delete Document by ID
+        public async Task DeleteDocumentByIdAsync(int documentId)
+        {
+            try
+            {
+                _logger.LogInformation("Deleting document with ID: {DocumentId} from Elasticsearch.", documentId);
+
+                var response = await _clientWrapper.DeleteDocumentAsync("ocr-results", documentId.ToString());
+
+                if (!response.IsValidResponse)
+                {
+                    _logger.LogError("Failed to delete document with ID {DocumentId}: {DebugInformation}", documentId, response.DebugInformation);
+                    throw new Exception($"Failed to delete document with ID {documentId}: {response.DebugInformation}");
+                }
+
+                _logger.LogInformation("Document with ID {DocumentId} deleted successfully.", documentId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting document with ID: {DocumentId}", documentId);
                 throw;
             }
         }

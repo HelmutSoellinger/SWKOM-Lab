@@ -10,6 +10,8 @@ namespace DMSystem.ElasticSearch
 
         Task<SearchResult<T>> SearchDocumentsAsync<T>(Action<SearchRequestDescriptor<T>> configureRequest)
             where T : class;
+
+        Task<MockableIndexResponse> DeleteDocumentAsync(string indexName, string documentId);
     }
 
     public class SearchResult<T>
@@ -29,7 +31,6 @@ namespace DMSystem.ElasticSearch
     {
         private readonly ElasticsearchClient _client;
 
-        // Wrapper for testing
         private readonly IElasticsearchClientWrapper _clientWrapper;
 
         // Constructor for testing with IElasticsearchClientWrapper
@@ -63,11 +64,9 @@ namespace DMSystem.ElasticSearch
             if (configureRequest == null)
                 throw new ArgumentNullException(nameof(configureRequest), "ConfigureRequest action cannot be null.");
 
-            // Use the test wrapper if it's initialized
             if (_clientWrapper != null)
                 return await _clientWrapper.IndexDocumentAsync(document, configureRequest);
 
-            // Otherwise, use the production client
             var response = await _client.IndexAsync(document, configureRequest);
 
             return new MockableIndexResponse
@@ -83,18 +82,36 @@ namespace DMSystem.ElasticSearch
             if (configureRequest == null)
                 throw new ArgumentNullException(nameof(configureRequest), "ConfigureRequest action cannot be null.");
 
-            // Use the test wrapper if it's initialized
             if (_clientWrapper != null)
                 return await _clientWrapper.SearchDocumentsAsync(configureRequest);
 
-            // Otherwise, use the production client
             var response = await _client.SearchAsync(configureRequest);
 
             return new SearchResult<T>
             {
                 IsValid = response.IsValidResponse,
                 DebugInformation = response.DebugInformation,
-                Hits = response.Hits ?? new List<Hit<T>>() // Default to an empty list if Hits is null
+                Hits = response.Hits ?? new List<Hit<T>>()
+            };
+        }
+
+        public async Task<MockableIndexResponse> DeleteDocumentAsync(string indexName, string documentId)
+        {
+            if (string.IsNullOrWhiteSpace(indexName))
+                throw new ArgumentNullException(nameof(indexName), "Index name cannot be null or empty.");
+
+            if (string.IsNullOrWhiteSpace(documentId))
+                throw new ArgumentNullException(nameof(documentId), "Document ID cannot be null or empty.");
+
+            if (_clientWrapper != null)
+                return await _clientWrapper.DeleteDocumentAsync(indexName, documentId);
+
+            var response = await _client.DeleteAsync<object>(documentId, d => d.Index(indexName));
+
+            return new MockableIndexResponse
+            {
+                IsValidResponse = response.IsValidResponse,
+                DebugInformation = response.DebugInformation
             };
         }
     }

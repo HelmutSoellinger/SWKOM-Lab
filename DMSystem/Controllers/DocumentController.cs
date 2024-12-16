@@ -24,6 +24,7 @@ namespace DMSystem.Controllers
         private readonly IMinioFileStorageService _fileStorageService;
         private readonly IElasticSearchService _elasticSearchService;
         private readonly string _ocrQueueName;
+        private readonly string _deleteQueueName;
 
         public DocumentController(
             IDocumentRepository documentRepository,
@@ -44,8 +45,9 @@ namespace DMSystem.Controllers
             _fileStorageService = fileStorageService;
             _elasticSearchService = elasticSearchService;
 
-            // Get OCR queue name from configuration
+            // RabbitMQ Queue configuration
             _ocrQueueName = rabbitMqSettings.Value.Queues["OcrQueue"];
+            _deleteQueueName = rabbitMqSettings.Value.Queues["DeleteQueue"];
         }
 
         /// <summary>
@@ -66,68 +68,42 @@ namespace DMSystem.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateDocument([FromForm] DocumentDTO documentDto, [FromForm] IFormFile? pdfFile)
         {
-            // Validate uploaded file
-            if (pdfFile == null || pdfFile.Length == 0)
-            {
-                ModelState.AddModelError("pdfFile", "No file uploaded.");
-                return BadRequest(ModelState);
-            }
-            if (!pdfFile.FileName.EndsWith(".pdf"))
-            {
-                ModelState.AddModelError("pdfFile", "Only PDF files are allowed.");
-                return BadRequest(ModelState);
-            }
-
-            // Validate the Document DTO
-            var validationResult = await _validator.ValidateAsync(documentDto);
-            if (!validationResult.IsValid)
-            {
-                var errors = validationResult.Errors
-                    .Select(e => new { Property = e.PropertyName, Message = e.ErrorMessage })
-                    .ToList();
-                return BadRequest(new { errors });
-            }
-
-            // Save the PDF file to MinIO
-            string objectName = Guid.NewGuid() + "_" + pdfFile.FileName;
-            using var fileStream = pdfFile.OpenReadStream();
             try
             {
-                await _fileStorageService.UploadFileAsync(objectName, fileStream, pdfFile.Length, pdfFile.ContentType);
+                // Validate the Document DTO
+                var validationResult = await _validator.ValidateAsync(documentDto);
+                if (!validationResult.IsValid)
+                {
+                    var errors = validationResult.Errors
+                        .Select(e => new { Property = e.PropertyName, Message = e.ErrorMessage })
+                        .ToList();
+                    return BadRequest(new { errors });
+                }
+
+                // Upload the file and get the file path
+                string objectName = await UploadFileToStorageAsync(pdfFile);
+
+                // Create a new document in the DAL
+                var newDocument = _mapper.Map<Document>(documentDto);
+                newDocument.FilePath = objectName; // Store MinIO object name
+                newDocument.LastModified = DateTime.UtcNow;
+                await _documentRepository.Add(newDocument);
+
+                // Publish OCR message
+                await PublishOcrMessageAsync(newDocument);
+
+                // Map back to DTO and return the response
+                var documentDtoResponse = _mapper.Map<DocumentDTO>(newDocument);
+                return CreatedAtAction(nameof(GetDocumentById), new { id = newDocument.Id }, documentDtoResponse);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error uploading file to MinIO.");
-                return StatusCode(500, new { message = "Error uploading file to MinIO storage." });
+                return StatusCode(500, new { message = ex.Message });
             }
-
-            // Create a new document in the DAL
-            var newDocument = _mapper.Map<Document>(documentDto);
-            newDocument.FilePath = objectName; // Store MinIO object name
-            newDocument.LastModified = DateTime.UtcNow;
-            await _documentRepository.Add(newDocument);
-
-            // Map back to DTO to send in OCR request
-            var documentDtoResponse = _mapper.Map<DocumentDTO>(newDocument);
-
-            // Publish OCR request using DocumentDTO
-            var ocrRequest = new OCRRequest
-            {
-                Document = documentDtoResponse
-            };
-
-            try
-            {
-                await _rabbitMqService.PublishMessageAsync(ocrRequest, _ocrQueueName);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error while sending message to RabbitMQ.");
-                return StatusCode(500, new { message = "Error sending OCR request to queue." });
-            }
-
-            // Return success response
-            return CreatedAtAction(nameof(GetDocumentById), new { id = newDocument.Id }, documentDtoResponse);
         }
 
         /// <summary>
@@ -142,7 +118,7 @@ namespace DMSystem.Controllers
                 return NotFound(new { message = $"Document with ID {id} not found." });
             }
 
-            // Update Name and Author (Validation)
+            // Validate Name and Author
             if (string.IsNullOrWhiteSpace(documentDto.Name) || string.IsNullOrWhiteSpace(documentDto.Author))
             {
                 return BadRequest(new { message = "Name and Author cannot be empty." });
@@ -154,30 +130,34 @@ namespace DMSystem.Controllers
             // Handle file upload and old file deletion
             if (pdfFile != null && pdfFile.Length > 0)
             {
-                if (!pdfFile.FileName.EndsWith(".pdf"))
-                {
-                    return BadRequest(new { message = "Only PDF files are allowed." });
-                }
-
                 try
                 {
+                    // Validate the uploaded file
+                    string newFilePath = await UploadFileToStorageAsync(pdfFile);
+
                     // Delete old file from storage
-                    await _fileStorageService.DeleteFileAsync(existingDocument.FilePath);
+                    if (!string.IsNullOrWhiteSpace(existingDocument.FilePath))
+                    {
+                        try
+                        {
+                            await _fileStorageService.DeleteFileAsync(existingDocument.FilePath);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, $"Error deleting old file '{existingDocument.FilePath}' from storage.");
+                            return StatusCode(500, new { message = "Error deleting old file from storage." });
+                        }
+                    }
 
-                    // Save new file to MinIO
-                    string objectName = Guid.NewGuid() + "_" + pdfFile.FileName;
-                    using var fileStream = pdfFile.OpenReadStream();
-                    await _fileStorageService.UploadFileAsync(objectName, fileStream, pdfFile.Length, pdfFile.ContentType);
-
-                    // Update document path
-                    existingDocument.FilePath = objectName;
+                    // Update document path with the new file
+                    existingDocument.FilePath = newFilePath;
 
                     // Trigger OCR since a new file was uploaded
-                    var ocrRequest = new OCRRequest
-                    {
-                        Document = _mapper.Map<DocumentDTO>(existingDocument)
-                    };
-                    await _rabbitMqService.PublishMessageAsync(ocrRequest, _ocrQueueName);
+                    await PublishOcrMessageAsync(existingDocument);
+                }
+                catch (ArgumentException ex)
+                {
+                    return BadRequest(new { message = ex.Message });
                 }
                 catch (Exception ex)
                 {
@@ -186,9 +166,12 @@ namespace DMSystem.Controllers
                 }
             }
 
+            // Update the last modified timestamp
             existingDocument.LastModified = DateTime.UtcNow;
 
+            // Save the updated document
             await _documentRepository.Update(existingDocument);
+
             return Ok(new { message = $"Document ID {id} updated successfully and OCR triggered." });
         }
 
@@ -201,7 +184,7 @@ namespace DMSystem.Controllers
             var doc = await _documentRepository.GetByIdAsync(id);
             if (doc == null)
             {
-                return NotFound();
+                return NotFound(new { message = $"Document with ID {id} not found." });
             }
 
             // Delete the file from MinIO
@@ -215,7 +198,29 @@ namespace DMSystem.Controllers
                 return StatusCode(500, new { message = "Error deleting file from MinIO storage." });
             }
 
-            await _documentRepository.Remove(doc);
+            // Publish delete request to RabbitMQ
+            try
+            {
+                var deleteMessage = new DeleteDocumentMessage { DocumentId = id };
+                await _rabbitMqService.PublishMessageAsync(deleteMessage, _deleteQueueName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error publishing delete message for Document ID {id} to RabbitMQ.");
+                return StatusCode(500, new { message = "Error publishing delete message to RabbitMQ." });
+            }
+
+            // Remove the document from the repository
+            try
+            {
+                await _documentRepository.Remove(doc);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error removing Document ID {id} from the database.");
+                return StatusCode(500, new { message = "Error removing document from the database." });
+            }
+
             return NoContent();
         }
 
@@ -312,6 +317,51 @@ namespace DMSystem.Controllers
             {
                 _logger.LogError(ex, $"Error occurred while downloading document with ID {id}.");
                 return StatusCode(500, new { message = "An unexpected error occurred while downloading the document." });
+            }
+        }
+
+        private async Task<string> UploadFileToStorageAsync(IFormFile pdfFile)
+        {
+            // Validate uploaded file
+            if (pdfFile == null || pdfFile.Length == 0)
+                throw new ArgumentException("No file uploaded.");
+
+            if (!pdfFile.FileName.EndsWith(".pdf"))
+                throw new ArgumentException("Only PDF files are allowed.");
+
+            // Generate a unique file name
+            string objectName = Guid.NewGuid() + "_" + pdfFile.FileName;
+
+            // Upload file to storage
+            using var fileStream = pdfFile.OpenReadStream();
+            try
+            {
+                await _fileStorageService.UploadFileAsync(objectName, fileStream, pdfFile.Length, pdfFile.ContentType);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading file to MinIO.");
+                throw new Exception("Error uploading file to MinIO storage.", ex);
+            }
+
+            return objectName;
+        }
+
+        private async Task PublishOcrMessageAsync(Document document)
+        {
+            var ocrRequest = new OCRRequest
+            {
+                Document = _mapper.Map<DocumentDTO>(document)
+            };
+
+            try
+            {
+                await _rabbitMqService.PublishMessageAsync(ocrRequest, _ocrQueueName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while sending message to RabbitMQ.");
+                throw new Exception("Error sending OCR request to queue.", ex);
             }
         }
     }
