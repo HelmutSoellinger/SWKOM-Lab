@@ -122,15 +122,6 @@ namespace DMSystem.Messaging
             _logger.LogInformation("Started consuming messages from {QueueName}", queueName);
         }
 
-        // For Testing Simulated Delivery
-        public async Task HandleBasicDeliverAsync(string consumerTag, BasicDeliverEventArgs ea)
-        {
-            await ProcessMessageAsync(_publishChannel, "TestQueue", ea, async (dynamic msg) =>
-            {
-                await Task.CompletedTask;
-            });
-        }
-
         private async Task ProcessMessageAsync<T>(IModel channel, string queueName, BasicDeliverEventArgs ea, Func<T, Task> onMessage)
         {
             try
@@ -182,14 +173,22 @@ namespace DMSystem.Messaging
 
         private void DeclareQueue(string queueName)
         {
-            _publishChannel.QueueDeclare(
-                queue: queueName,
-                durable: true,
-                exclusive: false,
-                autoDelete: false,
-                arguments: null);
+            try
+            {
+                _publishChannel.QueueDeclare(
+                    queue: queueName,
+                    durable: true,
+                    exclusive: false,
+                    autoDelete: false,
+                    arguments: null);
 
-            _logger.LogInformation("Declared queue: {QueueName}", queueName);
+                _logger.LogInformation("Declared queue: {QueueName}", queueName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to declare queue: {QueueName}", queueName);
+                throw;
+            }
         }
 
         private void ValidateConfiguration()

@@ -16,7 +16,16 @@
         }
 
         if (!response.ok) {
-            handleFetchError(response);
+            // Handle specific error cases
+            if (response.status === 404) {
+                tableBody.innerHTML = `<tr><td colspan="5">No documents found.</td></tr>`;
+            } else if (response.status === 500) {
+                tableBody.innerHTML = `<tr><td colspan="5">Server is starting up. Please try again later.</td></tr>`;
+            } else {
+                const errorMessage = await response.text();
+                console.error('Error loading documents:', errorMessage);
+                tableBody.innerHTML = `<tr><td colspan="5">Error loading documents: ${errorMessage}</td></tr>`;
+            }
             return;
         }
 
@@ -27,7 +36,6 @@
         }
 
         documents.forEach((doc) => {
-            // Handle both flat and nested structures
             const documentData = doc.document || doc;
 
             const row = document.createElement('tr');
@@ -50,9 +58,10 @@
         attachDeleteButtonEvents();
     } catch (error) {
         console.error('Error loading documents:', error);
-        alert('Error loading documents. Please try again later.');
+        tableBody.innerHTML = `<tr><td colspan="5">An unexpected error occurred. Please try again later.</td></tr>`;
     }
 }
+
 
 // Attach event listeners for Edit buttons
 function attachEditButtonEvents() {
@@ -146,7 +155,7 @@ async function submitEditForm(e) {
     try {
         const response = await fetch(`${apiBaseUrl}/${documentId}/upload`, {
             method: 'PUT',
-            body: formData, // multipart/form-data
+            body: formData,
         });
 
         if (!response.ok) {
@@ -159,12 +168,17 @@ async function submitEditForm(e) {
     } catch (error) {
         console.error('Error updating document:', error);
         alert('An unexpected error occurred while updating the document.');
+    } finally {
+        fileInput.value = ''; // Clear the file input
     }
 }
 
 // Close the edit modal
 function closeEditModal() {
     const editModal = document.getElementById('editDocumentModal');
+    const fileInput = document.getElementById('editDocFile');
+    fileInput.value = ''; // Clear the file input
+
     editModal.classList.add('hidden');
     editModal.style.display = 'none';
 }

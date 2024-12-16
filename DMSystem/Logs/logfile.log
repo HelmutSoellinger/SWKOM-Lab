@@ -643,3 +643,42 @@ Npgsql.NpgsqlException (0x80004005): Failed to connect to 172.19.0.2:5432
 2024-12-15 22:42:41,792 [1] INFO  Program - Database migration completed successfully.
 2024-12-15 22:42:42,047 [7] INFO  Program - MinIO bucket initialization completed.
 2024-12-15 22:42:42,054 [7] INFO  Program - Application has started.
+2024-12-16 14:09:43,858 [1] INFO  Program - Initializing application...
+2024-12-16 14:09:47,495 [1] INFO  Program - Database migration completed successfully.
+2024-12-16 14:09:47,854 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-16 14:09:47,875 [10] INFO  Program - Application has started.
+2024-12-16 14:19:45,630 [1] INFO  Program - Initializing application...
+2024-12-16 14:19:48,977 [1] INFO  Program - Database migration completed successfully.
+2024-12-16 14:19:49,278 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-16 14:19:49,291 [7] INFO  Program - Application has started.
+2024-12-16 14:29:01,939 [1] INFO  Program - Initializing application...
+2024-12-16 14:29:05,104 [1] ERROR Program - An error occurred during application initialization.
+Npgsql.NpgsqlException (0x80004005): Failed to connect to 172.19.0.2:5432
+ ---> System.Net.Sockets.SocketException (111): Connection refused
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.Connect(NpgsqlTimeout timeout)
+   at Npgsql.Internal.NpgsqlConnector.RawOpen(SslMode sslMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.<Open>g__OpenCore|214_1(NpgsqlConnector conn, SslMode sslMode, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.Internal.NpgsqlConnector.Open(NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.OpenNewConnector(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.PoolingDataSource.<Get>g__RentAsync|33_0(NpgsqlConnection conn, NpgsqlTimeout timeout, Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.<Open>g__OpenAsync|42_0(Boolean async, CancellationToken cancellationToken)
+   at Npgsql.NpgsqlConnection.Open()
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenDbConnection(Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.OpenInternal(Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.Open(Boolean errorsExpected)
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteReader(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Migrations.HistoryRepository.GetAppliedMigrations()
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlHistoryRepository.GetAppliedMigrations()
+   at Npgsql.EntityFrameworkCore.PostgreSQL.Migrations.Internal.NpgsqlMigrator.Migrate(String targetMigration)
+   at Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.Migrate(DatabaseFacade databaseFacade)
+   at Program.<Main>$(String[] args) in /src/DMSystem/Program.cs:line 113
+2024-12-16 14:29:05,207 [1] INFO  Program - Application has started.
+2024-12-16 14:32:52,793 [1] INFO  Program - Initializing application...
+2024-12-16 14:32:56,322 [1] INFO  Program - Database migration completed successfully.
+2024-12-16 14:32:56,595 [7] INFO  Program - MinIO bucket initialization completed.
+2024-12-16 14:32:56,603 [7] INFO  Program - Application has started.
+2024-12-16 14:46:02,962 [1] INFO  Program - Initializing application...
+2024-12-16 14:46:06,637 [1] INFO  Program - Database migration completed successfully.
+2024-12-16 14:46:06,864 [10] INFO  Program - MinIO bucket initialization completed.
+2024-12-16 14:46:06,873 [10] INFO  Program - Application has started.
